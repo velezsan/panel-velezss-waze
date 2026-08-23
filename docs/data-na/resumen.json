@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-23T05:56:32+00:00",
+ "actualizado": "2026-08-23T06:36:46+00:00",
  "env": "usa",
- "total": 80,
+ "total": 79,
  "estados": [
   {
    "estado": "Baja California",
@@ -18,7 +18,7 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 32,
+   "total": 31,
    "ciudades": 4
   }
  ],
@@ -27,7 +27,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 70.4,
+  "porcentaje_vuelta": 80.8,
   "modo": "completo"
  },
  "aviso": "",
