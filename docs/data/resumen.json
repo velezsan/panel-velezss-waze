@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-23T00:13:32+00:00",
+ "actualizado": "2026-08-23T02:42:58+00:00",
  "env": "row",
- "total": 155706,
+ "total": 155440,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -24,7 +24,7 @@
   {
    "estado": "Campeche",
    "slug": "campeche",
-   "total": 667,
+   "total": 647,
    "ciudades": 56
   },
   {
@@ -78,14 +78,14 @@
   {
    "estado": "Hidalgo",
    "slug": "hidalgo",
-   "total": 7650,
-   "ciudades": 313
+   "total": 7620,
+   "ciudades": 312
   },
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 12569,
-   "ciudades": 463
+   "total": 12516,
+   "ciudades": 462
   },
   {
    "estado": "Michoacán",
@@ -102,8 +102,8 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 10541,
-   "ciudades": 399
+   "total": 10473,
+   "ciudades": 397
   },
   {
    "estado": "Nayarit",
@@ -126,8 +126,8 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 7511,
-   "ciudades": 621
+   "total": 7448,
+   "ciudades": 620
   },
   {
    "estado": "Querétaro",
@@ -138,7 +138,7 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 3461,
+   "total": 3450,
    "ciudades": 45
   },
   {
@@ -180,7 +180,7 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 10089,
+   "total": 10068,
    "ciudades": 806
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161642,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 28.7,
+  "porcentaje_vuelta": 29.0,
   "modo": "completo"
  },
  "aviso": "",
