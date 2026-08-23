@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-23T22:46:32+00:00",
+ "actualizado": "2026-08-23T23:28:40+00:00",
  "env": "row",
- "total": 153827,
+ "total": 153491,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -66,8 +66,8 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 16627,
-   "ciudades": 590
+   "total": 16291,
+   "ciudades": 586
   },
   {
    "estado": "Guerrero",
