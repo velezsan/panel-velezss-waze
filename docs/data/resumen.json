@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-23T16:28:48+00:00",
+ "actualizado": "2026-08-23T16:35:56+00:00",
  "env": "row",
- "total": 153941,
+ "total": 153931,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -132,7 +132,7 @@
   {
    "estado": "Querétaro",
    "slug": "queretaro",
-   "total": 3913,
+   "total": 3903,
    "ciudades": 195
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161644,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 30.3,
+  "porcentaje_vuelta": 30.4,
   "modo": "completo"
  },
  "aviso": "",
