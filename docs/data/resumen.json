@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-24T04:45:13+00:00",
+ "actualizado": "2026-08-24T05:25:29+00:00",
  "env": "row",
- "total": 150201,
+ "total": 149551,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -24,8 +24,8 @@
   {
    "estado": "Campeche",
    "slug": "campeche",
-   "total": 593,
-   "ciudades": 53
+   "total": 569,
+   "ciudades": 50
   },
   {
    "estado": "Chiapas",
@@ -66,8 +66,8 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 15207,
-   "ciudades": 536
+   "total": 15193,
+   "ciudades": 531
   },
   {
    "estado": "Guerrero",
@@ -78,8 +78,8 @@
   {
    "estado": "Hidalgo",
    "slug": "hidalgo",
-   "total": 6999,
-   "ciudades": 301
+   "total": 6718,
+   "ciudades": 288
   },
   {
    "estado": "Jalisco",
@@ -126,14 +126,14 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 7396,
-   "ciudades": 612
+   "total": 7369,
+   "ciudades": 611
   },
   {
    "estado": "Querétaro",
    "slug": "queretaro",
-   "total": 3783,
-   "ciudades": 192
+   "total": 3549,
+   "ciudades": 184
   },
   {
    "estado": "Quintana Roo",
@@ -180,14 +180,14 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 9900,
-   "ciudades": 789
+   "total": 9837,
+   "ciudades": 781
   },
   {
    "estado": "Yucatán",
    "slug": "yucatan",
-   "total": 2903,
-   "ciudades": 157
+   "total": 2896,
+   "ciudades": 154
   },
   {
    "estado": "Zacatecas",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161645,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 32.0,
+  "porcentaje_vuelta": 32.1,
   "modo": "completo"
  },
  "aviso": "",
