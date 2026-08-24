@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-23T23:28:40+00:00",
+ "actualizado": "2026-08-24T00:12:56+00:00",
  "env": "row",
- "total": 153491,
+ "total": 153494,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -78,7 +78,7 @@
   {
    "estado": "Hidalgo",
    "slug": "hidalgo",
-   "total": 7375,
+   "total": 7378,
    "ciudades": 312
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161645,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 31.3,
+  "porcentaje_vuelta": 31.5,
   "modo": "completo"
  },
  "aviso": "",
