@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-24T20:29:27+00:00",
+ "actualizado": "2026-08-24T20:29:36+00:00",
  "env": "row",
- "total": 142470,
+ "total": 142314,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -84,8 +84,8 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 8235,
-   "ciudades": 387
+   "total": 8079,
+   "ciudades": 385
   },
   {
    "estado": "Michoacán",
