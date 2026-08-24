@@ -114,7 +114,7 @@ BLACKLIST_INEGI = {
     "prolongación", "diagonal", "paseo", "0", "1",
     "mapserver", "inegi", "nombre", "nomvial", "tipovial", "texto",
     "objectid", "shape", "length", "cvegeo", "shape_length",
-    "the_geom", "cve_mun", "cve_loc", "cve_ent", "ambito",
+    "the_geom", "cve_mun", "cve_loc", "cve_ent", "ambito", "ninguno",
 }
 
 RE_TH_TD = re.compile(r"<th[^>]*>([\s\S]*?)</th>\s*<td[^>]*>([\s\S]*?)</td>", re.I)
@@ -277,56 +277,57 @@ class ConsultorINEGI:
         try:
             r = self.sesion.get(INEGI_WMS, params=params, timeout=10)
             r.encoding = "utf-8"  # el INEGI responde UTF-8 sin declararlo
-            nombres = parse_wms(r.text) if r.status_code == 200 else []
-            if r.status_code == 200:
-                self.cache[key] = nombres
-            else:
+            if r.status_code != 200:
                 self.errores += 1
+                return None  # no contestó: distinto de "contestó y no hay nombre"
+            nombres = parse_wms(r.text)
+            self.cache[key] = nombres
             return nombres
         except requests.RequestException:
             self.errores += 1
-            return []
+            return None
 
     def sugerir(self, coords):
         """Réplica del flujo por etapas de GAIA con aborto temprano.
 
-        Devuelve (nombre, confianza 0-100, empatado). La confianza es el % de
-        puntos del segmento donde el INEGI regresó ese mismo nombre.
+        Devuelve (nombre, confianza 0-100, empatado, falló_el_inegi).
+
+        Un punto solo respalda un nombre si el INEGI devuelve ahí ese nombre
+        y ningún otro: en los cruces la consulta trae la calle que cruza
+        también, y ese punto no dice nada sobre cuál de las dos es. Así el
+        100% significa "los cinco puntos apuntan sin ambigüedad a esta calle",
+        que es lo mismo que reporta GAIA.
         """
         pts = puntos_consulta(coords)
         if not pts:
-            return "", 0, False
+            return "", 0, False, False
         total = len(pts)
-        conteo = {}
-        candidatos = None
-        respondidos = 0
+        solos = {}  # nombre -> puntos donde fue el único nombre válido
+        fallo = False
         for i, p in enumerate(pts):
             nombres = self.nombres_en(p[0], p[1])
-            if i == 0 and not nombres:
+            if i == 0 and nombres == []:
                 # la sonda regresó vacío: puede ser zona sin cobertura o un
                 # rechazo silencioso del INEGI; reintentamos una vez
                 self.cache.pop((round(p[0], 6), round(p[1], 6)), None)
                 time.sleep(max(self.pausa, 0.4))
                 nombres = self.nombres_en(p[0], p[1])
-            respondidos += 1
-            for n in nombres:
-                conteo[n] = conteo.get(n, 0) + 1
+            if nombres is None:  # el INEGI no contestó
+                fallo = True
+                break
             validos = [n for n in nombres if not _nombre_invalido(n)]
-            if candidatos is None:
-                candidatos = validos
-            else:
-                lset = {n.lower() for n in validos}
-                candidatos = [n for n in candidatos if n.lower() in lset]
-            if not candidatos:
-                break  # el 100% ya es imposible (o zona sin cobertura): abortar
+            if len(validos) != 1:
+                # punto sin nombre o ambiguo: el 100% ya es imposible, abortamos
+                break
+            n = validos[0]
+            solos[n] = solos.get(n, 0) + 1
         mejor, mejor_n = None, 0
-        for n, c in conteo.items():
-            if not _nombre_invalido(n) and c > mejor_n:
+        for n, c in solos.items():
+            if c > mejor_n:
                 mejor, mejor_n = n, c
         conf = round(100.0 * mejor_n / total) if mejor else 0
-        perfectos = sum(1 for n, c in conteo.items()
-                        if not _nombre_invalido(n) and round(100.0 * c / total) >= 100)
-        return (mejor or "", conf, perfectos > 1)
+        perfectos = sum(1 for c in solos.values() if round(100.0 * c / total) >= 100)
+        return (mejor or "", conf, perfectos > 1, fallo)
 
 
 # ---------------------------------------------------------------- utilidades
@@ -1013,12 +1014,15 @@ def enriquecer_con_inegi(hallazgos, inegi, limite, previas=None):
         coords = h.pop("_coords", [])
         if inegi is None or time.time() >= limite:
             continue
-        nombre, conf, empatado = inegi.sugerir(coords)
+        nombre, conf, empatado, fallo = inegi.sugerir(coords)
         # como GAIA: solo valen los resultados al 100% y sin empate
-        if nombre and conf >= 100 and not empatado:
+        if not fallo and nombre and conf >= 100 and not empatado:
             h["sug"] = nombre
             h["conf"] = 100
-        elif previas and str(h["id"]) in previas:
+        elif fallo and previas and str(h["id"]) in previas:
+            # el INEGI no contestó hoy: conservamos el nombre de otra corrida.
+            # Si contestó y ya no da el 100%, el segmento se cae solo: así una
+            # sugerencia vieja no se queda pegada para siempre.
             h["sug"] = previas[str(h["id"])]
             h["conf"] = 100
     if inegi is None:
