@@ -221,8 +221,15 @@ def parse_wms(html):
     return filtrados
 
 
+# etiquetas que usa el INEGI cuando no tiene el nombre de la vialidad
+_RE_SIN_NOMBRE = re.compile(
+    r"ninguno|sin nombre|no disponible|no aplica|"
+    r"n\s?/\s?[ad]|n\s?\.?\s?d\s?\.?|s\s?/\s?[dn]",
+    flags=re.I)
+
+
 def _nombre_invalido(n):
-    return bool(re.fullmatch(r"ninguno|sin nombre|n/a|s/n", n, flags=re.I))
+    return bool(_RE_SIN_NOMBRE.fullmatch((n or "").strip()))
 
 
 def puntos_consulta(coords):
@@ -1098,6 +1105,11 @@ def guardar_almacen(almacen, meta):
     resumen_estados = []
     slugs_actuales = set()
     for estado, segmentos in sorted(almacen.items()):
+        # etiquetas del INEGI ("Nd", "Ninguno") que se colaron como nombre
+        # en corridas viejas: se limpian al guardar, sin esperar el re-escaneo
+        for _sid in [k for k, r in segmentos.items()
+                     if _nombre_invalido(r.get("sug") or "")]:
+            del segmentos[_sid]
         slug = slugify(estado)
         slugs_actuales.add(slug)
         ciudades = {}
