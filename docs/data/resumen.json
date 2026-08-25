@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-25T12:33:47+00:00",
+ "actualizado": "2026-08-25T13:56:06+00:00",
  "env": "row",
- "total": 131064,
+ "total": 130598,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -66,13 +66,13 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 9380,
-   "ciudades": 409
+   "total": 9164,
+   "ciudades": 398
   },
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 6729,
+   "total": 6725,
    "ciudades": 212
   },
   {
@@ -84,7 +84,7 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 4842,
+   "total": 4795,
    "ciudades": 359
   },
   {
@@ -96,14 +96,14 @@
   {
    "estado": "Morelos",
    "slug": "morelos",
-   "total": 5384,
+   "total": 5354,
    "ciudades": 165
   },
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 9828,
-   "ciudades": 391
+   "total": 9819,
+   "ciudades": 390
   },
   {
    "estado": "Nayarit",
@@ -132,13 +132,13 @@
   {
    "estado": "Querétaro",
    "slug": "queretaro",
-   "total": 1288,
-   "ciudades": 116
+   "total": 1202,
+   "ciudades": 109
   },
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 2352,
+   "total": 2347,
    "ciudades": 43
   },
   {
@@ -174,8 +174,8 @@
   {
    "estado": "Tlaxcala",
    "slug": "tlaxcala",
-   "total": 2047,
-   "ciudades": 128
+   "total": 1978,
+   "ciudades": 126
   },
   {
    "estado": "Veracruz",
