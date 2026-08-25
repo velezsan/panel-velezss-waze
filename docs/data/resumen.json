@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-25T08:57:11+00:00",
+ "actualizado": "2026-08-25T09:48:33+00:00",
  "env": "row",
- "total": 133659,
+ "total": 133016,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -84,8 +84,8 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 6196,
-   "ciudades": 373
+   "total": 5733,
+   "ciudades": 367
   },
   {
    "estado": "Michoacán",
@@ -108,8 +108,8 @@
   {
    "estado": "Nayarit",
    "slug": "nayarit",
-   "total": 3934,
-   "ciudades": 191
+   "total": 3754,
+   "ciudades": 190
   },
   {
    "estado": "Nuevo León",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161648,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 34.2,
+  "porcentaje_vuelta": 34.3,
   "modo": "completo"
  },
  "aviso": "",
