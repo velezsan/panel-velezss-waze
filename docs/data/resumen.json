@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-25T05:26:00+00:00",
+ "actualizado": "2026-08-25T06:16:48+00:00",
  "env": "row",
- "total": 135473,
+ "total": 135410,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -84,7 +84,7 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 6330,
+   "total": 6267,
    "ciudades": 375
   },
   {
@@ -198,7 +198,7 @@
  ],
  "progreso": {
   "ciclo": 3,
-  "celdas_escaneadas": 161648,
+  "celdas_escaneadas": 161647,
   "celdas_total": 161650,
   "porcentaje": 100.0,
   "porcentaje_vuelta": 33.9,
