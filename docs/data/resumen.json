@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-26T12:29:35+00:00",
+ "actualizado": "2026-08-26T12:36:01+00:00",
  "env": "row",
- "total": 118595,
+ "total": 118541,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -84,8 +84,8 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 3766,
-   "ciudades": 328
+   "total": 3751,
+   "ciudades": 327
   },
   {
    "estado": "Michoacán",
@@ -192,8 +192,8 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 4663,
-   "ciudades": 335
+   "total": 4624,
+   "ciudades": 334
   }
  ],
  "progreso": {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161648,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 37.8,
+  "porcentaje_vuelta": 37.9,
   "modo": "completo"
  },
  "aviso": "",
