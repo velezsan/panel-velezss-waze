@@ -297,19 +297,16 @@ class ConsultorINEGI:
     def sugerir(self, coords):
         """Réplica del flujo por etapas de GAIA con aborto temprano.
 
-        Devuelve (nombre, confianza 0-100, empatado, falló_el_inegi).
-
-        Un punto solo respalda un nombre si el INEGI devuelve ahí ese nombre
-        y ningún otro: en los cruces la consulta trae la calle que cruza
-        también, y ese punto no dice nada sobre cuál de las dos es. Así el
-        100% significa "los cinco puntos apuntan sin ambigüedad a esta calle",
-        que es lo mismo que reporta GAIA.
+        Devuelve (nombre, confianza 0-100, empatado, falló_el_inegi). La
+        confianza es el % de puntos del segmento donde el INEGI regresó ese
+        mismo nombre.
         """
         pts = puntos_consulta(coords)
         if not pts:
             return "", 0, False, False
         total = len(pts)
-        solos = {}  # nombre -> puntos donde fue el único nombre válido
+        conteo = {}
+        candidatos = None
         fallo = False
         for i, p in enumerate(pts):
             nombres = self.nombres_en(p[0], p[1])
@@ -322,18 +319,23 @@ class ConsultorINEGI:
             if nombres is None:  # el INEGI no contestó
                 fallo = True
                 break
+            for n in nombres:
+                conteo[n] = conteo.get(n, 0) + 1
             validos = [n for n in nombres if not _nombre_invalido(n)]
-            if len(validos) != 1:
-                # punto sin nombre o ambiguo: el 100% ya es imposible, abortamos
-                break
-            n = validos[0]
-            solos[n] = solos.get(n, 0) + 1
+            if candidatos is None:
+                candidatos = validos
+            else:
+                lset = {n.lower() for n in validos}
+                candidatos = [n for n in candidatos if n.lower() in lset]
+            if not candidatos:
+                break  # el 100% ya es imposible (o zona sin cobertura): abortar
         mejor, mejor_n = None, 0
-        for n, c in solos.items():
-            if c > mejor_n:
+        for n, c in conteo.items():
+            if not _nombre_invalido(n) and c > mejor_n:
                 mejor, mejor_n = n, c
         conf = round(100.0 * mejor_n / total) if mejor else 0
-        perfectos = sum(1 for c in solos.values() if round(100.0 * c / total) >= 100)
+        perfectos = sum(1 for n, c in conteo.items()
+                        if not _nombre_invalido(n) and round(100.0 * c / total) >= 100)
         return (mejor or "", conf, perfectos > 1, fallo)
 
 
