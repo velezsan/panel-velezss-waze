@@ -270,8 +270,13 @@ class ConsultorINEGI:
         key = (round(lon, 6), round(lat, 6))
         if key in self.cache:
             return self.cache[key]
-        bbox = (f"{lon - INEGI_DELTA:.6f},{lat - INEGI_DELTA:.6f},"
-                f"{lon + INEGI_DELTA:.6f},{lat + INEGI_DELTA:.6f}")
+        # 7 decimales, igual que el script GAIA de Santiago. Con 6 el bbox
+        # queda corrido unos centímetros y el INEGI llega a devolver también
+        # la calle que cruza, lo que inflaba la confianza (el 290671259 salía
+        # al 100% cuando en realidad es 50%). Medido en 24 puntos: mismos
+        # nombres con 6 y con 7 decimales, salvo justo esos casos de borde.
+        bbox = (f"{lon - INEGI_DELTA:.7f},{lat - INEGI_DELTA:.7f},"
+                f"{lon + INEGI_DELTA:.7f},{lat + INEGI_DELTA:.7f}")
         params = {
             "SERVICE": "WMS", "VERSION": "1.1.1", "REQUEST": "GetFeatureInfo",
             "LAYERS": INEGI_LAYER, "QUERY_LAYERS": INEGI_LAYER,
