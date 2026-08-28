@@ -82,6 +82,10 @@ jobs:
         # traen los flujos por defecto tiene prohibido lanzar otros flujos,
         # por eso hace falta el secreto TOKEN_ESCANEO.
         if: always()
+        # Nunca debe tumbar la corrida: el escaneo ya hizo su trabajo y guardó.
+        # Si el encadenado falla (token sin permiso, vencido, o GitHub de malas)
+        # se avisa en el log y ya, que el cron haga de respaldo.
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.TOKEN_ESCANEO }}
           FLUJO: escaneo-na.yml
@@ -97,5 +101,9 @@ jobs:
             echo "La corrida duró ${DURACION}s (menos de 10 min): no se encadena."
             exit 0
           fi
-          gh workflow run "$FLUJO" --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME"
-          echo "Siguiente corrida lanzada."
+          if gh workflow run "$FLUJO" --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME"; then
+            echo "Siguiente corrida lanzada."
+          else
+            echo "No se pudo encadenar. Si dice 403, al token le falta el permiso"
+            echo "Actions: Read and write sobre este repo. El cron queda de respaldo."
+          fi
