@@ -2,7 +2,12 @@ name: Escaneo de segmentos sin nombre
 
 on:
   schedule:
-    - cron: '17 */4 * * *'   # 6 veces al día, cada 4 horas (con 30 min de holgura entre corridas)
+    - cron: '17 */2 * * *'   # cada 2 horas: corridas cortas y seguidas.
+    # GitHub retrasa y hasta descarta los disparos programados cuando el
+    # repo pesa mucho. Antes eran 210 min de cada 240 (87% ocupado) y se
+    # saltaba la mitad de las corridas, con huecos de 7 a 14 horas. Con
+    # 100 min de cada 120 hay holgura, y si GitHub se salta un disparo el
+    # siguiente entra 2 horas después en vez de 4.
   workflow_dispatch:
     inputs:
       modo:
@@ -12,7 +17,7 @@ on:
         options: [test, completo]
       minutos:
         description: 'Duración máxima en minutos'
-        default: '210'
+        default: '100'
       zona:
         description: 'Re-escaneo prioritario: estado, "lat,lon" o bbox (vacío = barrido normal)'
         default: ''
@@ -27,7 +32,7 @@ concurrency:
 jobs:
   escanear:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 170
     steps:
       - uses: actions/checkout@v4
         with:
@@ -44,7 +49,7 @@ jobs:
         run: |
           python scanner/scan.py \
             --modo "${{ github.event.inputs.modo || 'completo' }}" \
-            --minutos "${{ github.event.inputs.minutos || '210' }}" \
+            --minutos "${{ github.event.inputs.minutos || '100' }}" \
             --zona="${{ github.event.inputs.zona || '' }}"
 
       - name: Guardar resultados
