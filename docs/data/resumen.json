@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-28T01:25:26+00:00",
+ "actualizado": "2026-08-28T02:05:35+00:00",
  "env": "row",
- "total": 108590,
+ "total": 108379,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -144,8 +144,8 @@
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 1382,
-   "ciudades": 199
+   "total": 1276,
+   "ciudades": 197
   },
   {
    "estado": "Sinaloa",
@@ -192,8 +192,8 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 3405,
-   "ciudades": 284
+   "total": 3300,
+   "ciudades": 277
   }
  ],
  "progreso": {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161648,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 44.4,
+  "porcentaje_vuelta": 44.8,
   "modo": "completo"
  },
  "aviso": "",
