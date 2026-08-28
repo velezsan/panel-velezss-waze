@@ -2,7 +2,7 @@ name: Escaneo NA (franja fronteriza)
 
 on:
   schedule:
-    - cron: '17 2-22/4 * * *'   # 6 veces al día, intercalado con el escaneo ROW
+    - cron: '47 1-23/2 * * *'   # cada 2 horas, intercalado con el escaneo ROW
   workflow_dispatch:
     inputs:
       modo:
@@ -12,7 +12,7 @@ on:
         options: [test, completo]
       minutos:
         description: 'Duración máxima en minutos'
-        default: '210'
+        default: '100'
       zona:
         description: 'Re-escaneo prioritario: estado, "lat,lon" o bbox (vacío = barrido normal)'
         default: ''
@@ -27,7 +27,7 @@ concurrency:
 jobs:
   escanear:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 170
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,7 +45,7 @@ jobs:
           python scanner/scan.py \
             --panel na \
             --modo "${{ github.event.inputs.modo || 'completo' }}" \
-            --minutos "${{ github.event.inputs.minutos || '210' }}" \
+            --minutos "${{ github.event.inputs.minutos || '100' }}" \
             --zona="${{ github.event.inputs.zona || '' }}"
 
       - name: Guardar resultados
