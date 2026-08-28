@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-28T15:00:49+00:00",
+ "actualizado": "2026-08-28T16:36:35+00:00",
  "env": "row",
- "total": 107985,
+ "total": 107864,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -18,7 +18,7 @@
   {
    "estado": "Baja California Sur",
    "slug": "baja-california-sur",
-   "total": 1759,
+   "total": 1751,
    "ciudades": 48
   },
   {
@@ -168,8 +168,8 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 1362,
-   "ciudades": 113
+   "total": 1249,
+   "ciudades": 110
   },
   {
    "estado": "Tlaxcala",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161648,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 46.4,
+  "porcentaje_vuelta": 46.6,
   "modo": "completo"
  },
  "aviso": "",
