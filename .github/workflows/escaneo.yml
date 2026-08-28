@@ -45,6 +45,9 @@ jobs:
       - name: Instalar dependencias
         run: pip install requests
 
+      - name: Marca de inicio
+        run: echo "INICIO=$(date +%s)" >> "$GITHUB_ENV"
+
       - name: Correr escáner
         run: |
           python scanner/scan.py \
@@ -75,3 +78,28 @@ jobs:
             sleep 10
           done
           [ "$ok" = "1" ]
+
+      - name: Encadenar la siguiente corrida
+        # GitHub no crea los disparos programados de este repo con fiabilidad
+        # (se salta la mayoría y los que entran llegan a horas arbitrarias),
+        # así que cada corrida lanza la siguiente al terminar. El token que
+        # traen los flujos por defecto tiene prohibido lanzar otros flujos,
+        # por eso hace falta el secreto TOKEN_ESCANEO.
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.TOKEN_ESCANEO }}
+          FLUJO: escaneo.yml
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "Sin TOKEN_ESCANEO: no se encadena. El cron queda de respaldo."
+            exit 0
+          fi
+          # Freno de seguridad: si la corrida duró menos de 10 minutos algo
+          # salió mal, y encadenar sería un bucle. Mejor dejar que entre el cron.
+          DURACION=$(( $(date +%s) - ${INICIO:-0} ))
+          if [ "$DURACION" -lt 600 ]; then
+            echo "La corrida duró ${DURACION}s (menos de 10 min): no se encadena."
+            exit 0
+          fi
+          gh workflow run "$FLUJO" --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME"
+          echo "Siguiente corrida lanzada."
