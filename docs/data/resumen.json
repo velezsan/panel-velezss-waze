@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-29T15:33:40+00:00",
+ "actualizado": "2026-08-29T16:14:00+00:00",
  "env": "row",
- "total": 107194,
+ "total": 107091,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -18,7 +18,7 @@
   {
    "estado": "Baja California Sur",
    "slug": "baja-california-sur",
-   "total": 1425,
+   "total": 1421,
    "ciudades": 47
   },
   {
@@ -60,8 +60,8 @@
   {
    "estado": "Durango",
    "slug": "durango",
-   "total": 4494,
-   "ciudades": 146
+   "total": 4395,
+   "ciudades": 145
   },
   {
    "estado": "Guanajuato",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161648,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 52.7,
+  "porcentaje_vuelta": 53.0,
   "modo": "completo"
  },
  "aviso": "",
