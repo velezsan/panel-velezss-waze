@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-29T14:10:47+00:00",
+ "actualizado": "2026-08-29T14:52:41+00:00",
  "env": "row",
- "total": 107293,
+ "total": 107267,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -60,7 +60,7 @@
   {
    "estado": "Durango",
    "slug": "durango",
-   "total": 4489,
+   "total": 4494,
    "ciudades": 146
   },
   {
@@ -168,8 +168,8 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 1247,
-   "ciudades": 111
+   "total": 1224,
+   "ciudades": 109
   },
   {
    "estado": "Tlaxcala",
@@ -192,8 +192,8 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 3044,
-   "ciudades": 267
+   "total": 3036,
+   "ciudades": 266
   }
  ],
  "progreso": {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161648,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 52.3,
+  "porcentaje_vuelta": 52.5,
   "modo": "completo"
  },
  "aviso": "",
