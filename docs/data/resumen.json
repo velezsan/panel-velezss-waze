@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-30T00:38:36+00:00",
+ "actualizado": "2026-08-30T00:44:00+00:00",
  "env": "row",
- "total": 106854,
+ "total": 106833,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -60,7 +60,7 @@
   {
    "estado": "Durango",
    "slug": "durango",
-   "total": 4395,
+   "total": 4374,
    "ciudades": 145
   },
   {
