@@ -1,21 +1,14 @@
 {
- "actualizado": "2026-08-30T21:41:02+00:00",
+ "actualizado": "2026-08-30T22:24:31+00:00",
  "env": "usa",
- "total": 2,
- "estados": [
-  {
-   "estado": "Tamaulipas",
-   "slug": "tamaulipas",
-   "total": 2,
-   "ciudades": 1
-  }
- ],
+ "total": 0,
+ "estados": [],
  "progreso": {
-  "ciclo": 59,
+  "ciclo": 60,
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 99.0,
+  "porcentaje_vuelta": 62.2,
   "modo": "completo"
  },
  "aviso": "",
