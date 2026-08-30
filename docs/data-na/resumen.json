@@ -1,14 +1,8 @@
 {
- "actualizado": "2026-08-30T14:38:56+00:00",
+ "actualizado": "2026-08-30T15:20:00+00:00",
  "env": "usa",
- "total": 3,
+ "total": 2,
  "estados": [
-  {
-   "estado": "Sonora",
-   "slug": "sonora",
-   "total": 1,
-   "ciudades": 1
-  },
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
@@ -21,7 +15,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 82.1,
+  "porcentaje_vuelta": 93.2,
   "modo": "completo"
  },
  "aviso": "",
