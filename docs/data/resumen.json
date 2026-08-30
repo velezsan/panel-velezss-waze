@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-30T04:07:27+00:00",
+ "actualizado": "2026-08-30T04:14:55+00:00",
  "env": "row",
- "total": 106737,
+ "total": 106676,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -60,7 +60,7 @@
   {
    "estado": "Durango",
    "slug": "durango",
-   "total": 4374,
+   "total": 4352,
    "ciudades": 145
   },
   {
@@ -192,8 +192,8 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 2919,
-   "ciudades": 263
+   "total": 2880,
+   "ciudades": 262
   }
  ],
  "progreso": {
