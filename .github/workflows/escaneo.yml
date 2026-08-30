@@ -55,6 +55,14 @@ jobs:
             --minutos "${{ github.event.inputs.minutos || '210' }}" \
             --zona="${{ github.event.inputs.zona || '' }}"
 
+      - name: Revisar el foro (una vez al día)
+        # Cuelga del escaneo de ROW en vez de tener su propio cron, porque la
+        # cadena sí dispara puntual y los disparos programados de GitHub no.
+        # El propio script se salta el trabajo si ya se revisó hace menos de
+        # 20 horas, así que de las corridas del día solo una hace la consulta.
+        continue-on-error: true
+        run: python scanner/foro.py --dias 60 --si-viejo 20
+
       - name: Guardar resultados
         run: |
           git config user.name "escaner-bot"
