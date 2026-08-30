@@ -29,52 +29,84 @@
   .cargando{color:var(--muted);padding:40px;text-align:center}
   .nota{color:var(--muted);font-size:.85rem;margin-top:14px}
   .pos{color:var(--muted);width:36px}
+  td.foro{color:var(--muted);font-size:.88rem;white-space:nowrap;text-align:right}
+  td.foro b{color:var(--text);font-weight:600}
+  td.foro.cero{opacity:.35}
+  th .aclara{display:block;font-weight:400;font-size:.72rem;color:var(--muted);text-transform:none}
 </style>
 </head>
 <body>
 <header>
   <h1>🏆 Local Champs</h1>
-  <p class="sub">Segmentos editados por cada Local Champ en los últimos 60 días ·
+  <p class="sub">Lo que cada Local Champ hizo en los últimos 60 días: segmentos editados en el mapa
+    y actividad en el foro de México ·
     <a href="index.html">← Volver al panel</a></p>
 </header>
 <main>
   <div id="contenido"><div class="cargando">Cargando datos…</div></div>
   <p class="nota" id="nota"></p>
-  <p class="nota">El conteo se construye con lo que el escáner recorre: cada celda aporta los segmentos
+  <p class="nota">El conteo de segmentos se construye con lo que el escáner recorre: cada celda aporta los segmentos
     cuya última edición (de cualquier tipo de vía) fue hecha por un Local Champ dentro de la ventana de 60 días.
-    La lista de Local Champs viene del
+    Las dos últimas columnas cuentan su actividad en el
+    <a href="https://www.waze.com/discuss/c/editors/mexico/4569" target="_blank" rel="noopener" style="color:var(--accent)">foro de México</a>:
+    <b>desbloqueos</b> es la sección de desbloqueos, actualizaciones y cierres; <b>otras secciones</b> es todo lo demás
+    (edición de mapas, mentorship, regiones, MapRaids…). En cada una, el primer número son los temas que abrió
+    y el segundo las respuestas que escribió. El foro se revisa una vez al día. La lista de Local Champs viene del
     <a href="https://www.waze.com/discuss/t/local-champs/377004" target="_blank" rel="noopener" style="color:var(--accent)">foro oficial de la comunidad</a>.</p>
 </main>
 <script>
 (function(){
   const $=id=>document.getElementById(id);
   const fmt=n=>n.toLocaleString('es-MX');
-  fetch('../data-na/champs.json',{cache:'no-store'})
-    .then(r=>{if(!r.ok)throw 0;return r.json();})
-    .then(d=>{
-      const tot=Object.entries(d.totales||{}).sort((a,b)=>b[1]-a[1]);
-      if(!tot.length){
-        $('contenido').innerHTML='<div class="cargando">Aún no hay ediciones registradas. El conteo crece con cada corrida del escáner.</div>';
+  const pide=u=>fetch(u,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
+  Promise.all([pide('../data-na/champs.json'), pide('../data/foro.json')])
+    .then(([d,f])=>{
+      if(!d){
+        $('contenido').innerHTML='<div class="cargando">Los datos se generan con las corridas del escáner. Si esta sección es nueva, estará disponible después de la próxima corrida.</div>';
         return;
       }
-      const max=tot[0][1]||1;
-      const suma=tot.reduce((a,x)=>a+x[1],0);
-      let html='<table><thead><tr><th></th><th>Local Champ</th><th class="num">Segmentos editados</th><th></th></tr></thead><tbody>';
-      tot.forEach(([nombre,n],i)=>{
+      const ediciones=d.totales||{};
+      const foro=(f&&f.champs)||{};
+      // los dos lados usan el mismo apodo, pero no siempre con las mismas mayúsculas
+      const porClave={};
+      Object.keys(ediciones).forEach(n=>{porClave[n.toLowerCase()]={nombre:n, seg:ediciones[n], foro:null};});
+      Object.keys(foro).forEach(n=>{
+        const k=n.toLowerCase();
+        if(!porClave[k]) porClave[k]={nombre:n, seg:0, foro:null};
+        porClave[k].foro=foro[n];
+      });
+      const filas=Object.values(porClave).sort((a,b)=>b.seg-a.seg||a.nombre.localeCompare(b.nombre,'es'));
+      if(!filas.length){
+        $('contenido').innerHTML='<div class="cargando">Aún no hay actividad registrada. El conteo crece con cada corrida del escáner.</div>';
+        return;
+      }
+      const max=filas[0].seg||1;
+      const suma=filas.reduce((a,x)=>a+x.seg,0);
+      const celdaForo=s=>{
+        if(!s) return '<td class="foro cero" title="Sin datos del foro todavía">—</td>';
+        const vacia=(s.temas||0)+(s.respuestas||0)===0;
+        return `<td class="foro${vacia?' cero':''}" title="${s.temas||0} tema${(s.temas||0)===1?'':'s'} · ${s.respuestas||0} respuesta${(s.respuestas||0)===1?'':'s'}">`+
+               `<b>${fmt(s.temas||0)}</b> · ${fmt(s.respuestas||0)}</td>`;
+      };
+      let html='<table><thead><tr><th></th><th>Local Champ</th><th class="num">Segmentos editados</th>'+
+        '<th class="num">Desbloqueos<span class="aclara">temas · respuestas</span></th>'+
+        '<th class="num">Otras secciones<span class="aclara">temas · respuestas</span></th>'+
+        '<th></th></tr></thead><tbody>';
+      filas.forEach((r,i)=>{
         html+=`<tr><td class="pos">${i+1}</td>`+
-          `<td><a href="https://www.waze.com/user/editor/${encodeURIComponent(nombre)}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none">${nombre}</a>${i===0?' <span class="chip">líder</span>':''}</td>`+
-          `<td class="num">${fmt(n)}</td>`+
-          `<td><div class="barra"><i style="width:${Math.max(3,Math.round(100*n/max))}%"></i></div></td></tr>`;
+          `<td><a href="https://www.waze.com/user/editor/${encodeURIComponent(r.nombre)}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none">${r.nombre}</a>${i===0&&r.seg>0?' <span class="chip">líder</span>':''}</td>`+
+          `<td class="num">${fmt(r.seg)}</td>`+
+          celdaForo(r.foro&&r.foro.desbloqueos)+
+          celdaForo(r.foro&&r.foro.otras)+
+          `<td><div class="barra"><i style="width:${Math.max(3,Math.round(100*r.seg/max))}%"></i></div></td></tr>`;
       });
       html+='</tbody></table>';
       $('contenido').innerHTML=html;
       const act=d.actualizado?new Date(d.actualizado).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'—';
+      const actF=f&&f.actualizado?new Date(f.actualizado).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):null;
       $('nota').textContent=`Total: ${fmt(suma)} segmentos editados por Local Champs (últimos ${d.ventana_dias||60} días) · `+
-        `cobertura: ${d.porcentaje_pais!=null?d.porcentaje_pais+'% del país escaneado':'en construcción'} · actualizado ${act} (tu hora). `+
-        `El número seguirá subiendo conforme el escáner recorra más territorio.`;
-    })
-    .catch(()=>{
-      $('contenido').innerHTML='<div class="cargando">Los datos se generan con las corridas del escáner. Si esta sección es nueva, estará disponible después de la próxima corrida.</div>';
+        `cobertura: ${d.porcentaje_pais!=null?d.porcentaje_pais+'% del país escaneado':'en construcción'} · actualizado ${act} (tu hora)`+
+        (actF?` · foro revisado ${actF}`:' · el foro se revisa una vez al día.');
     });
 })();
 </script>
