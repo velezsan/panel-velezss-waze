@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-31T00:01:10+00:00",
+ "actualizado": "2026-08-31T00:46:23+00:00",
  "env": "row",
- "total": 104945,
+ "total": 104935,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -60,8 +60,8 @@
   {
    "estado": "Durango",
    "slug": "durango",
-   "total": 3884,
-   "ciudades": 138
+   "total": 3883,
+   "ciudades": 137
   },
   {
    "estado": "Guanajuato",
@@ -150,8 +150,8 @@
   {
    "estado": "Sinaloa",
    "slug": "sinaloa",
-   "total": 2575,
-   "ciudades": 164
+   "total": 2566,
+   "ciudades": 162
   },
   {
    "estado": "Sonora",
