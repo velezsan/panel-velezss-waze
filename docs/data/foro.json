@@ -1,15 +1,35 @@
 {
- "actualizado": "2026-08-30T18:20:54+00:00",
+ "actualizado": "2026-08-31T15:29:03+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 118,
- "peticiones": 125,
+ "temas_revisados": 120,
+ "peticiones": 128,
  "errores": 0,
  "champs": {
-  "arielorellana": {
+  "carloslaso": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 43
+    "respuestas": 28
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 17
+   }
+  },
+  "editorbcmx": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 4
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 11
+   }
+  },
+  "DavidAbarca": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 5
    },
    "otras": {
     "temas": 0,
@@ -23,7 +43,7 @@
    },
    "otras": {
     "temas": 0,
-    "respuestas": 3
+    "respuestas": 4
    }
   },
   "arturoae": {
@@ -33,17 +53,17 @@
    },
    "otras": {
     "temas": 0,
-    "respuestas": 1
+    "respuestas": 2
    }
   },
-  "carloslaso": {
+  "arielorellana": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 26
+    "respuestas": 43
    },
    "otras": {
     "temas": 0,
-    "respuestas": 14
+    "respuestas": 6
    }
   },
   "camachista": {
@@ -56,16 +76,6 @@
     "respuestas": 1
    }
   },
-  "DavidAbarca": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 5
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 3
-   }
-  },
   "Hector_HF": {
    "desbloqueos": {
     "temas": 0,
@@ -74,16 +84,6 @@
    "otras": {
     "temas": 0,
     "respuestas": 3
-   }
-  },
-  "editorbcmx": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 4
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 10
    }
   },
   "EumirGarciaC2": {
