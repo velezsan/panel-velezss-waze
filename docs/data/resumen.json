@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-01T04:05:21+00:00",
+ "actualizado": "2026-09-01T04:45:47+00:00",
  "env": "row",
- "total": 103266,
+ "total": 103185,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -36,7 +36,7 @@
   {
    "estado": "Chihuahua",
    "slug": "chihuahua",
-   "total": 2470,
+   "total": 2456,
    "ciudades": 137
   },
   {
@@ -48,8 +48,8 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 4149,
-   "ciudades": 137
+   "total": 4147,
+   "ciudades": 136
   },
   {
    "estado": "Colima",
@@ -156,8 +156,8 @@
   {
    "estado": "Sonora",
    "slug": "sonora",
-   "total": 1635,
-   "ciudades": 78
+   "total": 1570,
+   "ciudades": 76
   },
   {
    "estado": "Tabasco",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161648,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 70.2,
+  "porcentaje_vuelta": 70.9,
   "modo": "completo"
  },
  "aviso": "",
