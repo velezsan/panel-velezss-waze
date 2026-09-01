@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-08-31T15:29:03+00:00",
+ "actualizado": "2026-09-01T12:37:55+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
  "temas_revisados": 120,
@@ -9,11 +9,11 @@
   "carloslaso": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 28
+    "respuestas": 29
    },
    "otras": {
     "temas": 0,
-    "respuestas": 17
+    "respuestas": 20
    }
   },
   "editorbcmx": {
@@ -56,6 +56,16 @@
     "respuestas": 2
    }
   },
+  "camachista": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 13
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 2
+   }
+  },
   "arielorellana": {
    "desbloqueos": {
     "temas": 0,
@@ -64,16 +74,6 @@
    "otras": {
     "temas": 0,
     "respuestas": 6
-   }
-  },
-  "camachista": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 13
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 1
    }
   },
   "Hector_HF": {
@@ -88,7 +88,7 @@
   },
   "EumirGarciaC2": {
    "desbloqueos": {
-    "temas": 1,
+    "temas": 0,
     "respuestas": 2
    },
    "otras": {
