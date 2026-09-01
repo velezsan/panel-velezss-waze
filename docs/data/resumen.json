@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-01T00:37:28+00:00",
+ "actualizado": "2026-09-01T01:20:32+00:00",
  "env": "row",
- "total": 103510,
+ "total": 103475,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -36,8 +36,8 @@
   {
    "estado": "Chihuahua",
    "slug": "chihuahua",
-   "total": 2569,
-   "ciudades": 141
+   "total": 2546,
+   "ciudades": 139
   },
   {
    "estado": "Ciudad de México",
@@ -114,7 +114,7 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 5475,
+   "total": 5463,
    "ciudades": 190
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161648,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 68.3,
+  "porcentaje_vuelta": 68.6,
   "modo": "completo"
  },
  "aviso": "",
