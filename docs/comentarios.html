@@ -188,7 +188,7 @@
         <td class="gente">${esc(r.autor)||'—'}${r.editor&&r.editor!==r.autor?`<div class="ed">editó: ${esc(r.editor)}</div>`:''}</td>
         <td class="fecha">${esc(r.creado)||'—'}</td>
         <td class="fecha">${esc(r.editado)||'—'}</td>
-        <td><a class="wme ${hecho?'hecho':''}" href="${permalink(r)}" target="_blank" rel="noopener">Abrir</a>
+        <td><a class="wme ${hecho?'hecho':''}" href="${permalink(r)}" target="wme">Abrir</a>
           ${hecho?'<span class="quitar" title="Marcar como pendiente">↺</span>':''}</td>
       </tr>${hilo}`;
     }).join('');
@@ -196,11 +196,16 @@
         <th>Asunto</th><th>Descripción</th><th>Candado</th><th>Creó / editó</th><th>Creado</th><th>Modificado</th><th></th>
       </tr></thead><tbody>${filas}</tbody></table>`;
     $('contenido').querySelectorAll('a.wme').forEach(a=>{
-      a.addEventListener('click',()=>{
+      const marcar=()=>{
         const id=a.closest('tr').dataset.id;
         visitados.add(id); guardar();
         a.classList.add('hecho'); a.closest('tr').classList.add('visitado');
-      });
+      };
+      a.addEventListener('click',marcar);
+      // copiar el enlace con el botón derecho, o abrirlo con el de en medio,
+      // también cuenta como que ya lo viste
+      a.addEventListener('contextmenu',marcar);
+      a.addEventListener('auxclick',marcar);
     });
     $('contenido').querySelectorAll('.hilo-btn').forEach(b=>{
       b.addEventListener('click',()=>{
