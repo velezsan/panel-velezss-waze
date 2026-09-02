@@ -173,7 +173,7 @@
         <td>${r.ciudad||'<span class="chip">sin ciudad</span>'}</td>
         <td class="lk"><b>${r.lk}</b> → <span>${r.req}</span></td>
         <td style="white-space:nowrap">${det}${esNuevo?' <span class="chip nuevo">nuevo</span>':''}</td>
-        <td><a class="wme${vis?' hecho':''}" data-id="${r.id}" target="_blank" rel="noopener" href="${permalink(r)}">${vis?'✓ Abierto':'Abrir en WME'}</a>${vis?`<span class="quitar" data-quitar="${r.id}" title="Desmarcar">✕</span>`:''}</td></tr>`;
+        <td><a class="wme${vis?' hecho':''}" data-id="${r.id}" target="wme" href="${permalink(r)}">${vis?'✓ Abierto':'Abrir en WME'}</a>${vis?`<span class="quitar" data-quitar="${r.id}" title="Desmarcar">✕</span>`:''}</td></tr>`;
     });
     html+='</tbody></table>';
     $('contenido').innerHTML=html;
@@ -192,9 +192,16 @@
   $('contenido').addEventListener('click',e=>{
     const q=e.target.closest('.quitar');
     if(q){visitados.delete(String(q.dataset.quitar));guardar();pintar();return;}
+    marcarVisto(e);
+  });
+  function marcarVisto(e){
     const a=e.target.closest('a.wme');
     if(a&&a.dataset.id){visitados.add(String(a.dataset.id));guardar();setTimeout(pintar,150);}
-  });
+  }
+  // copiar el enlace con el botón derecho, o abrirlo con el de en medio,
+  // también cuenta como que ya lo viste
+  $('contenido').addEventListener('contextmenu',marcarVisto);
+  $('contenido').addEventListener('auxclick',marcarVisto);
   $('pg-prev').addEventListener('click',()=>{pagina--;pintar();window.scrollTo(0,0);});
   $('pg-next').addEventListener('click',()=>{pagina++;pintar();window.scrollTo(0,0);});
   $('pg-first').addEventListener('click',()=>{pagina=0;pintar();window.scrollTo(0,0);});
