@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-09-02T16:49:09+00:00",
+ "actualizado": "2026-09-02T17:32:49+00:00",
  "env": "row",
  "total": 101716,
  "estados": [
@@ -31,7 +31,7 @@
    "estado": "Chiapas",
    "slug": "chiapas",
    "total": 2040,
-   "ciudades": 164
+   "ciudades": 165
   },
   {
    "estado": "Chihuahua",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161648,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 2.2,
+  "porcentaje_vuelta": 3.2,
   "modo": "completo"
  },
  "aviso": "",
