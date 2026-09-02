@@ -285,7 +285,7 @@
         <td>${r.ciudad||'<span class="chip">sin ciudad</span>'}${r.est?' <span class="chip">'+r.est+'</span>':''}</td>
         <td>${sug}</td>
         <td class="fecha">${det}${esNuevo?' <span class="chip nuevo">nuevo</span>':''}</td>
-        <td><a class="wme${vis?' hecho':''}" data-id="${r.id}" target="_blank" rel="noopener" href="${permalink(r)}">${vis?'✓ Abierto':'Abrir en WME'}</a>${vis?`<span class="quitar" data-quitar="${r.id}" title="Desmarcar">✕</span>`:''}</td></tr>`;
+        <td><a class="wme${vis?' hecho':''}" data-id="${r.id}" target="wme" href="${permalink(r)}">${vis?'✓ Abierto':'Abrir en WME'}</a>${vis?`<span class="quitar" data-quitar="${r.id}" title="Desmarcar">✕</span>`:''}</td></tr>`;
     });
     html+='</tbody></table>';
     $('contenido').innerHTML=html;
@@ -310,9 +310,16 @@
     }
     const q=e.target.closest('.quitar');
     if(q){visitados.delete(String(q.dataset.quitar));guardarVisitados();pintarTabla();return;}
+    marcarVisto(e);
+  });
+  function marcarVisto(e){
     const a=e.target.closest('a.wme');
     if(a&&a.dataset.id){visitados.add(String(a.dataset.id));guardarVisitados();setTimeout(pintarTabla,150);}
-  });
+  }
+  // copiar el enlace con el botón derecho, o abrirlo con el de en medio,
+  // también cuenta como que ya lo viste
+  $('contenido').addEventListener('contextmenu',marcarVisto);
+  $('contenido').addEventListener('auxclick',marcarVisto);
 
   $('pg-prev').addEventListener('click',()=>{pagina--;pintarTabla();window.scrollTo(0,0);});
   $('pg-next').addEventListener('click',()=>{pagina++;pintarTabla();window.scrollTo(0,0);});
