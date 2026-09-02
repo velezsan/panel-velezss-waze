@@ -1169,9 +1169,12 @@ def main():
     PALABRAS_MAL = {k.lower(): v for k, v in
                     (load_json(PALABRAS_PATH, {}).get("palabras") or {}).items()}
     log(f"revisión de ortografía: {len(PALABRAS_MAL)} palabras cargadas")
+    # Las avenidas principales (PS) deben tener candado 2, así que salen las que
+    # están en nivel 1. Empezó solo en el Panel NA y desde hoy corre en los dos.
+    # Las PS sin nombre no entran aquí: esas se atienden en segmentos sin nombre.
+    REQ_CANDADO_EXTRA = {2: 2}
     if panel_na:
         FILTRAR_RESTRINGIDAS = True  # descartar lo que Waze marca como no editable
-        REQ_CANDADO_EXTRA = {2: 2}  # PS en nivel 1: solo el Panel NA por ahora
         STATE_PATH = os.path.join(BASE, "state", "scan_state_na.json")
         LASTRUN_PATH = os.path.join(BASE, "state", "last_run_na.json")
         DEBUG_PATH = os.path.join(BASE, "state", "debug_na.txt")
