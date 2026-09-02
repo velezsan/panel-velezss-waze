@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-02T01:14:19+00:00",
+ "actualizado": "2026-09-02T01:54:52+00:00",
  "env": "row",
- "total": 102615,
+ "total": 102587,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -156,8 +156,8 @@
   {
    "estado": "Sonora",
    "slug": "sonora",
-   "total": 1210,
-   "ciudades": 71
+   "total": 1182,
+   "ciudades": 69
   },
   {
    "estado": "Tabasco",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161648,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 80.1,
+  "porcentaje_vuelta": 80.4,
   "modo": "completo"
  },
  "aviso": "",
