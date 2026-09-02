@@ -249,7 +249,7 @@
           <span class="copiar" data-copia="${esc(r.sug)}" title="Copiar el nombre correcto">⧉</span></td>
         <td class="ciudad">${esc(r.ciudad)||'—'}</td>
         <td class="fecha">${revisado(r)}</td>
-        <td><a class="wme ${hecho?'hecho':''}" href="${permalink(r)}" target="_blank" rel="noopener">Abrir</a>
+        <td><a class="wme ${hecho?'hecho':''}" href="${permalink(r)}" target="wme">Abrir</a>
           ${hecho?'<span class="quitar" title="Marcar como pendiente">↺</span>':''}</td>
       </tr>`;
     }).join('');
@@ -266,11 +266,16 @@
       aplicarFiltros();
     });
     $('contenido').querySelectorAll('a.wme').forEach(a=>{
-      a.addEventListener('click',()=>{
+      const marcar=()=>{
         const sid=a.closest('tr').dataset.sid;
         visitados.add(sid); guardar();
         a.classList.add('hecho'); a.closest('tr').classList.add('visitado');
-      });
+      };
+      a.addEventListener('click',marcar);
+      // copiar el enlace con el botón derecho, o abrirlo con el de en medio,
+      // también cuenta como que ya lo viste
+      a.addEventListener('contextmenu',marcar);
+      a.addEventListener('auxclick',marcar);
     });
     $('contenido').querySelectorAll('.copiar').forEach(c=>{
       c.addEventListener('click',()=>{
