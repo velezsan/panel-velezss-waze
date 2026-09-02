@@ -14,6 +14,7 @@ permitidos. Entre petición y petición hay una pausa para no apretar el foro.
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from datetime import datetime, timedelta, timezone
@@ -33,11 +34,23 @@ def log(msg):
     print(f"[{datetime.now(timezone.utc).strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
+def _clave(nombre):
+    """Nombre comparable entre el WME y el foro.
+
+    No siempre se escriben igual: en el WME es "GWM_" y en el foro "GWM".
+    Quitando lo que no es letra ni número, los dos caen en "gwm".
+    """
+    return re.sub(r"[^a-z0-9]", "", (nombre or "").lower())
+
+
 def champs():
-    """La misma lista que usa el escáner, para no tenerla en dos lados."""
+    """La misma lista que usa el escáner, para no tenerla en dos lados.
+
+    Devuelve {clave comparable: nombre tal como lo escribe el escáner}.
+    """
     sys.path.insert(0, AQUI)
     import scan
-    return set(scan.CHAMPS_MX)
+    return {_clave(n): n for n in scan.CHAMPS_MX}
 
 
 class Foro:
@@ -136,6 +149,7 @@ def recolectar(dias=60, pausa=0.4, limite_temas=0):
     log(f"temas con actividad en la ventana: {len(ids)}")
 
     cuentas = {}
+    otros = {}   # quién más escribe, para cachar apodos que no cruzaron
     vacio = {"desbloqueos": {"temas": 0, "respuestas": 0},
              "otras": {"temas": 0, "respuestas": 0}}
     for n, tid in enumerate(ids, 1):
@@ -145,12 +159,16 @@ def recolectar(dias=60, pausa=0.4, limite_temas=0):
         seccion = "desbloqueos" if cat == CAT_DESBLOQUEOS else "otras"
         for p in posts:
             usuario = (p.get("username") or "").strip()
-            if not usuario or usuario.lower() not in lista:
+            if not usuario:
                 continue
             f = _fecha(p.get("created_at"))
             if not f or f < corte:
                 continue
-            reg = cuentas.setdefault(usuario, json.loads(json.dumps(vacio)))
+            champ = lista.get(_clave(usuario))
+            if not champ:
+                otros[usuario] = otros.get(usuario, 0) + 1
+                continue
+            reg = cuentas.setdefault(champ, json.loads(json.dumps(vacio)))
             clave = "temas" if p.get("post_number") == 1 else "respuestas"
             reg[seccion][clave] += 1
         if n % 25 == 0:
@@ -164,6 +182,9 @@ def recolectar(dias=60, pausa=0.4, limite_temas=0):
         "peticiones": foro.peticiones,
         "errores": foro.errores,
         "champs": cuentas,
+        # los que más escriben sin ser champs: sirve para detectar a un champ
+        # cuyo apodo en el foro no se parece al del WME
+        "otros_frecuentes": dict(sorted(otros.items(), key=lambda kv: -kv[1])[:15]),
     }
     return salida
 
