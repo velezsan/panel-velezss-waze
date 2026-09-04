@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-04T18:09:56+00:00",
+ "actualizado": "2026-09-04T18:54:47+00:00",
  "env": "row",
- "total": 100492,
+ "total": 100517,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -36,7 +36,7 @@
   {
    "estado": "Chihuahua",
    "slug": "chihuahua",
-   "total": 2084,
+   "total": 2079,
    "ciudades": 125
   },
   {
@@ -84,8 +84,8 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 3123,
-   "ciudades": 305
+   "total": 3163,
+   "ciudades": 306
   },
   {
    "estado": "Michoacán",
@@ -102,8 +102,8 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 9648,
-   "ciudades": 386
+   "total": 9638,
+   "ciudades": 385
   },
   {
    "estado": "Nayarit",
