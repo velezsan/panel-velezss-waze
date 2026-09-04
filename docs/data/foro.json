@@ -1,11 +1,21 @@
 {
- "actualizado": "2026-09-03T06:56:09+00:00",
+ "actualizado": "2026-09-04T04:05:19+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 121,
- "peticiones": 130,
+ "temas_revisados": 122,
+ "peticiones": 131,
  "errores": 0,
  "champs": {
+  "carloslaso": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 35
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 22
+   }
+  },
   "gwm_": {
    "desbloqueos": {
     "temas": 0,
@@ -14,16 +24,6 @@
    "otras": {
     "temas": 0,
     "respuestas": 3
-   }
-  },
-  "carloslaso": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 34
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 22
    }
   },
   "editorbcmx": {
@@ -69,7 +69,7 @@
   "camachista": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 13
+    "respuestas": 11
    },
    "otras": {
     "temas": 0,
@@ -108,9 +108,9 @@
   }
  },
  "otros_frecuentes": {
-  "velezss": 87,
-  "LuisCav29": 30,
-  "TheSammirs": 17,
+  "velezss": 86,
+  "LuisCav29": 31,
+  "TheSammirs": 14,
   "jcog69": 12,
   "system": 5,
   "JorgeLAB": 3,
