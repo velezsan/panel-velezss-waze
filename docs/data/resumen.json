@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-04T04:49:07+00:00",
+ "actualizado": "2026-09-04T05:30:05+00:00",
  "env": "row",
- "total": 101600,
+ "total": 101598,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -30,7 +30,7 @@
   {
    "estado": "Chiapas",
    "slug": "chiapas",
-   "total": 2012,
+   "total": 2011,
    "ciudades": 165
   },
   {
@@ -72,7 +72,7 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 6718,
+   "total": 6717,
    "ciudades": 210
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161648,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 13.4,
+  "porcentaje_vuelta": 13.6,
   "modo": "completo"
  },
  "aviso": "",
