@@ -1,13 +1,13 @@
 {
- "actualizado": "2026-09-04T16:05:22+00:00",
+ "actualizado": "2026-09-04T16:54:07+00:00",
  "env": "row",
- "total": 100800,
+ "total": 100635,
  "estados": [
   {
    "estado": "Aguascalientes",
    "slug": "aguascalientes",
-   "total": 468,
-   "ciudades": 43
+   "total": 474,
+   "ciudades": 44
   },
   {
    "estado": "Baja California",
@@ -48,7 +48,7 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 4140,
+   "total": 4135,
    "ciudades": 135
   },
   {
@@ -60,7 +60,7 @@
   {
    "estado": "Durango",
    "slug": "durango",
-   "total": 3592,
+   "total": 3577,
    "ciudades": 132
   },
   {
@@ -144,7 +144,7 @@
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 1257,
+   "total": 1255,
    "ciudades": 193
   },
   {
@@ -192,7 +192,7 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 2880,
+   "total": 2731,
    "ciudades": 262
   }
  ],
