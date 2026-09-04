@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-04T17:34:47+00:00",
+ "actualizado": "2026-09-04T18:09:56+00:00",
  "env": "row",
- "total": 100547,
+ "total": 100492,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -12,7 +12,7 @@
   {
    "estado": "Baja California",
    "slug": "baja-california",
-   "total": 1019,
+   "total": 1012,
    "ciudades": 44
   },
   {
@@ -36,7 +36,7 @@
   {
    "estado": "Chihuahua",
    "slug": "chihuahua",
-   "total": 2132,
+   "total": 2084,
    "ciudades": 125
   },
   {
