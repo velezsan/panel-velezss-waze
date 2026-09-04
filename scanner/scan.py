@@ -20,6 +20,7 @@ import subprocess
 import sys
 import time
 import unicodedata
+from collections import deque
 from datetime import datetime, timezone
 
 try:
@@ -104,6 +105,11 @@ def distancia_a_frontera(lon, lat):
 # sobre la capa de vialidades c112, en hasta 5 puntos del segmento.
 INEGI_WMS = "https://gaia.inegi.org.mx/NLB/tunnel/wms/wms61"
 INEGI_LAYER = "c112"
+# Celdas que fallan al pedirlas al WME: cuánto esperar antes de reintentarlas
+# y cuántos intentos se hacen dentro de una misma corrida.
+ESPERA_REINTENTO = 600
+MAX_INTENTOS = 3
+
 INEGI_DELTA = 0.00004
 
 BLACKLIST_INEGI = {
@@ -1339,6 +1345,42 @@ def main():
     sesion_usa = None
     celdas_run = set()
 
+    # Celdas que fallaron al pedirlas al WME. Antes se saltaban sin más: el
+    # cursor avanzaba y la celda no volvía a tocarse hasta la siguiente vuelta
+    # completa al país (semanas), y si volvía a fallar ahí, otra vuelta. Así se
+    # quedaron once celdas congeladas desde julio. Ahora se reintentan más
+    # adelante en la misma corrida y, si aun así fallan, encabezan la siguiente.
+    falladas = deque()       # (idx, intentos) listas para reintentarse ya
+    en_espera = []           # (cuándo, idx, intentos) esperando su turno
+    para_siguiente = []      # agotaron sus intentos: van a la próxima corrida
+    por_cola = set()         # celdas ya rehechas por la cola en esta corrida
+    for _p in estado.get("celdas_falladas", []):
+        try:
+            _i = int(_p[0] if isinstance(_p, (list, tuple)) else _p)
+        except (TypeError, ValueError, IndexError):
+            continue
+        if 0 <= _i < total_celdas:
+            falladas.append((_i, 0))
+    # Rezagadas: celdas con segmentos que el cursor ya dejó atrás dos vueltas o
+    # más. Son las que se congelaron con el comportamiento viejo; se recogen
+    # aquí para no esperar a que el barrido vuelva a pasar por ellas.
+    _ya = {i for i, _n in falladas}
+    for _k, _v in celdas_info.items():
+        if _v.get("n", 0) and ciclo - _v.get("c", 0) >= 2 and int(_k) not in _ya:
+            falladas.append((int(_k), 0))
+    if falladas:
+        log(f"{len(falladas)} celdas atrasadas o fallidas: van primero")
+
+    def cola_pendiente():
+        """Lo que falta reintentar, para guardarlo en el estado."""
+        vistas, salida = set(), []
+        for _i, _n in (list(falladas) + [(i, n) for _c, i, n in en_espera]
+                       + [(i, 0) for i in para_siguiente]):
+            if _i not in vistas:
+                vistas.add(_i)
+                salida.append([_i, _n])
+        return salida
+
     def sello_celda(n):
         """Registro de celda escaneada, con fecha y hora (para el mapa)."""
         return {"n": n, "c": ciclo,
@@ -1408,6 +1450,7 @@ def main():
                        "champs": champs_info, "candados": candados_info,
                        "pases": pases_info, "comentarios": comentarios_info,
                        "ortografia": ortografia_info,
+                       "celdas_falladas": cola_pendiente(),
                        "env": env, "celda_grados": celda, "bbox_escaneo": bbox_mx})
         save_json(STATE_PATH, estado, compact=True)
         # datos para el mapa de escaneo del panel
@@ -1743,16 +1786,30 @@ def main():
                     ultima_pub = time.time()
         else:
             while time.time() < limite:
-                if cursor >= total_celdas:
-                    cursor = 0
-                    ciclo += 1
-                    log(f"Vuelta completa al país. Iniciando ciclo {ciclo}")
-                idx = cursor
-                cursor += 1
-                if str(idx) in celdas_run:
-                    log("Toda la zona quedó cubierta en esta corrida; terminando")
-                    break
-                celdas_run.add(str(idx))
+                # las que ya cumplieron su espera vuelven a la cola
+                _ahora = time.time()
+                while en_espera and en_espera[0][0] <= _ahora:
+                    _c, _i, _n = en_espera.pop(0)
+                    falladas.append((_i, _n))
+                de_cola = bool(falladas)
+                if de_cola:
+                    idx, intentos = falladas.popleft()
+                    por_cola.add(idx)
+                else:
+                    intentos = 0
+                    if cursor >= total_celdas:
+                        cursor = 0
+                        ciclo += 1
+                        por_cola.clear()   # empieza otra vuelta: todas cuentan de nuevo
+                        log(f"Vuelta completa al país. Iniciando ciclo {ciclo}")
+                    idx = cursor
+                    cursor += 1
+                    if idx in por_cola:
+                        continue  # ya se rehízo por la cola en esta misma corrida
+                    if str(idx) in celdas_run:
+                        log("Toda la zona quedó cubierta en esta corrida; terminando")
+                        break
+                    celdas_run.add(str(idx))
                 info = celdas_info.get(str(idx))
                 # celdas que salieron vacías se revisan solo de vez en cuando
                 if info and info.get("n", 0) == 0 and ciclo - info.get("c", 0) < ciclos_vacia:
@@ -1800,11 +1857,21 @@ def main():
                     raise
                 except Exception as e:
                     fallos_seguidos += 1
-                    log(f"Celda {idx} falló ({e}); se reintentará en la próxima corrida")
+                    intentos += 1
+                    if intentos < MAX_INTENTOS:
+                        en_espera.append((time.time() + ESPERA_REINTENTO, idx, intentos))
+                        log(f"Celda {idx} falló ({e}); reintento {intentos} "
+                            f"en {ESPERA_REINTENTO // 60} min")
+                    else:
+                        para_siguiente.append(idx)  # ya no se reintenta en esta corrida
+                        log(f"Celda {idx} falló {intentos} veces ({e}); "
+                            "queda al principio de la próxima corrida")
+                    por_cola.discard(idx)
                     if fallos_seguidos >= 8:
                         log("Demasiados fallos seguidos; se detiene y se guarda el avance")
                         break
-                    cursor = max(cursor, idx + 1)
+                    if not de_cola:
+                        cursor = max(cursor, idx + 1)
                     time.sleep(3)
                     continue
                 segs_en_celda = contador["segs"] - segs_antes
