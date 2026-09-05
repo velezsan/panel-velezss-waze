@@ -1,11 +1,31 @@
 {
- "actualizado": "2026-09-05T01:15:04+00:00",
+ "actualizado": "2026-09-05T22:25:23+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 124,
- "peticiones": 133,
+ "temas_revisados": 125,
+ "peticiones": 134,
  "errores": 0,
  "champs": {
+  "davidabarca": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 5
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 9
+   }
+  },
+  "maalrivba": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 5
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 4
+   }
+  },
   "carloslaso": {
    "desbloqueos": {
     "temas": 0,
@@ -34,26 +54,6 @@
    "otras": {
     "temas": 0,
     "respuestas": 11
-   }
-  },
-  "davidabarca": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 5
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 8
-   }
-  },
-  "maalrivba": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 4
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 4
    }
   },
   "arturoae": {
@@ -108,20 +108,20 @@
   }
  },
  "otros_frecuentes": {
-  "velezss": 86,
+  "velezss": 88,
   "LuisCav29": 32,
-  "TheSammirs": 14,
   "jcog69": 12,
+  "TheSammirs": 12,
   "system": 5,
   "JorgeLAB": 3,
   "Fronyshout": 3,
   "usa_olubr1ay": 3,
+  "Alex_Miranda": 2,
   "netogrimald": 2,
   "CovidioMilaneso": 2,
   "world_0nyf3ism": 2,
   "ideastisp": 2,
   "world_w17lmrxz": 2,
-  "usa_8khn3v7j": 2,
-  "Arikato2043": 2
+  "usa_8khn3v7j": 2
  }
 }
