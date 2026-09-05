@@ -109,6 +109,9 @@ INEGI_LAYER = "c112"
 # y cuántos intentos se hacen dentro de una misma corrida.
 ESPERA_REINTENTO = 600
 MAX_INTENTOS = 3
+# Tope de celdas rezagadas que se recogen al arrancar, para que una corrida no
+# se vaya entera en reintentos si alguna vez se acumulan muchas.
+MAX_REZAGADAS = 200
 
 INEGI_DELTA = 0.00004
 
@@ -1361,15 +1364,31 @@ def main():
             continue
         if 0 <= _i < total_celdas:
             falladas.append((_i, 0))
-    # Rezagadas: celdas con segmentos que el cursor ya dejó atrás dos vueltas o
-    # más. Son las que se congelaron con el comportamiento viejo; se recogen
-    # aquí para no esperar a que el barrido vuelva a pasar por ellas.
+    # Rezagadas: celdas de las que seguimos publicando segmentos pero que el
+    # cursor ya dejó atrás dos vueltas o más sin conseguir re-escanearlas. Se
+    # recorren desde el almacén, no desde celdas_info, porque una celda que
+    # nunca logró escanearse bien no tiene entrada ahí (así estaba la 54360, de
+    # Querétaro: 24 segmentos publicados con la foto del 28 de julio).
+    # Atraso normal es una vuelta; dos o más significa que algo falló.
     _ya = {i for i, _n in falladas}
-    for _k, _v in celdas_info.items():
-        if _v.get("n", 0) and ciclo - _v.get("c", 0) >= 2 and int(_k) not in _ya:
-            falladas.append((int(_k), 0))
+    _con_segmentos = {r.get("celda") for _m in almacen.values() for r in _m.values()}
+    _rezagadas = []
+    for _c in _con_segmentos:
+        try:
+            _i = int(_c)
+        except (TypeError, ValueError):
+            continue
+        if not (0 <= _i < total_celdas) or _i in _ya:
+            continue
+        _v = celdas_info.get(str(_i))
+        if _v is None or ciclo - _v.get("c", 0) >= 2:
+            _rezagadas.append(_i)
+    for _i in sorted(_rezagadas)[:MAX_REZAGADAS]:
+        falladas.append((_i, 0))
     if falladas:
-        log(f"{len(falladas)} celdas atrasadas o fallidas: van primero")
+        log(f"{len(falladas)} celdas atrasadas o fallidas: van primero"
+            + (f" (de {len(_rezagadas)} rezagadas, el resto en la próxima corrida)"
+               if len(_rezagadas) > MAX_REZAGADAS else ""))
 
     def cola_pendiente():
         """Lo que falta reintentar, para guardarlo en el estado."""
