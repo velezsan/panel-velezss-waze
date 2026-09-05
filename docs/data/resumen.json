@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-05T10:22:52+00:00",
+ "actualizado": "2026-09-05T11:03:02+00:00",
  "env": "row",
- "total": 100059,
+ "total": 100061,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -72,7 +72,7 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 6197,
+   "total": 6199,
    "ciudades": 209
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161649,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 16.0,
+  "porcentaje_vuelta": 16.3,
   "modo": "completo"
  },
  "aviso": "",
