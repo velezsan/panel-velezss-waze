@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-04T23:44:49+00:00",
+ "actualizado": "2026-09-05T00:24:58+00:00",
  "env": "row",
- "total": 100087,
+ "total": 100079,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -72,8 +72,8 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 6234,
-   "ciudades": 210
+   "total": 6226,
+   "ciudades": 209
   },
   {
    "estado": "Hidalgo",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161648,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 14.4,
+  "porcentaje_vuelta": 14.6,
   "modo": "completo"
  },
  "aviso": "",
