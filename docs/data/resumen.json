@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-09-06T10:22:30+00:00",
+ "actualizado": "2026-09-06T11:04:37+00:00",
  "env": "row",
  "total": 99694,
  "estados": [
@@ -121,7 +121,7 @@
    "estado": "Oaxaca",
    "slug": "oaxaca",
    "total": 9262,
-   "ciudades": 572
+   "ciudades": 571
   },
   {
    "estado": "Puebla",
