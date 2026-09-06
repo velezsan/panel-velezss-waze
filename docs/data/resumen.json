@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-06T13:11:49+00:00",
+ "actualizado": "2026-09-06T13:52:45+00:00",
  "env": "row",
- "total": 99374,
+ "total": 99356,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -24,8 +24,8 @@
   {
    "estado": "Campeche",
    "slug": "campeche",
-   "total": 523,
-   "ciudades": 44
+   "total": 512,
+   "ciudades": 42
   },
   {
    "estado": "Chiapas",
@@ -162,7 +162,7 @@
   {
    "estado": "Tabasco",
    "slug": "tabasco",
-   "total": 2027,
+   "total": 2020,
    "ciudades": 73
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 20.2,
+  "porcentaje_vuelta": 20.3,
   "modo": "completo"
  },
  "aviso": "",
