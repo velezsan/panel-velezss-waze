@@ -243,10 +243,9 @@
     }else if(o==='ant'){
       // lo que lleva más tiempo sin revisarse primero
       lista.sort((a,b)=>(marca(a)||'9999').localeCompare(marca(b)||'9999')||desempate(a,b));
-    }else if(f&&f!=='sinfecha'){
-      // con filtro de fecha: los detectados más recientemente van hasta arriba
-      lista.sort((a,b)=>marca(b).localeCompare(marca(a))||desempate(a,b));
     }else{
+      // "por ciudad" manda siempre: antes, con un día elegido, esta rama
+      // reordenaba por fecha y parecía que el selector no hacía nada
       lista.sort(desempate);
     }
     pagina=0;
