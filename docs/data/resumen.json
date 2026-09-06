@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-06T06:52:27+00:00",
+ "actualizado": "2026-09-06T07:32:58+00:00",
  "env": "row",
- "total": 99922,
+ "total": 99920,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -24,8 +24,8 @@
   {
    "estado": "Campeche",
    "slug": "campeche",
-   "total": 561,
-   "ciudades": 48
+   "total": 559,
+   "ciudades": 47
   },
   {
    "estado": "Chiapas",
