@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-09-06T19:35:02+00:00",
+ "actualizado": "2026-09-07T16:45:10+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 125,
- "peticiones": 134,
+ "temas_revisados": 126,
+ "peticiones": 135,
  "errores": 0,
  "champs": {
   "davidabarca": {
@@ -108,11 +108,12 @@
   }
  },
  "otros_frecuentes": {
-  "velezss": 88,
+  "velezss": 89,
   "LuisCav29": 32,
-  "jcog69": 12,
-  "TheSammirs": 12,
+  "jcog69": 13,
+  "TheSammirs": 10,
   "system": 5,
+  "ideastisp": 3,
   "JorgeLAB": 3,
   "Fronyshout": 3,
   "usa_olubr1ay": 3,
@@ -120,7 +121,6 @@
   "netogrimald": 2,
   "CovidioMilaneso": 2,
   "world_0nyf3ism": 2,
-  "ideastisp": 2,
   "world_w17lmrxz": 2,
   "usa_8khn3v7j": 2
  }
