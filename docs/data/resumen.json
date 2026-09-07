@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-07T03:20:54+00:00",
+ "actualizado": "2026-09-07T04:01:11+00:00",
  "env": "row",
- "total": 97830,
+ "total": 97828,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -120,7 +120,7 @@
   {
    "estado": "Oaxaca",
    "slug": "oaxaca",
-   "total": 9248,
+   "total": 9246,
    "ciudades": 570
   },
   {
