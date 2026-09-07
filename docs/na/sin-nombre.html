@@ -81,7 +81,7 @@
   <div class="controls" id="controles" style="display:none">
     <button class="volver" id="btn-volver" style="display:none">← Todos los estados</button>
     <select id="sel-estado"><option value="">Elige un estado…</option></select>
-    <select id="sel-ciudad" style="display:none"><option value="">Todas las ciudades</option></select>
+    <select id="sel-ciudad" style="display:none" title="Filtra por ciudad; &quot;sin abrir&quot; deja solo las ciudades donde todavía no has abierto ningún permalink"><option value="">Todas las ciudades</option></select>
     <select id="sel-tipo" style="display:none"><option value="">Todos los tipos</option></select>
     <select id="sel-fecha" style="display:none"><option value="">Todas las fechas</option></select>
     <select id="sel-orden" style="display:none" title="Cómo se acomoda la lista">
@@ -119,6 +119,19 @@
   let visitados=new Set();
   try{visitados=new Set(JSON.parse(localStorage.getItem('svs_visitados_na')||'[]'));}catch(e){}
   function guardarVisitados(){try{localStorage.setItem('svs_visitados_na',JSON.stringify([...visitados]));}catch(e){}}
+
+  // Ciudades donde ya abriste al menos un permalink. Se toma una foto al elegir
+  // el filtro y no se recalcula con cada clic: si no, la ciudad desaparecería
+  // de la lista en cuanto abrieras el primer segmento de ella.
+  const CIUDAD_DE=r=>r.ciudad||'(sin ciudad)';
+  let ciudadesAbiertas=null;
+  function fotoCiudadesAbiertas(){
+    const s=new Set();
+    Object.values((datosEstado&&datosEstado.segmentos)||{}).forEach(r=>{
+      if(visitados.has(String(r.id)))s.add(CIUDAD_DE(r));
+    });
+    return s;
+  }
 
   const fmt=n=>n.toLocaleString('es-MX');
   // "visto" puede ser solo fecha (2026-07-23) o fecha con hora (2026-07-23T05:32, UTC)
@@ -202,7 +215,11 @@
     const ciudades=esNacional?[]:[...new Set(regs.map(r=>r.ciudad||'(sin ciudad)'))].sort((a,b)=>a.localeCompare(b,'es'));
     const tipos=[...new Set(regs.map(r=>r.rt))].sort((a,b)=>a-b);
     const sc=$('sel-ciudad'), st=$('sel-tipo');
-    sc.innerHTML='<option value="">Todas las ciudades</option>'+ciudades.map(c=>`<option>${c}</option>`).join('');
+    const abiertas=fotoCiudadesAbiertas();
+    const sinAbrir=ciudades.filter(c=>!abiertas.has(c)).length;
+    sc.innerHTML='<option value="">Todas las ciudades</option>'
+      +`<option value="__sinabrir">Ciudades sin abrir (${fmt(sinAbrir)} de ${fmt(ciudades.length)})</option>`
+      +ciudades.map(c=>`<option value="${c.replace(/"/g,'&quot;')}">${c}${abiertas.has(c)?' ·':''}</option>`).join('');
     st.innerHTML='<option value="">Todos los tipos</option>'+tipos.map(t=>`<option value="${t}">${tipoNombre(t)}</option>`).join('');
     const fechas=[...new Set(regs.map(r=>(r.rev||r.visto||'').slice(0,10)).filter(Boolean))].sort().reverse();
     const fmtDia=v=>new Date(v+'T12:00:00Z').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});
@@ -222,8 +239,9 @@
     if(!datosEstado)return;
     const c=$('sel-ciudad').value, t=$('sel-tipo').value, f=$('sel-fecha').value, q=$('buscar').value.trim().toLowerCase();
     lista=Object.values(datosEstado.segmentos||{}).filter(r=>{
-      const ciudad=r.ciudad||'(sin ciudad)';
-      if(c&&ciudad!==c)return false;
+      const ciudad=CIUDAD_DE(r);
+      if(c==='__sinabrir'){ if(ciudadesAbiertas&&ciudadesAbiertas.has(ciudad))return false; }
+      else if(c&&ciudad!==c)return false;
       if(t&&String(r.rt)!==t)return false;
       if(f){
         const marca=r.rev||r.visto;
@@ -341,7 +359,13 @@
   }
   $('sel-estado').addEventListener('change',e=>cargarEstado(e.target.value));
   $('btn-volver').addEventListener('click',()=>tablaEstados());
-  ['sel-ciudad','sel-tipo','sel-fecha','sel-orden'].forEach(i=>$(i).addEventListener('change',filtrar));
+  $('sel-ciudad').addEventListener('change',e=>{
+    // foto nueva cada vez que se (re)elige "sin abrir"; así puedes refrescarla
+    // volviendo a elegir la opción cuando termines una tanda
+    ciudadesAbiertas = e.target.value==='__sinabrir' ? fotoCiudadesAbiertas() : null;
+    filtrar();
+  });
+  ['sel-tipo','sel-fecha','sel-orden'].forEach(i=>$(i).addEventListener('change',filtrar));
   $('buscar').addEventListener('input',()=>{clearTimeout(window._bt);window._bt=setTimeout(filtrar,250);});
 
   fetch('../data-na/resumen.json',{cache:'no-store'})
