@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-07T04:59:50+00:00",
+ "actualizado": "2026-09-07T05:41:52+00:00",
  "env": "row",
- "total": 97798,
+ "total": 97784,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -72,7 +72,7 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 4602,
+   "total": 4588,
    "ciudades": 161
   },
   {
