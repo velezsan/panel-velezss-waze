@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-07T08:56:31+00:00",
+ "actualizado": "2026-09-07T09:36:40+00:00",
  "env": "row",
- "total": 97099,
+ "total": 97096,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -96,8 +96,8 @@
   {
    "estado": "Morelos",
    "slug": "morelos",
-   "total": 4599,
-   "ciudades": 146
+   "total": 4595,
+   "ciudades": 145
   },
   {
    "estado": "México",
@@ -126,7 +126,7 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 6985,
+   "total": 6986,
    "ciudades": 595
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 22.8,
+  "porcentaje_vuelta": 22.9,
   "modo": "completo"
  },
  "aviso": "",
