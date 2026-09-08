@@ -1,21 +1,11 @@
 {
- "actualizado": "2026-09-07T16:45:10+00:00",
+ "actualizado": "2026-09-08T13:55:03+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 126,
- "peticiones": 135,
+ "temas_revisados": 124,
+ "peticiones": 133,
  "errores": 0,
  "champs": {
-  "davidabarca": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 5
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 9
-   }
-  },
   "maalrivba": {
    "desbloqueos": {
     "temas": 0,
@@ -29,11 +19,31 @@
   "carloslaso": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 36
+    "respuestas": 37
    },
    "otras": {
     "temas": 0,
     "respuestas": 22
+   }
+  },
+  "eumirgarciac2": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 2
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 1
+   }
+  },
+  "davidabarca": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 5
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 9
    }
   },
   "gwm_": {
@@ -95,23 +105,13 @@
     "temas": 0,
     "respuestas": 3
    }
-  },
-  "eumirgarciac2": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 2
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 1
-   }
   }
  },
  "otros_frecuentes": {
   "velezss": 89,
   "LuisCav29": 32,
   "jcog69": 13,
-  "TheSammirs": 10,
+  "TheSammirs": 9,
   "system": 5,
   "ideastisp": 3,
   "JorgeLAB": 3,
