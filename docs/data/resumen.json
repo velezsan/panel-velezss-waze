@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-08T16:06:00+00:00",
+ "actualizado": "2026-09-08T16:46:52+00:00",
  "env": "row",
- "total": 94424,
+ "total": 94398,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -54,7 +54,7 @@
   {
    "estado": "Colima",
    "slug": "colima",
-   "total": 663,
+   "total": 662,
    "ciudades": 30
   },
   {
@@ -90,7 +90,7 @@
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 4519,
+   "total": 4494,
    "ciudades": 334
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 25.9,
+  "porcentaje_vuelta": 26.1,
   "modo": "completo"
  },
  "aviso": "",
