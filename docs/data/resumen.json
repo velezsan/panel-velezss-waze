@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-08T06:10:01+00:00",
+ "actualizado": "2026-09-08T06:50:19+00:00",
  "env": "row",
- "total": 94621,
+ "total": 94608,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -54,7 +54,7 @@
   {
    "estado": "Colima",
    "slug": "colima",
-   "total": 662,
+   "total": 663,
    "ciudades": 30
   },
   {
@@ -90,7 +90,7 @@
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 4533,
+   "total": 4519,
    "ciudades": 334
   },
   {
