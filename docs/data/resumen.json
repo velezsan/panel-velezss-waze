@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-09T15:23:02+00:00",
+ "actualizado": "2026-09-09T16:03:24+00:00",
  "env": "row",
- "total": 93828,
+ "total": 93779,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -180,8 +180,8 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 7346,
-   "ciudades": 641
+   "total": 7297,
+   "ciudades": 640
   },
   {
    "estado": "Yucatán",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 27.8,
+  "porcentaje_vuelta": 28.0,
   "modo": "completo"
  },
  "aviso": "",
