@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-09T01:53:46+00:00",
+ "actualizado": "2026-09-09T02:35:47+00:00",
  "env": "row",
- "total": 94324,
+ "total": 94307,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -102,8 +102,8 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 9613,
-   "ciudades": 381
+   "total": 9596,
+   "ciudades": 380
   },
   {
    "estado": "Nayarit",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 26.7,
+  "porcentaje_vuelta": 26.8,
   "modo": "completo"
  },
  "aviso": "",
