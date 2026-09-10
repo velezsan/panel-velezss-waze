@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Panel velezss · informar nombre de calle desde el Live Map
 // @namespace    https://velezsan.github.io/panel-velezss-waze/
-// @version      1.1
+// @version      1.2
 // @description  Al abrir "Informar un error en el mapa" en el Live Map, elige "Error general en el mapa" y escribe el nombre que propuso el panel. Nunca envía: el botón Enviar lo aprietas tú.
 // @author       velezss
 // @match        https://velezsan.github.io/panel-velezss-waze/*
@@ -109,41 +109,115 @@
     campo.dispatchEvent(new w.Event('change', { bubbles: true }));
   }
 
+  // Escribir de verdad en un campo. Poner .value a mano no siempre basta:
+  // según la librería que use el formulario, el componente vuelve a pintar
+  // con su propio estado y borra lo escrito. execCommand('insertText') pasa
+  // por el camino del navegador y genera los mismos eventos que el teclado,
+  // que es lo que aceptan React, Angular y Vue por igual. Si falla, se usa
+  // el setter nativo. Y al final SE COMPRUEBA que el valor quedó.
+  function escribir(campo, valor) {
+    const doc = campo.ownerDocument;
+    try {
+      campo.focus();
+      if (campo.setSelectionRange) campo.setSelectionRange(0, (campo.value || '').length);
+      else if (campo.select) campo.select();
+      doc.execCommand('insertText', false, valor);
+      if (campo.value === valor) return true;
+    } catch (_) {}
+    try { ponerValor(campo, valor); } catch (_) {}
+    return campo.value === valor;
+  }
+
+  const norm = s => (s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const TEXTOS_VACIO = ['elige un tema', 'choose a topic', 'elige un asunto'];
+
   // El elemento MÁS INTERNO cuyo texto es exactamente el buscado. Importa:
   // si tomamos el primero que aparece, agarramos un contenedor de afuera que
   // también contiene ese texto, y el clic no cae en el control.
   function elementoConTexto(doc, textos, selector) {
-    const quiere = t => textos.some(x => x.toLowerCase() === t);
+    const quiere = t => textos.some(x => norm(x) === t);
     const hallados = [...doc.querySelectorAll(selector)]
-      .filter(e => quiere((e.textContent || '').trim().toLowerCase()));
+      .filter(e => quiere(norm(e.textContent)));
     return hallados.length ? hallados[hallados.length - 1] : null;
   }
 
-  function elegirTipo(doc) {
+  // La opción puede pintarse fuera del formulario (en un portal del documento
+  // de arriba), así que se busca en todos los documentos, no solo en el suyo.
+  function opcionEnCualquierDocumento(textos) {
+    for (const d of documentos()) {
+      const op = elementoConTexto(d, textos,
+        '[role="option"],li,div,span,button,td,p');
+      if (op && op.offsetParent !== null) return op;
+      if (op) return op;
+    }
+    return null;
+  }
+
+  async function elegirTipo(doc) {
     // 1) si es un <select> de verdad, por texto visible
     for (const sel of doc.querySelectorAll('select')) {
-      const op = [...sel.options].find(o => o.textContent.trim() === TIPO_ERROR);
+      const op = [...sel.options].find(o => norm(o.textContent) === norm(TIPO_ERROR));
       if (op) { ponerValor(sel, op.value); return 'select'; }
     }
-    // 2) si es un desplegable dibujado a mano, abrirlo y clicar la opción
-    const disparador =
-      elementoConTexto(doc, ['elige un tema', 'choose a topic'],
-                       '[role="combobox"],[role="button"],button,div,span')
-      || doc.querySelector('[role="combobox"]');
+    // 2) desplegable dibujado a mano. Puede ser un div con el texto, o un
+    //    input de solo lectura cuyo texto vive en value/placeholder, que no
+    //    aparece en textContent y por eso antes no lo encontrábamos.
+    let disparador = elementoConTexto(doc, TEXTOS_VACIO,
+      '[role="combobox"],[role="button"],button,div,span,label,p');
+    if (!disparador) {
+      disparador = [...doc.querySelectorAll('input')].find(i =>
+        TEXTOS_VACIO.includes(norm(i.value)) || TEXTOS_VACIO.includes(norm(i.placeholder)));
+    }
+    if (!disparador) disparador = doc.querySelector('[role="combobox"],[aria-haspopup]');
     if (!disparador) return null;
-    disparador.click();
-    return new Promise(res => setTimeout(() => {
-      const op = elementoConTexto(doc, [TIPO_ERROR],
-                                  '[role="option"],li,div,span,button');
-      if (op) { op.click(); res('lista'); } else res(null);
-    }, 400));
+
+    // algunos controles solo reaccionan al ratón completo, no a .click()
+    for (const paso of ['abrirConClick', 'abrirConRaton', 'abrirConTeclado']) {
+      if (paso === 'abrirConClick') disparador.click();
+      if (paso === 'abrirConRaton') golpeDeRaton(disparador);
+      if (paso === 'abrirConTeclado') {
+        disparador.focus();
+        const w = disparador.ownerDocument.defaultView || window;
+        for (const tipo of ['keydown', 'keyup']) {
+          disparador.dispatchEvent(new w.KeyboardEvent(tipo,
+            { key: 'ArrowDown', code: 'ArrowDown', bubbles: true }));
+        }
+      }
+      await new Promise(r => setTimeout(r, 450));
+      const op = opcionEnCualquierDocumento([TIPO_ERROR]);
+      if (op) {
+        op.click();
+        golpeDeRaton(op);
+        await new Promise(r => setTimeout(r, 300));
+        return paso;
+      }
+    }
+    return null;
+  }
+
+  function golpeDeRaton(el) {
+    const w = el.ownerDocument.defaultView || window;
+    const r = el.getBoundingClientRect();
+    const opciones = { bubbles: true, cancelable: true, view: w,
+      clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 };
+    for (const t of ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']) {
+      try {
+        const Ev = t.startsWith('pointer') && w.PointerEvent ? w.PointerEvent : w.MouseEvent;
+        el.dispatchEvent(new Ev(t, opciones));
+      } catch (_) {}
+    }
+  }
+
+  // El área de texto de la descripción: si hay varias, la que se ve.
+  function areaDescripcion(doc) {
+    const tas = [...doc.querySelectorAll('textarea')];
+    return tas.find(t => t.offsetParent !== null) || tas[0] || null;
   }
 
   function describir(doc, texto) {
-    const ta = doc.querySelector('textarea');
+    const ta = areaDescripcion(doc);
     if (!ta) return false;
-    ponerValor(ta, texto);
-    return true;
+    return escribir(ta, texto);
   }
 
   function aviso(txt, ok) {
@@ -199,18 +273,47 @@
     if (!p) return;
     yaLlenados.add(doc);
 
-    const tipo = await elegirTipo(doc);
     const texto = PLANTILLA(p.calle);
-    const desc = describir(doc, texto);
 
-    if (desc && tipo) {
-      aviso('Formulario llenado: "' + texto + '". Revísalo y dale Enviar.', true);
-    } else if (desc) {
-      aviso('Escribí la descripción, pero no pude elegir el tipo de error. Selecciónalo tú.', false);
+    // Primero la descripción, que es lo que de verdad importa. Abrir el
+    // desplegable puede repintar el formulario y borrarla, así que después
+    // de elegir el tipo se vuelve a comprobar y, si hizo falta, se reescribe.
+    describir(doc, texto);
+    const tipo = await elegirTipo(doc);
+    await new Promise(r => setTimeout(r, 300));
+
+    let ta = areaDescripcion(doc);
+    if (!ta || ta.value !== texto) describir(doc, texto);
+    await new Promise(r => setTimeout(r, 300));
+
+    // Nada de suponer: se mira el estado real de los campos.
+    ta = areaDescripcion(doc);
+    const descOk = !!ta && ta.value === texto;
+    const tipoOk = tipoElegido(doc);
+
+    if (descOk && tipoOk) {
+      aviso('Listo: "' + texto + '". Revísalo y dale Enviar.', true);
+    } else if (descOk) {
+      aviso('Escribí la descripción. Falta que elijas el tipo de error.', false);
+    } else if (tipoOk) {
+      aviso('Elegí el tipo, pero no pude escribir. Copia: ' + texto, false);
     } else {
-      aviso('No pude llenar el formulario. El nombre es: ' + p.calle, false);
+      aviso('No pude llenar el formulario. Copia esto: ' + texto, false);
     }
-    log('tipo:', tipo, '· descripción:', desc, '·', texto);
+    log('tipo:', tipo, '· tipo puesto:', tipoOk, '· descripción puesta:', descOk,
+        '· valor real:', ta && ta.value);
+  }
+
+  // ¿Quedó realmente elegido un tipo de error? Vale tanto si es un <select>
+  // como si es un control propio: en ese caso ya no debe decir "Elige un tema".
+  function tipoElegido(doc) {
+    for (const sel of doc.querySelectorAll('select')) {
+      const t = norm(sel.selectedOptions[0] && sel.selectedOptions[0].textContent);
+      if (t && !TEXTOS_VACIO.includes(t)) return true;
+    }
+    const t = norm(doc.body && doc.body.innerText);
+    if (t.includes(norm(TIPO_ERROR))) return true;
+    return false;
   }
 
   function vigilar() {
@@ -225,7 +328,7 @@
     unsafeWindowSeguro().reporteEstado = () => {
       const docs = documentos();
       const info = {
-        version: '1.1',
+        version: '1.2',
         url: location.href,
         pendiente: pendiente(),
         documentosVisibles: docs.length,
@@ -234,6 +337,35 @@
         iframesEnLaPagina: document.querySelectorAll('iframe').length,
       };
       console.log('[panel-velezss] estado:', info);
+      return info;
+    };
+
+    // Radiografía del formulario: qué controles hay y cómo están hechos.
+    // Si algo no se llena, con esto se ve por qué sin tener que adivinar.
+    unsafeWindowSeguro().reporteCampos = () => {
+      const doc = documentos().find(esElFormulario);
+      if (!doc) { console.log('[panel-velezss] no veo el formulario abierto'); return null; }
+      const ficha = e => ({
+        etiqueta: e.tagName.toLowerCase(),
+        rol: e.getAttribute('role') || null,
+        tipo: e.getAttribute('type') || null,
+        soloLectura: e.readOnly || null,
+        valor: (e.value || '').slice(0, 60) || null,
+        marcador: (e.placeholder || '').slice(0, 60) || null,
+        texto: (e.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60) || null,
+        clase: (e.className || '').toString().slice(0, 60) || null,
+      });
+      const info = {
+        selects: [...doc.querySelectorAll('select')].map(s => ({
+          opciones: [...s.options].map(o => o.textContent.trim()).slice(0, 12) })),
+        entradas: [...doc.querySelectorAll('input')].map(ficha).slice(0, 10),
+        areasDeTexto: [...doc.querySelectorAll('textarea')].map(ficha),
+        combos: [...doc.querySelectorAll('[role="combobox"],[aria-haspopup],[role="listbox"]')].map(ficha).slice(0, 6),
+        conElTextoElige: [...doc.querySelectorAll('*')]
+          .filter(e => TEXTOS_VACIO.includes(norm(e.textContent)) && e.children.length <= 2)
+          .map(ficha).slice(0, 6),
+      };
+      console.log('[panel-velezss] campos:', JSON.stringify(info, null, 1));
       return info;
     };
   }
