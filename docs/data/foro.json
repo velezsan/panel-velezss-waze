@@ -1,11 +1,21 @@
 {
- "actualizado": "2026-09-09T11:06:06+00:00",
+ "actualizado": "2026-09-10T08:16:40+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 125,
- "peticiones": 134,
+ "temas_revisados": 126,
+ "peticiones": 135,
  "errores": 0,
  "champs": {
+  "carloslaso": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 37
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 23
+   }
+  },
   "camachista": {
    "desbloqueos": {
     "temas": 0,
@@ -34,16 +44,6 @@
    "otras": {
     "temas": 0,
     "respuestas": 4
-   }
-  },
-  "carloslaso": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 37
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 22
    }
   },
   "davidabarca": {
