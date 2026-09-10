@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Panel velezss · informar nombre de calle desde el Live Map
 // @namespace    https://velezsan.github.io/panel-velezss-waze/
-// @version      1.0
+// @version      1.1
 // @description  Al abrir "Informar un error en el mapa" en el Live Map, elige "Error general en el mapa" y escribe el nombre que propuso el panel. Nunca envía: el botón Enviar lo aprietas tú.
 // @author       velezss
 // @match        https://velezsan.github.io/panel-velezss-waze/*
@@ -9,6 +9,8 @@
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @run-at       document-start
+// @updateURL    https://raw.githubusercontent.com/velezsan/panel-velezss-waze/main/reportar-nombre-livemap.user.js
+// @downloadURL  https://raw.githubusercontent.com/velezsan/panel-velezss-waze/main/reportar-nombre-livemap.user.js
 // ==/UserScript==
 
 (function () {
@@ -22,6 +24,22 @@
   const PLANTILLA = calle => `El nombre de la calle es: ${calle}`;
 
   const log = (...a) => console.log('[panel-velezss]', ...a);
+
+  // Señal de vida. Sin esto, cuando algo falla no hay manera de distinguir
+  // "el script no está instalado" de "el script está y no funcionó".
+  function senal(txt) {
+    const pintar = () => {
+      const d = document.createElement('div');
+      d.textContent = txt;
+      d.style.cssText = 'position:fixed;left:12px;bottom:12px;z-index:2147483647;' +
+        'background:#123d1c;color:#fff;font:12px system-ui;padding:6px 10px;' +
+        'border-radius:8px;opacity:.9;pointer-events:none';
+      document.body.appendChild(d);
+      setTimeout(() => d.remove(), 5000);
+    };
+    if (document.body) pintar();
+    else document.addEventListener('DOMContentLoaded', pintar);
+  }
 
   // ------------------------------------------------------------------
   // LADO 1: el panel. Al hacer clic en "Live Map", guarda qué calle es.
@@ -44,6 +62,7 @@
     // clic normal, clic derecho (copiar enlace) y botón de en medio
     ['click', 'contextmenu', 'auxclick'].forEach(t =>
       document.addEventListener(t, anotar, true));
+    senal('✓ script de reporte activo');
     return;
   }
 
@@ -144,17 +163,41 @@
     aviso._t = setTimeout(() => c.remove(), 9000);
   }
 
+  // Todos los documentos donde puede estar el formulario: el de arriba y los
+  // de cada iframe del mismo origen (el de Waze carga de www.waze.com, igual
+  // que el Live Map). No damos por hecho que sea un iframe: si algún día lo
+  // dibujan directo en la página, esto lo encuentra igual.
+  function documentos() {
+    const salida = [document];
+    const meter = doc => {
+      for (const f of doc.querySelectorAll('iframe')) {
+        let d = null;
+        try { d = f.contentDocument; } catch (_) {}   // otro origen: ni modo
+        if (d && !salida.includes(d)) { salida.push(d); meter(d); }
+      }
+    };
+    try { meter(document); } catch (_) {}
+    return salida;
+  }
+
+  // ¿Este documento es el formulario de reporte? Pedimos las dos señas: el
+  // área de texto y algún rastro del formulario, para no escribir por error
+  // en cualquier otro campo de la página.
+  function esElFormulario(doc) {
+    if (!doc.querySelector('textarea')) return false;
+    const t = (doc.body && doc.body.innerText || '').toLowerCase();
+    return /informar un error|report a map|tipo de error|describe el error|elige un tema|choose a topic/.test(t);
+  }
+
   const yaLlenados = new WeakSet();
 
-  async function intentar(iframe) {
-    if (yaLlenados.has(iframe)) return;
-    let doc;
-    try { doc = iframe.contentDocument; } catch (_) { return; }   // otro origen
-    if (!doc || !doc.querySelector('textarea')) return;           // aún no carga
+  async function intentar(doc) {
+    if (!doc || yaLlenados.has(doc)) return;
+    if (!esElFormulario(doc)) return;
 
     const p = pendiente();
     if (!p) return;
-    yaLlenados.add(iframe);
+    yaLlenados.add(doc);
 
     const tipo = await elegirTipo(doc);
     const texto = PLANTILLA(p.calle);
@@ -171,13 +214,38 @@
   }
 
   function vigilar() {
-    const revisar = () => document.querySelectorAll('iframe').forEach(intentar);
+    const revisar = () => { try { documentos().forEach(intentar); } catch (e) { log('fallo al revisar:', e); } };
     new MutationObserver(revisar).observe(document.documentElement, { childList: true, subtree: true });
-    // el iframe carga su contenido después de aparecer, así que también por reloj
+    // el formulario carga su contenido después de aparecer, así que también por reloj
     setInterval(revisar, 700);
     revisar();
+
+    // Diagnóstico a mano: escribe reporteEstado() en la consola y te dice qué
+    // está viendo el script. Sirve para saber por qué no llenó algo.
+    unsafeWindowSeguro().reporteEstado = () => {
+      const docs = documentos();
+      const info = {
+        version: '1.1',
+        url: location.href,
+        pendiente: pendiente(),
+        documentosVisibles: docs.length,
+        conAreaDeTexto: docs.filter(d => d.querySelector('textarea')).length,
+        reconocidosComoFormulario: docs.filter(esElFormulario).length,
+        iframesEnLaPagina: document.querySelectorAll('iframe').length,
+      };
+      console.log('[panel-velezss] estado:', info);
+      return info;
+    };
   }
 
+  // Publicar la función de diagnóstico donde la consola la pueda ver, tanto
+  // si el gestor nos da unsafeWindow como si no.
+  function unsafeWindowSeguro() {
+    try { return typeof unsafeWindow !== 'undefined' ? unsafeWindow : window; }
+    catch (_) { return window; }
+  }
+
+  senal('✓ script de reporte activo');
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', vigilar);
   } else {
