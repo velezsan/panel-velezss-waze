@@ -625,15 +625,44 @@ def nombre_de_calle(street):
 
 
 def punto_medio(seg):
+    """Mitad del segmento medida sobre el trazo, no el vértice de en medio.
+
+    Antes se devolvía coords[len//2]. En una calle recta, que son dos puntos,
+    ese índice es 1: el final del segmento, o sea la esquina. Por eso el pin
+    del Live Map y del WME caía en el cruce y no sobre la calle. Ahora se
+    recorre la geometría acumulando distancia y se devuelve el punto que deja
+    la mitad del largo de cada lado, interpolando dentro del tramo que toca.
+    """
     geom = seg.get("geometry") or seg.get("geoJSONGeometry") or seg.get("geom") or {}
     coords = geom.get("coordinates") or []
     if not coords:
         return None, None
-    p = coords[len(coords) // 2]
     try:
-        return float(p[0]), float(p[1])
+        pts = [(float(p[0]), float(p[1])) for p in coords]
     except (TypeError, ValueError, IndexError):
         return None, None
+    if len(pts) == 1:
+        return pts[0]
+
+    # Distancias planas: a esta escala (metros) la diferencia con la fórmula
+    # esférica no mueve el punto, y el coseno corrige el achatamiento en x.
+    cos_lat = math.cos(math.radians(pts[0][1])) or 1.0
+    def dist(a, b):
+        return math.hypot((b[0] - a[0]) * cos_lat, b[1] - a[1])
+
+    tramos = [dist(a, b) for a, b in zip(pts, pts[1:])]
+    total = sum(tramos)
+    if total <= 0:
+        return pts[0]
+
+    objetivo = total / 2.0
+    recorrido = 0.0
+    for (a, b), largo in zip(zip(pts, pts[1:]), tramos):
+        if recorrido + largo >= objetivo:
+            f = (objetivo - recorrido) / largo if largo else 0.0
+            return a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f
+        recorrido += largo
+    return pts[-1]
 
 
 def largo_metros(seg):
