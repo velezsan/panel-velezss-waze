@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Panel velezss · informar nombre de calle desde el Live Map
 // @namespace    https://velezsan.github.io/panel-velezss-waze/
-// @version      1.2
-// @description  Al abrir "Informar un error en el mapa" en el Live Map, elige "Error general en el mapa" y escribe el nombre que propuso el panel. Nunca envía: el botón Enviar lo aprietas tú.
+// @version      1.3
+// @description  Al abrir "Informar un error en el mapa" en el Live Map, elige "Error general del mapa" y escribe el nombre que propuso el panel. Nunca envía: el botón Enviar lo aprietas tú.
 // @author       velezss
 // @match        https://velezsan.github.io/panel-velezss-waze/*
 // @match        https://www.waze.com/*live-map*
@@ -20,7 +20,11 @@
   // Si pasa más, el script no llena nada, para no meter en un reporte el
   // nombre de una calle que abriste hace media hora.
   const VIGENCIA_MIN = 20;
-  const TIPO_ERROR = 'Error general en el mapa';
+  // El formulario real de Waze usa "Error general DEL mapa" (no "en el"), y
+  // por dentro el valor es GENERAL_PROBLEM. Buscamos por el valor primero,
+  // que no depende del idioma ni de cómo esté redactada la etiqueta.
+  const TIPO_VALOR = 'GENERAL_PROBLEM';
+  const TIPO_ERROR = 'Error general del mapa';
   const PLANTILLA = calle => `El nombre de la calle es: ${calle}`;
 
   const log = (...a) => console.log('[panel-velezss]', ...a);
@@ -153,29 +157,64 @@
     return null;
   }
 
+  function opcionQueContenga(trozo) {
+    for (const d of documentos()) {
+      const c = buscarEn(d, '[role="option"],li,div,span,button,td,p')
+        .filter(e => norm(e.textContent).includes(trozo) && e.children.length === 0);
+      if (c.length) return c[c.length - 1];
+    }
+    return null;
+  }
+
   async function elegirTipo(doc) {
-    // 1) si es un <select> de verdad, por texto visible
-    for (const sel of doc.querySelectorAll('select')) {
-      const op = [...sel.options].find(o => norm(o.textContent) === norm(TIPO_ERROR));
+    // Camino de Waze: <wz-select placeholder="Elige un tema"> con hijos
+    // <wz-option value="GENERAL_PROBLEM">. El texto del placeholder está en el
+    // ATRIBUTO, no en el contenido, que es donde lo buscábamos antes.
+    const selects = buscarEn(doc, 'wz-select, [placeholder]').filter(e =>
+      e.tagName.toLowerCase() === 'wz-select' ||
+      TEXTOS_VACIO.includes(norm(e.getAttribute('placeholder'))));
+    for (const sel of selects) {
+      const ops = buscarEn(doc, 'wz-option').filter(o => sel.contains(o));
+      const op = ops.find(o => norm(o.value) === norm(TIPO_VALOR))
+        || ops.find(o => norm(o.textContent) === norm(TIPO_ERROR))
+        || ops.find(o => /error general/.test(norm(o.textContent)));
+      if (!op) continue;
+      // abrir el menú (por si hace falta para que el componente reaccione)
+      try {
+        const menu = sel.shadowRoot && sel.shadowRoot.querySelector('wz-menu');
+        if (menu && menu.showMenu) await menu.showMenu();
+        const caja = sel.shadowRoot && sel.shadowRoot.querySelector('.select-box');
+        if (caja) golpeDeRaton(caja);
+      } catch (_) {}
+      await new Promise(r => setTimeout(r, 350));
+      golpeDeRaton(op);              // esto es lo que fija el valor
+      await new Promise(r => setTimeout(r, 350));
+      if (!norm(sel.value)) { try { sel.value = op.value; } catch (_) {} }
+      await new Promise(r => setTimeout(r, 250));
+      if (norm(sel.value) === norm(op.value)) return 'wz-select';
+    }
+
+    // Camino normal, por si algún día lo cambian a un <select> de siempre
+    for (const sel of buscarEn(doc, 'select')) {
+      const op = [...sel.options].find(o => norm(o.textContent) === norm(TIPO_ERROR))
+        || [...sel.options].find(o => /error general/.test(norm(o.textContent)));
       if (op) { ponerValor(sel, op.value); return 'select'; }
     }
-    // 2) desplegable dibujado a mano. Puede ser un div con el texto, o un
-    //    input de solo lectura cuyo texto vive en value/placeholder, que no
-    //    aparece en textContent y por eso antes no lo encontrábamos.
+
+    // Último recurso: un desplegable cualquiera dibujado a mano. No es lo que
+    // usa Waze hoy, pero si lo cambian, esto lo sigue sacando adelante.
     let disparador = elementoConTexto(doc, TEXTOS_VACIO,
       '[role="combobox"],[role="button"],button,div,span,label,p');
     if (!disparador) {
-      disparador = [...doc.querySelectorAll('input')].find(i =>
+      disparador = buscarEn(doc, 'input').find(i =>
         TEXTOS_VACIO.includes(norm(i.value)) || TEXTOS_VACIO.includes(norm(i.placeholder)));
     }
-    if (!disparador) disparador = doc.querySelector('[role="combobox"],[aria-haspopup]');
+    if (!disparador) disparador = buscarEn(doc, '[role="combobox"],[aria-haspopup]')[0];
     if (!disparador) return null;
-
-    // algunos controles solo reaccionan al ratón completo, no a .click()
-    for (const paso of ['abrirConClick', 'abrirConRaton', 'abrirConTeclado']) {
-      if (paso === 'abrirConClick') disparador.click();
-      if (paso === 'abrirConRaton') golpeDeRaton(disparador);
-      if (paso === 'abrirConTeclado') {
+    for (const paso of ['click', 'raton', 'teclado']) {
+      if (paso === 'click') disparador.click();
+      if (paso === 'raton') golpeDeRaton(disparador);
+      if (paso === 'teclado') {
         disparador.focus();
         const w = disparador.ownerDocument.defaultView || window;
         for (const tipo of ['keydown', 'keyup']) {
@@ -184,13 +223,11 @@
         }
       }
       await new Promise(r => setTimeout(r, 450));
-      const op = opcionEnCualquierDocumento([TIPO_ERROR]);
-      if (op) {
-        op.click();
-        golpeDeRaton(op);
-        await new Promise(r => setTimeout(r, 300));
-        return paso;
-      }
+      // por etiqueta exacta y, si no, por "error general", que aguanta que
+      // Waze reescriba la frase ("del mapa" / "en el mapa" / etc.)
+      const op = opcionEnCualquierDocumento([TIPO_ERROR])
+        || opcionQueContenga('error general');
+      if (op) { op.click(); golpeDeRaton(op); await new Promise(r => setTimeout(r, 300)); return paso; }
     }
     return null;
   }
@@ -208,10 +245,12 @@
     }
   }
 
-  // El área de texto de la descripción: si hay varias, la que se ve.
+  // El área de texto de la descripción. Ojo: en el documento hay varias
+  // ocultas, de alto cero, que no son el campo que ves; la buena vive dentro
+  // del shadow de <wz-textarea>. Nos quedamos siempre con una que se vea.
   function areaDescripcion(doc) {
-    const tas = [...doc.querySelectorAll('textarea')];
-    return tas.find(t => t.offsetParent !== null) || tas[0] || null;
+    const tas = buscarEn(doc, 'textarea');
+    return tas.find(seVe) || null;
   }
 
   function describir(doc, texto) {
@@ -253,6 +292,31 @@
     try { meter(document); } catch (_) {}
     return salida;
   }
+
+  // TODO lo de Waze está hecho con componentes propios (wz-select, wz-textarea,
+  // wz-option) que esconden sus campos dentro de Shadow DOM. querySelectorAll
+  // normal no ve ahí adentro: por eso el script escribía en un textarea oculto
+  // del documento y no encontraba nunca el desplegable.
+  function raicesDe(doc) {
+    const out = [doc];
+    const rec = raiz => {
+      let hijos = [];
+      try { hijos = [...raiz.querySelectorAll('*')]; } catch (_) { return; }
+      for (const e of hijos) if (e.shadowRoot) { out.push(e.shadowRoot); rec(e.shadowRoot); }
+    };
+    try { rec(doc); } catch (_) {}
+    return out;
+  }
+
+  function buscarEn(doc, selector) {
+    const out = [];
+    for (const r of raicesDe(doc)) {
+      try { out.push(...r.querySelectorAll(selector)); } catch (_) {}
+    }
+    return out;
+  }
+
+  const seVe = e => { try { return e.getBoundingClientRect().height > 0; } catch (_) { return false; } };
 
   // ¿Este documento es el formulario de reporte? Pedimos las dos señas: el
   // área de texto y algún rastro del formulario, para no escribir por error
@@ -307,12 +371,13 @@
   // ¿Quedó realmente elegido un tipo de error? Vale tanto si es un <select>
   // como si es un control propio: en ese caso ya no debe decir "Elige un tema".
   function tipoElegido(doc) {
-    for (const sel of doc.querySelectorAll('select')) {
+    for (const sel of buscarEn(doc, 'wz-select')) {
+      if (norm(sel.value)) return true;
+    }
+    for (const sel of buscarEn(doc, 'select')) {
       const t = norm(sel.selectedOptions[0] && sel.selectedOptions[0].textContent);
       if (t && !TEXTOS_VACIO.includes(t)) return true;
     }
-    const t = norm(doc.body && doc.body.innerText);
-    if (t.includes(norm(TIPO_ERROR))) return true;
     return false;
   }
 
@@ -328,7 +393,7 @@
     unsafeWindowSeguro().reporteEstado = () => {
       const docs = documentos();
       const info = {
-        version: '1.2',
+        version: '1.3',
         url: location.href,
         pendiente: pendiente(),
         documentosVisibles: docs.length,
