@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-12T05:24:46+00:00",
+ "actualizado": "2026-09-12T06:06:38+00:00",
  "env": "row",
- "total": 95729,
+ "total": 96292,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -66,8 +66,8 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 4608,
-   "ciudades": 379
+   "total": 4990,
+   "ciudades": 387
   },
   {
    "estado": "Guerrero",
@@ -84,8 +84,8 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 5826,
-   "ciudades": 370
+   "total": 6007,
+   "ciudades": 375
   },
   {
    "estado": "Michoacán",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 32.9,
+  "porcentaje_vuelta": 33.0,
   "modo": "completo"
  },
  "aviso": "",
