@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-09-11T05:27:46+00:00",
+ "actualizado": "2026-09-12T02:38:23+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 126,
- "peticiones": 135,
+ "temas_revisados": 127,
+ "peticiones": 136,
  "errores": 0,
  "champs": {
   "carloslaso": {
@@ -29,7 +29,7 @@
   "eumirgarciac2": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 2
+    "respuestas": 1
    },
    "otras": {
     "temas": 0,
@@ -109,7 +109,7 @@
  },
  "otros_frecuentes": {
   "velezss": 89,
-  "LuisCav29": 32,
+  "LuisCav29": 34,
   "jcog69": 13,
   "TheSammirs": 9,
   "system": 5,
