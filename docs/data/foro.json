@@ -1,11 +1,21 @@
 {
- "actualizado": "2026-09-12T02:38:23+00:00",
+ "actualizado": "2026-09-12T23:49:24+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
  "temas_revisados": 127,
  "peticiones": 136,
  "errores": 0,
  "champs": {
+  "gwm_": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 35
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 3
+   }
+  },
   "carloslaso": {
    "desbloqueos": {
     "temas": 0,
@@ -54,16 +64,6 @@
    "otras": {
     "temas": 0,
     "respuestas": 9
-   }
-  },
-  "gwm_": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 33
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 3
    }
   },
   "editorbcmx": {
