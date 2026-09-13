@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-13T03:20:51+00:00",
+ "actualizado": "2026-09-13T04:04:27+00:00",
  "env": "row",
- "total": 106899,
+ "total": 107079,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -66,8 +66,8 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 7572,
-   "ciudades": 446
+   "total": 7687,
+   "ciudades": 451
   },
   {
    "estado": "Guerrero",
@@ -84,8 +84,8 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 9669,
-   "ciudades": 395
+   "total": 9721,
+   "ciudades": 401
   },
   {
    "estado": "Michoacán",
@@ -108,8 +108,8 @@
   {
    "estado": "Nayarit",
    "slug": "nayarit",
-   "total": 951,
-   "ciudades": 88
+   "total": 964,
+   "ciudades": 89
   },
   {
    "estado": "Nuevo León",
