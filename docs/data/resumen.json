@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-13T20:57:55+00:00",
+ "actualizado": "2026-09-13T21:41:57+00:00",
  "env": "row",
- "total": 114596,
+ "total": 114716,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -78,7 +78,7 @@
   {
    "estado": "Hidalgo",
    "slug": "hidalgo",
-   "total": 4503,
+   "total": 4506,
    "ciudades": 265
   },
   {
@@ -132,20 +132,20 @@
   {
    "estado": "Querétaro",
    "slug": "queretaro",
-   "total": 2815,
+   "total": 2817,
    "ciudades": 151
   },
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 3099,
+   "total": 3102,
    "ciudades": 43
   },
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 1317,
-   "ciudades": 195
+   "total": 1346,
+   "ciudades": 197
   },
   {
    "estado": "Sinaloa",
@@ -180,14 +180,14 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 8186,
-   "ciudades": 707
+   "total": 8239,
+   "ciudades": 712
   },
   {
    "estado": "Yucatán",
    "slug": "yucatan",
-   "total": 2338,
-   "ciudades": 141
+   "total": 2368,
+   "ciudades": 145
   },
   {
    "estado": "Zacatecas",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 36.9,
+  "porcentaje_vuelta": 37.0,
   "modo": "completo"
  },
  "aviso": "",
