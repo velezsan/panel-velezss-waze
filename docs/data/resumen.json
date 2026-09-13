@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-13T15:58:07+00:00",
+ "actualizado": "2026-09-13T16:45:32+00:00",
  "env": "row",
- "total": 113000,
+ "total": 113093,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -138,7 +138,7 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 2836,
+   "total": 2887,
    "ciudades": 43
   },
   {
@@ -186,8 +186,8 @@
   {
    "estado": "Yucatán",
    "slug": "yucatan",
-   "total": 2230,
-   "ciudades": 133
+   "total": 2272,
+   "ciudades": 136
   },
   {
    "estado": "Zacatecas",
