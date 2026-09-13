@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-13T09:43:11+00:00",
+ "actualizado": "2026-09-13T10:23:43+00:00",
  "env": "row",
- "total": 109594,
+ "total": 110122,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -84,8 +84,8 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 9844,
-   "ciudades": 408
+   "total": 9868,
+   "ciudades": 411
   },
   {
    "estado": "Michoacán",
@@ -108,8 +108,8 @@
   {
    "estado": "Nayarit",
    "slug": "nayarit",
-   "total": 1044,
-   "ciudades": 91
+   "total": 1454,
+   "ciudades": 98
   },
   {
    "estado": "Nuevo León",
@@ -138,7 +138,7 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 2520,
+   "total": 2565,
    "ciudades": 43
   },
   {
@@ -186,8 +186,8 @@
   {
    "estado": "Yucatán",
    "slug": "yucatan",
-   "total": 1845,
-   "ciudades": 120
+   "total": 1894,
+   "ciudades": 124
   },
   {
    "estado": "Zacatecas",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 35.7,
+  "porcentaje_vuelta": 35.9,
   "modo": "completo"
  },
  "aviso": "",
