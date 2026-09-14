@@ -1,13 +1,13 @@
 {
- "actualizado": "2026-09-14T04:46:14+00:00",
+ "actualizado": "2026-09-14T05:26:27+00:00",
  "env": "row",
- "total": 118291,
+ "total": 118917,
  "estados": [
   {
    "estado": "Aguascalientes",
    "slug": "aguascalientes",
-   "total": 526,
-   "ciudades": 48
+   "total": 592,
+   "ciudades": 52
   },
   {
    "estado": "Baja California",
@@ -66,8 +66,8 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 11587,
-   "ciudades": 500
+   "total": 11598,
+   "ciudades": 501
   },
   {
    "estado": "Guerrero",
@@ -84,7 +84,7 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 10819,
+   "total": 10826,
    "ciudades": 437
   },
   {
@@ -108,8 +108,8 @@
   {
    "estado": "Nayarit",
    "slug": "nayarit",
-   "total": 2860,
-   "ciudades": 140
+   "total": 3050,
+   "ciudades": 148
   },
   {
    "estado": "Nuevo León",
@@ -144,8 +144,8 @@
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 1781,
-   "ciudades": 231
+   "total": 2001,
+   "ciudades": 236
   },
   {
    "estado": "Sinaloa",
@@ -192,8 +192,8 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 3141,
-   "ciudades": 274
+   "total": 3273,
+   "ciudades": 275
   }
  ],
  "progreso": {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 39.6,
+  "porcentaje_vuelta": 39.9,
   "modo": "completo"
  },
  "aviso": "",
