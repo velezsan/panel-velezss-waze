@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-14T01:55:29+00:00",
+ "actualizado": "2026-09-14T02:36:13+00:00",
  "env": "row",
- "total": 117001,
+ "total": 117156,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -66,8 +66,8 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 11493,
-   "ciudades": 496
+   "total": 11509,
+   "ciudades": 497
   },
   {
    "estado": "Guerrero",
@@ -84,8 +84,8 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 10713,
-   "ciudades": 431
+   "total": 10725,
+   "ciudades": 434
   },
   {
    "estado": "Michoacán",
@@ -108,8 +108,8 @@
   {
    "estado": "Nayarit",
    "slug": "nayarit",
-   "total": 2499,
-   "ciudades": 118
+   "total": 2559,
+   "ciudades": 120
   },
   {
    "estado": "Nuevo León",
@@ -132,7 +132,7 @@
   {
    "estado": "Querétaro",
    "slug": "queretaro",
-   "total": 2835,
+   "total": 2836,
    "ciudades": 151
   },
   {
@@ -144,8 +144,8 @@
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 1404,
-   "ciudades": 202
+   "total": 1442,
+   "ciudades": 209
   },
   {
    "estado": "Sinaloa",
@@ -180,8 +180,8 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 8521,
-   "ciudades": 721
+   "total": 8527,
+   "ciudades": 722
   },
   {
    "estado": "Yucatán",
@@ -192,8 +192,8 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 2978,
-   "ciudades": 272
+   "total": 3000,
+   "ciudades": 273
   }
  ],
  "progreso": {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 38.2,
+  "porcentaje_vuelta": 38.6,
   "modo": "completo"
  },
  "aviso": "",
