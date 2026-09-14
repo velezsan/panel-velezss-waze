@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-14T00:31:26+00:00",
+ "actualizado": "2026-09-14T01:15:13+00:00",
  "env": "row",
- "total": 116117,
+ "total": 116351,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -66,8 +66,8 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 11198,
-   "ciudades": 490
+   "total": 11279,
+   "ciudades": 494
   },
   {
    "estado": "Guerrero",
@@ -84,8 +84,8 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 10553,
-   "ciudades": 423
+   "total": 10619,
+   "ciudades": 427
   },
   {
    "estado": "Michoacán",
@@ -132,7 +132,7 @@
   {
    "estado": "Querétaro",
    "slug": "queretaro",
-   "total": 2829,
+   "total": 2835,
    "ciudades": 151
   },
   {
@@ -144,8 +144,8 @@
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 1370,
-   "ciudades": 199
+   "total": 1404,
+   "ciudades": 202
   },
   {
    "estado": "Sinaloa",
@@ -180,8 +180,8 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 8477,
-   "ciudades": 718
+   "total": 8521,
+   "ciudades": 721
   },
   {
    "estado": "Yucatán",
@@ -192,7 +192,7 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 2929,
+   "total": 2932,
    "ciudades": 269
   }
  ],
