@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-14T00:24:52+00:00",
+ "actualizado": "2026-09-14T00:31:26+00:00",
  "env": "row",
- "total": 116026,
+ "total": 116117,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -108,8 +108,8 @@
   {
    "estado": "Nayarit",
    "slug": "nayarit",
-   "total": 2137,
-   "ciudades": 114
+   "total": 2204,
+   "ciudades": 115
   },
   {
    "estado": "Nuevo León",
@@ -192,8 +192,8 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 2905,
-   "ciudades": 267
+   "total": 2929,
+   "ciudades": 269
   }
  ],
  "progreso": {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 37.8,
+  "porcentaje_vuelta": 37.9,
   "modo": "completo"
  },
  "aviso": "",
