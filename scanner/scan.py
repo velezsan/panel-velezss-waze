@@ -41,6 +41,7 @@ CANDADOS_DIR = os.path.join(DATA_DIR, "candados")
 PASES_DIR = os.path.join(DATA_DIR, "pases")
 COMENTARIOS_DIR = os.path.join(DATA_DIR, "comentarios")
 ORTOGRAFIA_DIR = os.path.join(DATA_DIR, "ortografia")
+VELOCIDADES_DIR = os.path.join(DATA_DIR, "velocidades")
 PALABRAS_PATH = os.path.join(BASE, "scanner", "palabras_mal_escritas.json")
 
 # Servidores del WME. México vive en el entorno "row" (Rest of World).
@@ -730,6 +731,7 @@ _candados_celda = {}  # id -> registro de candado bajo (se vacía por celda)
 _pases_celda = {}  # id -> segmento con pases de peaje (se vacía por celda)
 _comentarios_celda = {}  # id -> comentario de mapa (se vacía por celda)
 _ortografia_celda = {}  # idCalle -> calle mal escrita (se vacía por celda)
+_velocidades_celda = {}  # id -> segmento con velocidad rara (se vacía por celda)
 # revisión de ortografía en los nombres de calle (solo Panel NA por ahora)
 REVISAR_ORTOGRAFIA = False
 PALABRAS_MAL = {}  # forma incorrecta en minúsculas -> forma correcta
@@ -745,6 +747,30 @@ PASES_CONOCIDOS = {
     "viapass-mexico": "VIAPASS",
     "easytrip-mexico": "easytrip",
 }
+
+
+def velocidad_rara(v):
+    """¿Ese límite de velocidad está mal puesto?
+
+    En México los límites se ponen en múltiplos de 5, así que uno que no
+    termine en 0 ni en 5 (11, 38, 47...) es casi siempre un dedazo. El 0 y el
+    vacío significan "sin límite puesto", que es otra cosa y no se reporta.
+    """
+    if isinstance(v, bool) or not isinstance(v, int):
+        return False
+    if v <= 0:
+        return False
+    return v % 5 != 0
+
+
+def velocidades_raras(seg):
+    """Límites mal puestos del segmento, por sentido."""
+    malas = {}
+    for lado, campo in (("ida", "fwdMaxSpeed"), ("regreso", "revMaxSpeed")):
+        v = seg.get(campo)
+        if velocidad_rara(v):
+            malas[lado] = v
+    return malas
 
 
 def pases_de_segmento(seg):
@@ -975,6 +1001,24 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             "nombre": nombre_de_calle(stp) or "",
         }
 
+    # segmentos con límite de velocidad mal puesto (no termina en 0 ni en 5)
+    for seg in segs:
+        malas = velocidades_raras(seg)
+        if not malas:
+            continue
+        lon_v, lat_v = punto_medio(seg)
+        if lon_v is None:
+            continue
+        stv, ciudad_v, edo_v = _ciudad_estado(seg, streets, cities, states)
+        _velocidades_celda[seg.get("id")] = {
+            "id": seg.get("id"), "lat": round(lat_v, 6), "lon": round(lon_v, 6),
+            "rt": seg.get("roadType"),
+            "vel": malas,   # {"ida": 11} o {"ida": 11, "regreso": 38}
+            "lk": (seg.get("lockRank") + 1) if isinstance(seg.get("lockRank"), int) else 1,
+            "ciudad": ciudad_v, "edo": edo_v,
+            "nombre": nombre_de_calle(stv) or "",
+        }
+
     # nombre por segmento (para sugerencias) y conectividad por nodos
     nombre_seg = {}
     nodos = {}  # nodeID -> [segmento_ids]
@@ -1198,7 +1242,7 @@ def main():
     # el Panel NA usa sus propios archivos de estado y datos (docs/data-na)
     global STATE_PATH, LASTRUN_PATH, DEBUG_PATH, DATA_DIR, ESTADOS_DIR, CANDADOS_DIR
     global PASES_DIR, REQ_CANDADO_EXTRA, COMENTARIOS_DIR, PEDIR_COMENTARIOS
-    global ORTOGRAFIA_DIR, REVISAR_ORTOGRAFIA, PALABRAS_MAL
+    global ORTOGRAFIA_DIR, REVISAR_ORTOGRAFIA, PALABRAS_MAL, VELOCIDADES_DIR
     global FILTRAR_RESTRINGIDAS
     panel_na = args.panel == "na"
     # secciones que corren en los dos paneles
@@ -1222,6 +1266,7 @@ def main():
         PASES_DIR = os.path.join(DATA_DIR, "pases")
         COMENTARIOS_DIR = os.path.join(DATA_DIR, "comentarios")
         ORTOGRAFIA_DIR = os.path.join(DATA_DIR, "ortografia")
+        VELOCIDADES_DIR = os.path.join(DATA_DIR, "velocidades")
 
     cfg = load_json(CONFIG_PATH, {})
     bbox_mx = cfg.get("bbox", [-118.45, 14.5, -86.65, 32.75])
@@ -1297,6 +1342,7 @@ def main():
     pases_info = estado.get("pases", {})  # idx -> [segmentos con pases de peaje]
     comentarios_info = estado.get("comentarios", {})  # idx -> [notas de mapa]
     ortografia_info = estado.get("ortografia", {})  # idx -> [calles mal escritas]
+    velocidades_info = estado.get("velocidades", {})  # idx -> [velocidades raras]
     cursor = estado.get("cursor", 0)
     ciclo = estado.get("ciclo", 1)
     if (estado.get("celda_grados") not in (None, celda)
@@ -1308,6 +1354,7 @@ def main():
         pases_info = {}
         comentarios_info = {}
         ortografia_info = {}
+        velocidades_info = {}
 
     if args.modo == "test":
         log("MODO PRUEBA: escaneando solo el centro de Guadalajara")
@@ -1498,6 +1545,7 @@ def main():
                        "champs": champs_info, "candados": candados_info,
                        "pases": pases_info, "comentarios": comentarios_info,
                        "ortografia": ortografia_info,
+                       "velocidades": velocidades_info,
                        "celdas_falladas": cola_pendiente(),
                        "env": env, "celda_grados": celda, "bbox_escaneo": bbox_mx})
         save_json(STATE_PATH, estado, compact=True)
@@ -1655,6 +1703,37 @@ def main():
             "tipos": {str(k): v for k, v in ROAD_TYPE_NAMES.items()},
             "nombres_pases": PASES_CONOCIDOS,
         }, compact=True)
+        # panel de velocidades mal puestas: reagrupar por estado
+        vel_por_estado = {}
+        for regs in velocidades_info.values():
+            for r in regs:
+                est_v = (normalizar_estado(r.get("edo", ""), estados_mx)
+                         or estados_mx.estado_de(r["lon"], r["lat"]))
+                if panel_na:
+                    if est_v not in nombres_mx:
+                        continue  # del lado de EUA: no se incluye
+                    if not r.get("edo") and not estados_mx.dentro_de_alguno(r["lon"], r["lat"]):
+                        continue
+                reg_v = {k: v for k, v in r.items() if k != "edo"}
+                vel_por_estado.setdefault(est_v, {})[str(r["id"])] = reg_v
+        os.makedirs(VELOCIDADES_DIR, exist_ok=True)
+        slugs_v = set()
+        lista_v = []
+        for est_v, segs_v in sorted(vel_por_estado.items()):
+            slug_v = slugify(est_v)
+            slugs_v.add(slug_v)
+            save_json(os.path.join(VELOCIDADES_DIR, f"{slug_v}.json"),
+                      {"estado": est_v, "segmentos": segs_v}, compact=True)
+            lista_v.append({"estado": est_v, "slug": slug_v, "total": len(segs_v)})
+        for fn in os.listdir(VELOCIDADES_DIR):
+            if fn.endswith(".json") and fn[:-5] != "index" and fn[:-5] not in slugs_v:
+                os.remove(os.path.join(VELOCIDADES_DIR, fn))
+        save_json(os.path.join(VELOCIDADES_DIR, "index.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "total": sum(e["total"] for e in lista_v),
+            "estados": lista_v,
+            "tipos": {str(k): v for k, v in ROAD_TYPE_NAMES.items()},
+        }, compact=True)
         return resumen
 
     def _git(*args_git):
@@ -1745,6 +1824,7 @@ def main():
                 _champs_celda.clear()
                 _candados_celda.clear()
                 _pases_celda.clear()
+                _velocidades_celda.clear()
                 _comentarios_celda.clear()
                 _ortografia_celda.clear()
                 segs_antes = contador["segs"]
@@ -1770,6 +1850,7 @@ def main():
                     _champs_celda.clear()
                     _candados_celda.clear()
                     _pases_celda.clear()
+                    _velocidades_celda.clear()
                     _comentarios_celda.clear()
                     _ortografia_celda.clear()
                 # si el servidor NA tiene datos significativos ahí, la zona es suya
@@ -1780,6 +1861,7 @@ def main():
                     _champs_celda.clear()  # celda del servidor NA: no cuenta
                     _candados_celda.clear()
                     _pases_celda.clear()
+                    _velocidades_celda.clear()
                     _comentarios_celda.clear()
                     _ortografia_celda.clear()
                 else:
@@ -1822,6 +1904,16 @@ def main():
                     ortografia_info[str(idx)] = list(_ortografia_celda.values())
                 else:
                     ortografia_info.pop(str(idx), None)
+                if _velocidades_celda:
+                    _hoy_v = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_v = {p.get("id"): p.get("v", "")
+                               for p in velocidades_info.get(str(idx), [])}
+                    for _rv in _velocidades_celda.values():
+                        _rv["v"] = _prev_v.get(_rv["id"]) or _hoy_v  # primera vez que se vio
+                        _rv["r"] = _hoy_v  # última revisión
+                    velocidades_info[str(idx)] = list(_velocidades_celda.values())
+                else:
+                    velocidades_info.pop(str(idx), None)
                 celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
                 escaneadas.append((str(idx), bb, h))
                 hallados_run += len(h)
@@ -1894,6 +1986,7 @@ def main():
                 _champs_celda.clear()
                 _candados_celda.clear()
                 _pases_celda.clear()
+                _velocidades_celda.clear()
                 _comentarios_celda.clear()
                 _ortografia_celda.clear()
                 segs_antes = contador["segs"]
@@ -1930,6 +2023,7 @@ def main():
                     _champs_celda.clear()
                     _candados_celda.clear()
                     _pases_celda.clear()
+                    _velocidades_celda.clear()
                     _comentarios_celda.clear()
                     _ortografia_celda.clear()
                 # si el servidor NA tiene datos significativos ahí, la zona es suya
@@ -1942,6 +2036,7 @@ def main():
                     _champs_celda.clear()  # celda del servidor NA: no cuenta
                     _candados_celda.clear()
                     _pases_celda.clear()
+                    _velocidades_celda.clear()
                     _comentarios_celda.clear()
                     _ortografia_celda.clear()
                 else:
@@ -1984,6 +2079,16 @@ def main():
                     ortografia_info[str(idx)] = list(_ortografia_celda.values())
                 else:
                     ortografia_info.pop(str(idx), None)
+                if _velocidades_celda:
+                    _hoy_v = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_v = {p.get("id"): p.get("v", "")
+                               for p in velocidades_info.get(str(idx), [])}
+                    for _rv in _velocidades_celda.values():
+                        _rv["v"] = _prev_v.get(_rv["id"]) or _hoy_v  # primera vez que se vio
+                        _rv["r"] = _hoy_v  # última revisión
+                    velocidades_info[str(idx)] = list(_velocidades_celda.values())
+                else:
+                    velocidades_info.pop(str(idx), None)
                 celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
                 escaneadas.append((str(idx), bb, h))
                 hallados_run += len(h)
