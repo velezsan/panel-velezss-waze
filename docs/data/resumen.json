@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-15T12:35:22+00:00",
+ "actualizado": "2026-09-15T13:16:10+00:00",
  "env": "row",
- "total": 121965,
+ "total": 121900,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -114,8 +114,8 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 5437,
-   "ciudades": 191
+   "total": 5421,
+   "ciudades": 189
   },
   {
    "estado": "Oaxaca",
@@ -144,8 +144,8 @@
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 3352,
-   "ciudades": 276
+   "total": 3342,
+   "ciudades": 275
   },
   {
    "estado": "Sinaloa",
@@ -192,8 +192,8 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 3333,
-   "ciudades": 281
+   "total": 3294,
+   "ciudades": 279
   }
  ],
  "progreso": {
