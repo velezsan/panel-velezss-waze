@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velocidades mal puestas · velezss NA</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#171e2e; --panel2:#1d2639; --line:#2a3550;
+    --text:#e8ecf4; --muted:#93a0b8; --accent:#4da3ff; --accent2:#7fd18c; --warn:#ffb454;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.45}
+  header{padding:24px 20px 8px;max-width:1100px;margin:0 auto}
+  h1{margin:0 0 4px;font-size:1.3rem;font-weight:700}
+  .sub{color:var(--muted);font-size:.92rem;margin:0}
+  .sub a{color:var(--accent);text-decoration:none}
+  main{max-width:1100px;margin:0 auto;padding:14px 20px 60px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;align-items:center}
+  select{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+         border-radius:8px;padding:8px 10px;font-size:.92rem;min-width:150px}
+  input[type=search]{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+         border-radius:8px;padding:8px 10px;font-size:.92rem;min-width:200px}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;overflow:hidden;font-size:.92rem}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  th{background:var(--panel2);color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+  tr:last-child td{border-bottom:none}
+  a.wme{display:inline-block;background:var(--accent);color:#08131f;font-weight:600;
+        padding:5px 11px;border-radius:7px;text-decoration:none;font-size:.85rem;white-space:nowrap}
+  a.wme:hover{filter:brightness(1.1)}
+  tr.visitado td{opacity:.45}
+  a.wme.hecho{background:var(--accent2)}
+  .quitar{color:var(--muted);cursor:pointer;margin-left:7px;font-size:.85rem}
+  .quitar:hover{color:var(--text)}
+  .chip{display:inline-block;background:#243049;border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
+  .chip.nuevo{background:#1e3a24;color:#7fd18c}
+  .vel{display:inline-block;background:#3a2c14;color:#ffd9a0;border:1px solid var(--warn);
+       border-radius:6px;padding:2px 8px;font-size:.82rem;font-weight:600;
+       font-variant-numeric:tabular-nums;margin:1px 3px 1px 0;white-space:nowrap}
+  .sentido{color:var(--muted);font-weight:400;font-size:.76rem}
+  .lk{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--warn);font-weight:600}
+  .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
+  .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+        border-radius:8px;padding:7px 14px;cursor:pointer;font-size:.9rem}
+  .pager button:disabled{opacity:.4;cursor:default}
+  .pager input{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;
+        padding:7px 6px;width:64px;font-size:.9rem;text-align:center}
+  .pager #pg-total{color:var(--muted);font-size:.9rem}
+  .cargando{color:var(--muted);padding:40px;text-align:center}
+  .nota{color:var(--muted);font-size:.85rem;margin-top:12px}
+  @media (max-width:640px){ th:nth-child(3),td:nth-child(3){display:none} }
+</style>
+</head>
+<body>
+<header>
+  <h1>🚦 Velocidades mal puestas</h1>
+  <p class="sub">Segmentos cuyo límite de velocidad no termina en 0 ni en 5 ·
+    <a href="index.html">← Volver al panel</a></p>
+</header>
+<main>
+  <div class="controls">
+    <select id="sel-estado"><option value="">Elige un estado…</option></select>
+    <select id="sel-sentido">
+      <option value="">Todos los sentidos</option>
+      <option value="dos">Los dos sentidos mal</option>
+      <option value="uno">Solo un sentido mal</option>
+    </select>
+    <select id="sel-orden">
+      <option value="">Orden: por ciudad</option>
+      <option value="vel">Orden: velocidad más baja</option>
+      <option value="rec">Orden: escaneo más reciente</option>
+    </select>
+    <input type="search" id="buscar" placeholder="Buscar por ciudad o nombre…">
+    <span class="chip" id="resumen-chip" style="display:none"></span>
+  </div>
+  <div id="contenido"><div class="cargando">Cargando datos…</div></div>
+  <div class="pager" id="pager" style="display:none">
+    <button id="pg-first" title="Primera página">«</button>
+    <button id="pg-prev">← Anterior</button>
+    <span id="pg-info"></span>
+    <input type="number" id="pg-num" min="1" value="1" title="Escribe la página y presiona Enter">
+    <span id="pg-total"></span>
+    <button id="pg-next">Siguiente →</button>
+    <button id="pg-last" title="Última página">»</button>
+  </div>
+  <p class="nota">Los límites de velocidad se ponen en múltiplos de cinco, así que uno que termine en
+    1, 2, 3, 4, 6, 7, 8 o 9 (11, 38, 47…) casi siempre es un dedazo al capturar. El 40 y el 25 no salen
+    en esta lista porque están bien. Los segmentos sin límite puesto tampoco: eso no es un error,
+    es otra cosa. Se revisan los dos sentidos por separado, y la columna dice cuál de los dos está mal.
+    La columna de candado es el nivel que tiene hoy el segmento en el editor.
+    Los datos se actualizan con cada corrida del escáner.</p>
+</main>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmt=n=>n.toLocaleString('es-MX');
+  let indice=null, datos=null, lista=[], pagina=0, porPagina=100;
+
+  let visitados=new Set();
+  try{visitados=new Set(JSON.parse(localStorage.getItem('svs_visitados_vel_na')||'[]'));}catch(e){}
+  function guardar(){try{localStorage.setItem('svs_visitados_vel_na',JSON.stringify([...visitados]));}catch(e){}}
+
+  const tipoNombre=rt=>(indice&&indice.tipos&&indice.tipos[String(rt)])||('Tipo '+rt);
+  const permalink=r=>`https://www.waze.com/editor?env=usa&lat=${r.lat}&lon=${r.lon}&zoomLevel=17&segments=${r.id}`;
+  const fechaDe=v=>v.includes('T')?new Date(v+':00Z'):new Date(v+'T12:00:00Z');
+  const sentidos=r=>Object.keys(r.vel||{});
+  const masBaja=r=>Math.min(...Object.values(r.vel||{}).concat([9999]));
+
+  // "11 km/h en los dos sentidos" cuando coinciden; si no, uno por sentido
+  function chipsVel(r){
+    const v=r.vel||{};
+    const ida=v.ida, reg=v.regreso;
+    if(ida!=null&&reg!=null&&ida===reg){
+      return `<span class="vel">${ida} km/h <span class="sentido">los dos sentidos</span></span>`;
+    }
+    let out='';
+    if(ida!=null)out+=`<span class="vel">${ida} km/h <span class="sentido">ida</span></span>`;
+    if(reg!=null)out+=`<span class="vel">${reg} km/h <span class="sentido">regreso</span></span>`;
+    return out||'<span class="chip">—</span>';
+  }
+
+  async function cargarEstado(slug){
+    if(!slug){$('contenido').innerHTML='<div class="cargando">Elige un estado para ver sus segmentos.</div>';$('pager').style.display='none';return;}
+    $('contenido').innerHTML='<div class="cargando">Cargando segmentos…</div>';
+    try{
+      if(slug==='__todos'){
+        const listas=await Promise.all(indice.estados.map(async e=>{
+          try{
+            const r=await fetch('../data-na/velocidades/'+e.slug+'.json',{cache:'no-store'});
+            const d=await r.json();
+            return Object.values(d.segmentos||{}).map(s=>({...s,est:e.estado}));
+          }catch(_){return [];}
+        }));
+        const segs={};
+        listas.flat().forEach(s=>{segs[s.id]=s;});
+        datos={segmentos:segs};
+      }else{
+        const r=await fetch('../data-na/velocidades/'+slug+'.json',{cache:'no-store'});
+        datos=await r.json();
+      }
+    }catch(e){
+      $('contenido').innerHTML='<div class="cargando">No se pudo cargar este estado.</div>';
+      return;
+    }
+    filtrar();
+  }
+
+  function filtrar(){
+    if(!datos)return;
+    const s=$('sel-sentido').value, q=$('buscar').value.trim().toLowerCase();
+    lista=Object.values(datos.segmentos||{}).filter(r=>{
+      const n=sentidos(r).length;
+      if(s==='dos'&&n<2)return false;
+      if(s==='uno'&&n!==1)return false;
+      if(q&&!((r.ciudad||'').toLowerCase().includes(q)
+            ||(r.nombre||'').toLowerCase().includes(q)
+            ||(r.est||'').toLowerCase().includes(q)))return false;
+      return true;
+    });
+    const marca=r=>r.r||r.v||'';
+    const porCiudad=(a,b)=>(a.est||'').localeCompare(b.est||'','es')
+      ||(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')
+      ||(a.nombre||'').localeCompare(b.nombre||'','es')
+      ||a.id-b.id;
+    const o=$('sel-orden').value;
+    if(o==='vel')lista.sort((a,b)=>masBaja(a)-masBaja(b)||porCiudad(a,b));
+    else if(o==='rec')lista.sort((a,b)=>marca(b).localeCompare(marca(a))||porCiudad(a,b));
+    else lista.sort(porCiudad);
+    pagina=0;
+    pintar();
+  }
+
+  function pintar(){
+    const total=lista.length;
+    const ini=pagina*porPagina, fin=Math.min(ini+porPagina,total);
+    let html=`<table><thead><tr><th>Tipo de vía</th><th>Nombre</th><th>Ciudad</th><th>Velocidad</th><th>Candado</th><th>Revisado</th><th></th></tr></thead><tbody>`;
+    if(!total){
+      html+='<tr><td colspan="7" class="cargando">No hay segmentos con esos filtros. 🎉</td></tr>';
+    }
+    lista.slice(ini,fin).forEach(r=>{
+      const vis=visitados.has(String(r.id));
+      let det='—', esNuevo=false;
+      const marca=r.r||r.v;
+      if(marca){
+        const d=fechaDe(marca);
+        det=d.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+        if(marca.includes('T'))det+=' '+d.toLocaleTimeString('es-MX',{hour:'numeric',minute:'2-digit'});
+      }
+      if(r.v)esNuevo=(Date.now()-fechaDe(r.v).getTime())<48*3600*1000;
+      html+=`<tr class="${vis?'visitado':''}"><td><span class="chip">${tipoNombre(r.rt)}</span></td>
+        <td>${r.nombre||'<span class="chip">sin nombre</span>'}${r.est?' <span class="chip">'+r.est+'</span>':''}</td>
+        <td>${r.ciudad||'<span class="chip">sin ciudad</span>'}</td>
+        <td>${chipsVel(r)}</td>
+        <td class="lk">${r.lk||'—'}</td>
+        <td style="white-space:nowrap">${det}${esNuevo?' <span class="chip nuevo">nuevo</span>':''}</td>
+        <td><a class="wme${vis?' hecho':''}" data-id="${r.id}" target="wme" href="${permalink(r)}">${vis?'✓ Abierto':'Abrir en WME'}</a>${vis?`<span class="quitar" data-quitar="${r.id}" title="Desmarcar">✕</span>`:''}</td></tr>`;
+    });
+    html+='</tbody></table>';
+    $('contenido').innerHTML=html;
+    const pgs=Math.max(1,Math.ceil(total/porPagina));
+    $('pager').style.display=total>porPagina?'flex':'none';
+    $('pg-info').textContent=`${fmt(ini+1)}–${fmt(fin)} de ${fmt(total)} · pág.`;
+    $('pg-num').value=pagina+1;
+    $('pg-num').max=pgs;
+    $('pg-total').textContent=`/ ${pgs}`;
+    $('pg-first').disabled=pagina===0;
+    $('pg-prev').disabled=pagina===0;
+    $('pg-next').disabled=pagina>=pgs-1;
+    $('pg-last').disabled=pagina>=pgs-1;
+  }
+
+  $('contenido').addEventListener('click',e=>{
+    const q=e.target.closest('.quitar');
+    if(q){visitados.delete(String(q.dataset.quitar));guardar();pintar();return;}
+    marcarVisto(e);
+  });
+  function marcarVisto(e){
+    const a=e.target.closest('a.wme');
+    if(a&&a.dataset.id){visitados.add(String(a.dataset.id));guardar();setTimeout(pintar,150);}
+  }
+  // copiar el enlace con el botón derecho, o abrirlo con el de en medio,
+  // también cuenta como que ya lo viste
+  $('contenido').addEventListener('contextmenu',marcarVisto);
+  $('contenido').addEventListener('auxclick',marcarVisto);
+  $('pg-prev').addEventListener('click',()=>{pagina--;pintar();window.scrollTo(0,0);});
+  $('pg-next').addEventListener('click',()=>{pagina++;pintar();window.scrollTo(0,0);});
+  $('pg-first').addEventListener('click',()=>{pagina=0;pintar();window.scrollTo(0,0);});
+  $('pg-last').addEventListener('click',()=>{pagina=Math.max(0,Math.ceil(lista.length/porPagina)-1);pintar();window.scrollTo(0,0);});
+  function irAPagina(){
+    const pgs=Math.max(1,Math.ceil(lista.length/porPagina));
+    let v=parseInt($('pg-num').value,10);
+    if(isNaN(v))v=pagina+1;
+    pagina=Math.min(Math.max(v,1),pgs)-1;
+    pintar();window.scrollTo(0,0);
+  }
+  $('pg-num').addEventListener('change',irAPagina);
+  $('pg-num').addEventListener('keydown',e=>{if(e.key==='Enter')irAPagina();});
+  $('sel-estado').addEventListener('change',e=>cargarEstado(e.target.value));
+  ['sel-sentido','sel-orden'].forEach(i=>$(i).addEventListener('change',filtrar));
+  $('buscar').addEventListener('input',()=>{clearTimeout(window._bt);window._bt=setTimeout(filtrar,250);});
+
+  fetch('../data-na/velocidades/index.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{
+      indice=d;
+      const sel=$('sel-estado');
+      if(d.estados&&d.estados.length){
+        const ot=document.createElement('option');
+        ot.value='__todos';ot.textContent=`Toda la franja (${fmt(d.total)})`;
+        sel.appendChild(ot);
+        d.estados.forEach(e=>{
+          const o=document.createElement('option');
+          o.value=e.slug;o.textContent=`${e.estado} (${fmt(e.total)})`;
+          sel.appendChild(o);
+        });
+        const chip=$('resumen-chip');
+        chip.style.display='inline-block';
+        const act=d.actualizado?new Date(d.actualizado).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'—';
+        chip.textContent=`${fmt(d.total)} segmentos · actualizado ${act}`;
+        $('contenido').innerHTML='<div class="cargando">Elige un estado para ver sus segmentos.</div>';
+      }else{
+        $('contenido').innerHTML='<div class="cargando">Sin velocidades mal puestas por ahora. 🎉 La lista se llena con las corridas del escáner.</div>';
+      }
+    })
+    .catch(()=>{
+      $('contenido').innerHTML='<div class="cargando">Los datos se generan con las corridas del escáner. Esta sección es nueva: estará disponible después de la próxima corrida.</div>';
+    });
+})();
+</script>
+</body>
+</html>
