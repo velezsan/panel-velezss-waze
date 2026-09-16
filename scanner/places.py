@@ -256,23 +256,45 @@ def necesita_correccion(texto):
 # Ayudas para la lista del panel
 # ---------------------------------------------------------------------------
 _RE_SOLO_LETRAS = re.compile("[^" + LETRA + "]")
+_RE_VOCAL = re.compile("[aeiouáéíóúàèìòùäëïöüAEIOUÁÉÍÓÚÀÈÌÒÙÄËÏÖÜ]")
+_RE_DIGITO = re.compile(r"\d")
+# palabras cortas que salen en mayúsculas sin ser siglas ("DE", "LA", "THE")
+_NO_SIGLAS = (LOWERS | CONDITIONAL_ARTICLES | PREPOSITIONS
+              | {"the", "los", "las", "un", "una", "of"})
+
+
+def _parece_sigla(tok):
+    """¿Ese pedazo del nombre trae mayúsculas a propósito?
+
+    Sí para las abreviaturas (GDL, UADY, CTM, C5, 3B) y para las marcas con
+    mayúscula interna (BanBajio, AutoZone, iHop). No para las palabras largas
+    en mayúsculas, que casi siempre son un nombre escrito a gritos
+    ("FARMACIA FRANCESA"), ni para los artículos y preposiciones.
+    """
+    letras = _RE_SOLO_LETRAS.sub("", tok)
+    if not letras or letras.lower() in _NO_SIGLAS:
+        return False
+    todo_mayus = tok == tok.upper()
+    if _RE_DIGITO.search(tok) and todo_mayus:
+        return True            # 3B, C5, G500
+    if len(letras) < 2:
+        return False
+    if todo_mayus:
+        # corta, o sin vocales: sigla. Larga y con vocales: nombre a gritos.
+        return len(letras) <= 5 or not _RE_VOCAL.search(letras)
+    return tok != tok.capitalize() and tok != tok.lower()
 
 
 def siglas_aplastadas(antes, despues):
-    """Siglas (2+ letras, todo mayúsculas) que la propuesta deja de respetar.
+    """Siglas y marcas que la propuesta deja de respetar.
 
     Sirve para marcar esos renglones en el panel: casi siempre significan que
     a la lista de siglas permitidas le falta esa palabra, no que el nombre
     esté mal. Santiago las va agregando conforme salen.
     """
     def piezas(s):
-        return [t for t in re.split(r"[\s\-/(),]+", s) if len(_RE_SOLO_LETRAS.sub("", t)) >= 2]
+        return [t for t in re.split(r"[\s\-/(),]+", s) if _RE_SOLO_LETRAS.sub("", t)]
 
     despues_piezas = piezas(despues)
-    fuera = []
-    for t in piezas(antes):
-        letras = _RE_SOLO_LETRAS.sub("", t)
-        if len(letras) >= 2 and t == t.upper() and re.search("[A-Z]", t):
-            if t not in despues_piezas:
-                fuera.append(t)
-    return fuera
+    return [t for t in piezas(antes)
+            if _parece_sigla(t) and t not in despues_piezas]

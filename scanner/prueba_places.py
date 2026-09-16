@@ -198,9 +198,19 @@ def main():
     casos = [
         ("Farmacia GDL", ["GDL"]),
         ("UADY Facultad de Medicina", ["UADY"]),
-        ("LIBRERÍA DE MONJAS", ["LIBRERÍA", "DE", "MONJAS"]),
+        ("Tiendas 3B", ["3B"]),                      # sigla con número
+        ("BanBajio - Plaza Zaragoza", ["BanBajio"]),  # mayúscula interna
+        ("SAT - ADSC Querétaro", ["ADSC"]),           # SAT sí está en la lista
+        ("VIPS", ["VIPS"]),
+        # las palabras largas en mayúsculas son un nombre a gritos, no siglas:
+        # esas no se marcan, porque la corrección sí es la buena
+        ("LIBRERÍA DE MONJAS", []),
+        ("FARMACIA FRANCESA", []),
+        ("Panificadora CENTENO", []),
         ("Café de la Parroquia", []),
         ("IMSS UMF 33", []),
+        ("McDonald's", []),
+        ("Medievo XXI", []),
     ]
     print("\nmarca de siglas aplastadas:")
     malos = 0
