@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-16T14:01:31+00:00",
+ "actualizado": "2026-09-16T14:44:54+00:00",
  "env": "row",
- "total": 120742,
+ "total": 120690,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -114,8 +114,8 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 5406,
-   "ciudades": 187
+   "total": 5355,
+   "ciudades": 186
   },
   {
    "estado": "Oaxaca",
@@ -168,8 +168,8 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 1096,
-   "ciudades": 98
+   "total": 1095,
+   "ciudades": 97
   },
   {
    "estado": "Tlaxcala",
