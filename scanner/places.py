@@ -121,6 +121,10 @@ CONDITIONAL_ARTICLES = {"el", "la", "los", "las"}
 PREPOSITIONS = {"de", "del", "a", "en", "por", "con", "para", "al"}
 # Marcas que se dejan tal cual, y solo en estas formas exactas (distingue mayúsculas)
 KEEP_AS_IS = ["OXXO", "Oxxo", "Toks", "Tok's"]
+# Palabras que se quedan como vengan escritas, sin proponer cambio de
+# mayúsculas: "KM 110+100" se queda en KM y "Km 22" se queda en Km. Lo pidió
+# Santiago: la forma la decide quien capturó el place, no nosotros.
+RESPETAR_FORMA = {"km", "kms"}
 
 # ---------------------------------------------------------------------------
 # Dos arreglos respecto al JavaScript original, pedidos por Santiago
@@ -189,6 +193,11 @@ def es_codigo(tok):
     return bool(_RE_SOLO_LETRAS.sub("", tok)) and any(ch.isdigit() for ch in tok)
 
 
+def se_respeta(tok):
+    """Palabra que se deja con las mayúsculas que ya traía (KM / Km)."""
+    return tok.lower() in RESPETAR_FORMA
+
+
 def fix_grammar(texto):
     """Misma salida que fixGrammar() del userscript."""
     guardadas = []
@@ -205,7 +214,7 @@ def fix_grammar(texto):
 
     def _guardar_codigo(m):
         tok = m.group(2)
-        if not es_codigo(tok):
+        if not es_codigo(tok) and not se_respeta(tok):
             return m.group(0)
         marcador = MARCA_INI + str(len(guardadas)) + MARCA_FIN
         guardadas.append(tok)

@@ -147,6 +147,10 @@ MEJORAS = [
     ("Tiendas 3B", "Tiendas 3b", "Tiendas 3B"),
     ("C5 Sinaloa", "C5 Sinaloa", "C5 Sinaloa"),
     ("TACOS EL 5TO", "Tacos El 5to", "Tacos El 5TO"),
+    # el kilómetro se queda como lo escribieron, en mayúsculas o en minúsculas
+    ("Caseta Las Brisas KM 110+100", "Caseta Las Brisas Km 110+100",
+     "Caseta Las Brisas KM 110+100"),
+    ("Km 22 Carretera Libre", "Km 22 Carretera Libre", "Km 22 Carretera Libre"),
 ]
 
 # Lo ya bien escrito no debe cambiar al volver a pasarlo (idempotencia).
@@ -156,6 +160,7 @@ IDEMPOTENTES = [
     "Jorge A. Treviño", "S.A. de C.V.", "IMSS UMF 33", "OXXO", "AT&T",
     "Café de la Parroquia", "Farmacia del Ahorro", "McDonald's", "L'Occitane",
     "Pemex - ES08877", "Tiendas 3B", "C5 Sinaloa", "UAS Facultad de Derecho",
+    "Caseta Las Brisas KM 110+100", "Km 22 Carretera Libre",
 ]
 
 
