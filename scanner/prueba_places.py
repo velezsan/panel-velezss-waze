@@ -31,6 +31,8 @@ PARES = [
     ("I.N.A.H. Centro regional de Jalisco", "INAH Centro Regional de Jalisco"),
     # --- siglas del diccionario
     ("IMSS UMF 33", "IMSS UMF 33"), ("imss umf 33", "IMSS UMF 33"),
+    ("UAS Facultad de Derecho", "UAS Facultad de Derecho"),
+    ("ES", "ES"),
     # --- apóstrofos y marcas del diccionario
     ("McDonald's", "McDonald's"), ("mcdonalds", "McDonald's"),
     ("l'occitane", "L'Occitane"),
@@ -87,7 +89,6 @@ PARES = [
     ("Laboratorios LABSA", "Laboratorios Labsa"),
     ("Tayrona BTQ", "Tayrona Btq"),
     ("UADY Facultad de Medicina", "Uady Facultad de Medicina"),
-    ("Tiendas 3B", "Tiendas 3b"),
     ("BanBajio - Plaza Zaragoza", "Banbajio - Plaza Zaragoza"),
     ("GTS (GLOBAL THERMAL SOLUTIONS)", "Gts (Global Thermal Solutions)"),
     ("Citibanamex - 16 de Septiembre", "Banamex - 16 de Septiembre"),
@@ -106,7 +107,6 @@ PARES = [
     ("La piramide", "La Piramide"),
     ("Paleteria michoacana", "Paleteria Michoacana"),
     # --- sin cambios
-    ("Tiendas 3B", "Tiendas 3b"),
     ("Punto de lectura", "Punto de Lectura"),
     ("Riel store", "Riel Store"),
     ("MG Motors", "MG Motors"),
@@ -142,6 +142,11 @@ MEJORAS = [
     ("Tiendas Extra", "Tiendas Tiendas Extra", "Tiendas Extra"),
     ("The Home Depot", "The Home Depot", "The Home Depot"),
     # estas tres sí las duplicaba su script (llaves de una palabra)
+    # códigos con letras y números: antes se aplastaban
+    ("Pemex - ES08877", "Pemex - Es08877", "Pemex - ES08877"),
+    ("Tiendas 3B", "Tiendas 3b", "Tiendas 3B"),
+    ("C5 Sinaloa", "C5 Sinaloa", "C5 Sinaloa"),
+    ("TACOS EL 5TO", "Tacos El 5to", "Tacos El 5TO"),
 ]
 
 # Lo ya bien escrito no debe cambiar al volver a pasarlo (idempotencia).
@@ -150,6 +155,7 @@ IDEMPOTENTES = [
     "The Home Depot", "Círculo K", "Nuevo León", "Farmacia Guadalajara",
     "Jorge A. Treviño", "S.A. de C.V.", "IMSS UMF 33", "OXXO", "AT&T",
     "Café de la Parroquia", "Farmacia del Ahorro", "McDonald's", "L'Occitane",
+    "Pemex - ES08877", "Tiendas 3B", "C5 Sinaloa", "UAS Facultad de Derecho",
 ]
 
 
@@ -198,7 +204,7 @@ def main():
     casos = [
         ("Farmacia GDL", ["GDL"]),
         ("UADY Facultad de Medicina", ["UADY"]),
-        ("Tiendas 3B", ["3B"]),                      # sigla con número
+        ("Tiendas 3B", []),        # ya no se aplasta: se protege el código
         ("BanBajio - Plaza Zaragoza", ["BanBajio"]),  # mayúscula interna
         ("SAT - ADSC Querétaro", ["ADSC"]),           # SAT sí está en la lista
         ("VIPS", ["VIPS"]),
@@ -211,6 +217,7 @@ def main():
         ("IMSS UMF 33", []),
         ("McDonald's", []),
         ("Medievo XXI", []),
+        ("Pemex - ES08877", []),
     ]
     print("\nmarca de siglas aplastadas:")
     malos = 0

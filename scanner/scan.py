@@ -31,7 +31,8 @@ except ImportError:
 
 # reglas de los places (ortografía y sin dirección): viven en places.py
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from places import fix_grammar, necesita_correccion, siglas_aplastadas
+from places import (fix_grammar, necesita_correccion, siglas_aplastadas,
+                    SIN_CALLE_EXENTAS)
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(BASE, "scanner", "config.json")
@@ -1048,7 +1049,12 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             nom_pl = (ven.get("name") or "").strip()
             st_pl = streets.get(ven.get("streetID"))
             calle_pl = nombre_de_calle(st_pl)
-            sin_dir = 0 if calle_pl else 1   # "sin dirección" = sin calle, como su script
+            cats_pl = [str(c) for c in (ven.get("categories") or [])[:3]]
+            # los ríos, lagunas, puentes y demás accidentes geográficos no
+            # llevan calle: no son domicilios y no entran en esta regla
+            exenta_pl = any(c in SIN_CALLE_EXENTAS for c in cats_pl)
+            # "sin dirección" = sin calle, como su script
+            sin_dir = 0 if (calle_pl or exenta_pl) else 1
             sug_pl = fix_grammar(nom_pl) if necesita_correccion(nom_pl) else ""
             if sug_pl == nom_pl:
                 sug_pl = ""
@@ -1070,7 +1076,7 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
                 "calle": calle_pl[:140],
                 "ciudad": ciudad_pl, "edo": edo_pl,
                 "lk": (lr_pl + 1) if isinstance(lr_pl, int) else 1,
-                "cat": [str(c) for c in (ven.get("categories") or [])[:3]],
+                "cat": cats_pl,
                 "area": 1 if (ven.get("geometry") or {}).get("type") != "Point" else 0,
             }
             if sin_dir:

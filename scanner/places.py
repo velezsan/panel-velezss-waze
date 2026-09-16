@@ -102,6 +102,17 @@ ALLOWED = {
     "VW", "DHL", "UPS", "SCT", "HEB", "GMC", "CPA", "S.A.", "C.V.", "S.C.", "A.C.", "S.A.B.",
     "S.A.P.I.", "S.R.L.", "I.A.P.", "II", "III", "IV", "VI", "VII", "VIII", "IX", "KTM",
     "AM", "PM", "SA", "CV", "SC", "AC", "SAPI", "LLC", "INC", "SOS", "IAP", "MG", "RTP", "AT&T",
+    # las va agregando Santiago conforme salen en el panel
+    "ES", "UAS",
+}
+
+# Categorías donde una calle no aplica: son accidentes geográficos y obras, no
+# domicilios. No entran en la regla de "sin dirección" (sí en la ortografía).
+# Santiago pidió sacarlas al ver la primera lista: salían ríos y lagunas.
+SIN_CALLE_EXENTAS = {
+    "RIVER_STREAM", "SEA_LAKE_POOL", "CANAL", "DAM", "ISLAND", "FOREST_GROVE",
+    "SWAMP_MARSH", "HILL_MOUNTAIN", "BEACH", "TUNNEL", "BRIDGE",
+    "JUNCTION_INTERCHANGE", "RAILROAD_CROSSING", "SCENIC_LOOKOUT_VIEWPOINT",
 }
 
 LOWERS = {"a", "de", "del", "y", "o", "en", "con", "por", "para", "al", "un", "una", "e", "u",
@@ -165,6 +176,17 @@ MARCA_INI = chr(0xE000)   # zona privada de Unicode: no aparece en nombres reale
 MARCA_FIN = chr(0xE001)
 _RE_MARCADOR = re.compile(MARCA_INI + r"(\d+)" + MARCA_FIN)
 _RE_ATT = re.compile(r"\bat&t\b", re.I)
+# 4) Códigos con letras y números en mayúsculas ("Pemex - ES08877", "Tiendas 3B",
+#    "C5", "5TO"): son claves o nombres de marca, no palabras, y el paso de
+#    minúsculas los aplastaba ("Es08877", "3b"). Se protegen como las marcas.
+_RE_CODIGO = re.compile("(^|[^" + LETRA + r"\d])([" + LETRA + r"\d]+)(?=[^" + LETRA + r"\d]|$)")
+
+
+def es_codigo(tok):
+    """Mezcla letras y números, toda en mayúsculas: ES08877, 3B, C5, 5TO."""
+    if tok != tok.upper():
+        return False
+    return bool(_RE_SOLO_LETRAS.sub("", tok)) and any(ch.isdigit() for ch in tok)
 
 
 def fix_grammar(texto):
@@ -180,6 +202,16 @@ def fix_grammar(texto):
             return m.group(1) + marcador
 
         src = patron.sub(_guardar, src)
+
+    def _guardar_codigo(m):
+        tok = m.group(2)
+        if not es_codigo(tok):
+            return m.group(0)
+        marcador = MARCA_INI + str(len(guardadas)) + MARCA_FIN
+        guardadas.append(tok)
+        return m.group(1) + marcador
+
+    src = _RE_CODIGO.sub(_guardar_codigo, src)
 
     s = _RE_BBVA.sub("BBVA", src)
     s = _RE_PAN.sub("%%%PAN%%%", s)
