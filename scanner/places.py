@@ -85,6 +85,7 @@ ACCENT_FIXES = {
     "pemex": "Pemex", "bp": "BP", "shell": "Shell", "mobil": "Mobil", "g500": "G500",
     "repsol": "Repsol", "imss": "IMSS", "issste": "ISSSTE", "cfe": "CFE", "cac": "CAC",
     "fedex": "FedEx", "l'occitane": "L'Occitane", "ihop": "iHop", "hotel hi": "Hotel hi",
+    "cargogas": "Cargo Gas", "firstcash": "FirstCash",
 }
 
 ALLOWED = {
@@ -103,7 +104,7 @@ ALLOWED = {
     "S.A.P.I.", "S.R.L.", "I.A.P.", "II", "III", "IV", "VI", "VII", "VIII", "IX", "KTM",
     "AM", "PM", "SA", "CV", "SC", "AC", "SAPI", "LLC", "INC", "SOS", "IAP", "MG", "RTP", "AT&T",
     # las va agregando Santiago conforme salen en el panel
-    "ES", "UAS",
+    "ES", "UAS", "ABL", "CEDIS", "CMD", "HNI", "INNOTEC", "MIT", "DSPM", "HGSZMF",
 }
 
 # Categorías donde una calle no aplica: son accidentes geográficos y obras, no
@@ -120,7 +121,7 @@ LOWERS = {"a", "de", "del", "y", "o", "en", "con", "por", "para", "al", "un", "u
 CONDITIONAL_ARTICLES = {"el", "la", "los", "las"}
 PREPOSITIONS = {"de", "del", "a", "en", "por", "con", "para", "al"}
 # Marcas que se dejan tal cual, y solo en estas formas exactas (distingue mayúsculas)
-KEEP_AS_IS = ["OXXO", "Oxxo", "Toks", "Tok's"]
+KEEP_AS_IS = ["OXXO", "Oxxo", "Toks", "Tok's", "FirstCash"]
 # Palabras que se quedan como vengan escritas, sin proponer cambio de
 # mayúsculas: "KM 110+100" se queda en KM y "Km 22" se queda en Km. Lo pidió
 # Santiago: la forma la decide quien capturó el place, no nosotros.
@@ -180,6 +181,9 @@ MARCA_INI = chr(0xE000)   # zona privada de Unicode: no aparece en nombres reale
 MARCA_FIN = chr(0xE001)
 _RE_MARCADOR = re.compile(MARCA_INI + r"(\d+)" + MARCA_FIN)
 _RE_ATT = re.compile(r"\bat&t\b", re.I)
+# 5) Lo que va entre corchetes se deja como está: son etiquetas, no palabras
+#    ("Pemex [E] 08877"). El paso de minúsculas las aplastaba a "[e]".
+_RE_CORCHETES = re.compile(r"\[[^\[\]]{1,24}\]")
 # 4) Códigos con letras y números en mayúsculas ("Pemex - ES08877", "Tiendas 3B",
 #    "C5", "5TO"): son claves o nombres de marca, no palabras, y el paso de
 #    minúsculas los aplastaba ("Es08877", "3b"). Se protegen como las marcas.
@@ -221,6 +225,13 @@ def fix_grammar(texto):
         return m.group(1) + marcador
 
     src = _RE_CODIGO.sub(_guardar_codigo, src)
+
+    def _guardar_corchetes(m):
+        marcador = MARCA_INI + str(len(guardadas)) + MARCA_FIN
+        guardadas.append(m.group(0))
+        return marcador
+
+    src = _RE_CORCHETES.sub(_guardar_corchetes, src)
 
     s = _RE_BBVA.sub("BBVA", src)
     s = _RE_PAN.sub("%%%PAN%%%", s)

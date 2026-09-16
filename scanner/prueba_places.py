@@ -31,6 +31,12 @@ PARES = [
     ("I.N.A.H. Centro regional de Jalisco", "INAH Centro Regional de Jalisco"),
     # --- siglas del diccionario
     ("IMSS UMF 33", "IMSS UMF 33"), ("imss umf 33", "IMSS UMF 33"),
+    # --- las que fue marcando Santiago al revisar el panel
+    ("ABL Consultores", "ABL Consultores"), ("CEDIS Bimbo", "CEDIS Bimbo"),
+    ("CMD Monterrey", "CMD Monterrey"), ("HNI Torreon", "HNI Torreon"),
+    ("INNOTEC", "INNOTEC"), ("MIT Academy", "MIT Academy"),
+    ("DSPM Zapopan", "DSPM Zapopan"), ("HGSZMF No. 4", "HGSZMF No. 4"),
+    ("FirstCash", "FirstCash"),
     ("UAS Facultad de Derecho", "UAS Facultad de Derecho"),
     ("ES", "ES"),
     # --- apóstrofos y marcas del diccionario
@@ -151,6 +157,12 @@ MEJORAS = [
     ("Caseta Las Brisas KM 110+100", "Caseta Las Brisas Km 110+100",
      "Caseta Las Brisas KM 110+100"),
     ("Km 22 Carretera Libre", "Km 22 Carretera Libre", "Km 22 Carretera Libre"),
+    # lo que va entre corchetes es una etiqueta, no una palabra
+    ("Pemex [E] 08877", "Pemex [e] 08877", "Pemex [E] 08877"),
+    # Cargogas son dos palabras, lo dijo Santiago
+    ("Cargogas", "Cargogas", "Cargo Gas"),
+    ("CARGOGAS Norte", "Cargogas Norte", "Cargo Gas Norte"),
+    ("FIRSTCASH", "Firstcash", "FirstCash"),
 ]
 
 # Lo ya bien escrito no debe cambiar al volver a pasarlo (idempotencia).
@@ -161,6 +173,7 @@ IDEMPOTENTES = [
     "Café de la Parroquia", "Farmacia del Ahorro", "McDonald's", "L'Occitane",
     "Pemex - ES08877", "Tiendas 3B", "C5 Sinaloa", "UAS Facultad de Derecho",
     "Caseta Las Brisas KM 110+100", "Km 22 Carretera Libre",
+    "Cargo Gas", "FirstCash", "Pemex [E] 08877", "INNOTEC", "CEDIS Bimbo",
 ]
 
 
