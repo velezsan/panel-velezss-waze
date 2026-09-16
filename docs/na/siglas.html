@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Siglas por revisar · velezss NA</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#171e2e; --panel2:#1d2639; --line:#2a3550;
+    --text:#e8ecf4; --muted:#93a0b8; --accent:#4da3ff; --accent2:#7fd18c; --warn:#ffb454;
+    --no:#ff8a8a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.45}
+  header{padding:24px 20px 8px;max-width:980px;margin:0 auto}
+  h1{margin:0 0 4px;font-size:1.3rem;font-weight:700}
+  .sub{color:var(--muted);font-size:.92rem;margin:0}
+  .sub a{color:var(--accent);text-decoration:none}
+  main{max-width:980px;margin:0 auto;padding:14px 20px 60px}
+  .barra{height:6px;background:var(--panel2);border-radius:99px;overflow:hidden;margin:14px 0 6px}
+  .barra i{display:block;height:100%;background:var(--accent);width:0;transition:width .2s}
+  .cuenta{color:var(--muted);font-size:.86rem;margin-bottom:14px}
+  .tarjeta{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 22px 18px}
+  .sigla{font-size:2.1rem;font-weight:800;letter-spacing:.02em;margin:0 0 2px;
+         font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .veces{color:var(--muted);font-size:.9rem;margin:0 0 16px}
+  .ej{border-top:1px solid var(--line);padding:9px 0;font-size:.93rem;
+      display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .ej .nom{font-weight:600}
+  .ej .fl{color:var(--muted)}
+  .ej .sug{color:#ffd9a0}
+  .ej .edo{color:var(--muted);font-size:.8rem;background:#243049;border-radius:6px;padding:1px 7px}
+  .ej a{color:var(--accent);text-decoration:none;font-size:.84rem;margin-left:auto;white-space:nowrap}
+  .acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+  button{font-family:inherit;font-size:.95rem;border-radius:9px;padding:11px 18px;cursor:pointer;
+         border:1px solid var(--line);background:var(--panel2);color:var(--text);font-weight:600}
+  button:hover{filter:brightness(1.15)}
+  button.si{background:var(--accent2);color:#07200f;border-color:transparent}
+  button.no{background:#3a1e22;color:var(--no);border-color:#5c2b30}
+  button.chico{font-weight:400;font-size:.86rem;padding:8px 13px}
+  .teclas{color:var(--muted);font-size:.8rem;margin-top:10px}
+  .listas{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:26px}
+  .caja{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .caja h3{margin:0 0 8px;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .caja textarea{width:100%;min-height:92px;background:var(--panel2);color:var(--text);
+        border:1px solid var(--line);border-radius:8px;padding:9px;font-size:.88rem;resize:vertical;
+        font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .caja .pie{display:flex;gap:8px;align-items:center;margin-top:9px;flex-wrap:wrap}
+  .caja .pie span{color:var(--muted);font-size:.82rem}
+  .fin{text-align:center;color:var(--muted);padding:34px 10px}
+  .fin b{color:var(--accent2);font-size:1.05rem}
+  .cargando{color:var(--muted);padding:40px;text-align:center}
+  .nota{color:var(--muted);font-size:.85rem;margin-top:18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔠 Siglas por revisar</h1>
+  <p class="sub">Una por una: las mayúsculas que la corrección de nombres aplastaría ·
+    <a href="places.html">← Places mal escritos</a> ·
+    <a href="index.html">Panel</a></p>
+</header>
+<main>
+  <div class="barra"><i id="barra"></i></div>
+  <div class="cuenta" id="cuenta">Cargando…</div>
+  <div id="tarjeta"><div class="cargando">Cargando siglas…</div></div>
+
+  <div class="listas">
+    <div class="caja">
+      <h3>✅ Van en mayúsculas</h3>
+      <textarea id="lista-si" readonly placeholder="Todavía no marcas ninguna."></textarea>
+      <div class="pie">
+        <button class="chico" id="copiar-si">Copiar</button>
+        <button class="chico" id="borrar-si">Vaciar</button>
+        <span id="n-si"></span>
+      </div>
+    </div>
+    <div class="caja">
+      <h3>❌ No son siglas (la corrección está bien)</h3>
+      <textarea id="lista-no" readonly placeholder="Todavía no descartas ninguna."></textarea>
+      <div class="pie">
+        <button class="chico" id="copiar-no">Copiar</button>
+        <button class="chico" id="borrar-no">Vaciar</button>
+        <span id="n-no"></span>
+      </div>
+    </div>
+  </div>
+
+  <p class="nota">Cada tarjeta es una palabra que aparece en mayúsculas en el nombre de un place y que la
+    corrección dejaría en minúsculas. Si la palabra debe quedarse como está, dale a «Sí»: se va a la lista
+    de la izquierda, que es la que me pasas para meterla al script. Si la corrección es la buena, dale a
+    «No» y no la vuelves a ver. Lo que decidas se guarda en este navegador, así que puedes cerrar y seguir
+    después. La cuenta de cada sigla es cuántos places la traen; los ejemplos abren el editor en ese punto.
+    La lista se rehace con cada corrida del escáner: las siglas que ya metimos al script desaparecen solas.</p>
+</main>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const CLAVE='svs_siglas_na';
+  let datos=null, orden=[], pos=0, decision={};
+  try{decision=JSON.parse(localStorage.getItem(CLAVE)||'{}');}catch(e){decision={};}
+  const guardar=()=>{try{localStorage.setItem(CLAVE,JSON.stringify(decision));}catch(e){}};
+  const permalink=e=>`https://www.waze.com/editor?env=usa&lat=${e.lat}&lon=${e.lon}&zoomLevel=18&venues=${e.id}`;
+
+  function pendientes(){ return orden.filter(t=>!decision[t]); }
+
+  function pintar(){
+    const pend=pendientes();
+    const total=orden.length, hechas=total-pend.length;
+    $('barra').style.width=total?(100*hechas/total)+'%':'0';
+    $('cuenta').textContent=total
+      ? `${hechas} de ${total} revisadas · quedan ${pend.length}`
+      : 'Todavía no hay siglas marcadas.';
+    pintarListas();
+    if(!pend.length){
+      $('tarjeta').innerHTML=total
+        ? '<div class="fin"><b>Listo, no queda ninguna.</b><br>Pásame la lista de la izquierda y las meto al script.</div>'
+        : '<div class="fin">Sin siglas por revisar por ahora. La lista se llena con las corridas del escáner.</div>';
+      return;
+    }
+    if(pos>=pend.length)pos=0;
+    if(pos<0)pos=pend.length-1;
+    const tok=pend[pos], d=datos.siglas[tok];
+    const ejs=(d.ej||[]).map(e=>`<div class="ej">
+        <span class="nom">${esc(e.nom)||'<i>sin nombre</i>'}</span>
+        <span class="fl">→</span><span class="sug">${esc(e.sug)}</span>
+        ${e.edo?'<span class="edo">'+esc(e.edo)+'</span>':''}
+        <a target="wme" href="${permalink(e)}">Abrir en WME</a></div>`).join('');
+    $('tarjeta').innerHTML=`<div class="tarjeta">
+      <p class="sigla">${esc(tok)}</p>
+      <p class="veces">${d.n} ${d.n===1?'place la trae':'places la traen'}${d.n>(d.ej||[]).length?' · se muestran '+(d.ej||[]).length:''}</p>
+      ${ejs}
+      <div class="acciones">
+        <button class="si" data-v="si">✅ Sí, va en mayúsculas</button>
+        <button class="no" data-v="no">❌ No, la corrección está bien</button>
+        <button class="chico" data-v="saltar">Saltar</button>
+        <button class="chico" data-v="atras">← Anterior</button>
+      </div>
+      <p class="teclas">Atajos: <b>S</b> sí · <b>N</b> no · <b>→</b> saltar · <b>←</b> anterior</p>
+    </div>`;
+  }
+
+  function pintarListas(){
+    const si=orden.filter(t=>decision[t]==='si');
+    const no=orden.filter(t=>decision[t]==='no');
+    $('lista-si').value=si.join(', ');
+    $('lista-no').value=no.join(', ');
+    $('n-si').textContent=si.length?si.length+' siglas':'';
+    $('n-no').textContent=no.length?no.length+' palabras':'';
+  }
+
+  function decidir(v){
+    const pend=pendientes();
+    if(!pend.length)return;
+    const tok=pend[pos];
+    if(v==='si'||v==='no'){ decision[tok]=v; guardar(); }
+    else if(v==='saltar'){ pos++; }
+    else if(v==='atras'){ pos--; }
+    pintar();
+  }
+
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('button[data-v]');
+    if(b){decidir(b.dataset.v);return;}
+    const c=e.target.closest('#copiar-si,#copiar-no');
+    if(c){
+      const ta=$(c.id==='copiar-si'?'lista-si':'lista-no');
+      ta.select();
+      const ok=()=>{const t=c.textContent;c.textContent='¡Copiado!';setTimeout(()=>c.textContent=t,1200);};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(ta.value).then(ok,()=>{try{document.execCommand('copy');ok();}catch(_){}});
+      }else{try{document.execCommand('copy');ok();}catch(_){}}
+      return;
+    }
+    const v=e.target.closest('#borrar-si,#borrar-no');
+    if(v){
+      const cual=v.id==='borrar-si'?'si':'no';
+      orden.forEach(t=>{if(decision[t]===cual)delete decision[t];});
+      guardar();pos=0;pintar();
+    }
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT')return;
+    const k=e.key.toLowerCase();
+    if(k==='s'){decidir('si');e.preventDefault();}
+    else if(k==='n'){decidir('no');e.preventDefault();}
+    else if(e.key==='ArrowRight'){decidir('saltar');e.preventDefault();}
+    else if(e.key==='ArrowLeft'){decidir('atras');e.preventDefault();}
+  });
+
+  fetch('../data-na/places/siglas.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{
+      datos=d;
+      orden=Object.keys(d.siglas||{}).sort((a,b)=>
+        (d.siglas[b].n-d.siglas[a].n)||a.localeCompare(b,'es'));
+      pintar();
+    })
+    .catch(()=>{
+      $('tarjeta').innerHTML='<div class="cargando">La lista se arma con las corridas del escáner. Si esta sección es nueva, estará lista después de la próxima corrida.</div>';
+      $('cuenta').textContent='';
+    });
+})();
+</script>
+</body>
+</html>
