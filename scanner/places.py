@@ -105,6 +105,7 @@ ALLOWED = {
     "AM", "PM", "SA", "CV", "SC", "AC", "SAPI", "LLC", "INC", "SOS", "IAP", "MG", "RTP", "AT&T",
     # las va agregando Santiago conforme salen en el panel
     "ES", "UAS", "ABL", "CEDIS", "CMD", "HNI", "INNOTEC", "MIT", "DSPM", "HGSZMF",
+    "ABC", "CAM", "FMA", "CEA",
 }
 
 # Categorías donde una calle no aplica: son accidentes geográficos y obras, no

@@ -25,7 +25,6 @@ PARES = [
     ("AT&T", "AT&T"), ("at&t Plaza", "AT&T Plaza"),
     # --- siglas con puntos
     ("S.A. de C.V.", "S.A. de C.V."),
-    ("Industrias ABC S.A. de C.V.", "Industrias Abc S.A. de C.V."),
     ("C.F.E.", "C.F.E."), ("cfe", "CFE"),
     ("D.H.L", "DHL"),
     ("I.N.A.H. Centro regional de Jalisco", "INAH Centro Regional de Jalisco"),
@@ -163,6 +162,12 @@ MEJORAS = [
     ("Cargogas", "Cargogas", "Cargo Gas"),
     ("CARGOGAS Norte", "Cargogas Norte", "Cargo Gas Norte"),
     ("FIRSTCASH", "Firstcash", "FirstCash"),
+    # siglas que Santiago fue aprobando: ya no se aplastan
+    ("Industrias ABC S.A. de C.V.", "Industrias Abc S.A. de C.V.",
+     "Industrias ABC S.A. de C.V."),
+    ("Súper y Carnes ABC", "Súper y Carnes Abc", "Súper y Carnes ABC"),
+    ("CAM No. 5 Héroes Coahuilenses", "Cam No. 5 Héroes Coahuilenses",
+     "CAM No. 5 Héroes Coahuilenses"),
 ]
 
 # Lo ya bien escrito no debe cambiar al volver a pasarlo (idempotencia).

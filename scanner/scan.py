@@ -1842,7 +1842,8 @@ def main():
                 "sin_dir": len([1 for p in plcs.values() if p.get("sd")]),
             })
         for fn in os.listdir(PLACES_DIR):
-            if fn.endswith(".json") and fn[:-5] != "index" and fn[:-5] not in slugs_pl:
+            if (fn.endswith(".json") and fn[:-5] not in ("index", "siglas")
+                    and fn[:-5] not in slugs_pl):
                 os.remove(os.path.join(PLACES_DIR, fn))
         save_json(os.path.join(PLACES_DIR, "index.json"), {
             "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -1850,6 +1851,26 @@ def main():
             "orto": sum(e["orto"] for e in lista_pl),
             "sin_dir": sum(e["sin_dir"] for e in lista_pl),
             "estados": lista_pl,
+        }, compact=True)
+        # resumen de las mayúsculas que la corrección aplastaría, con ejemplos:
+        # es lo que Santiago revisa una por una para curar la lista de siglas
+        siglas_pl = {}
+        for est_pl, plcs in sorted(places_por_estado.items()):
+            for p_pl in plcs.values():
+                for sg in p_pl.get("sig") or []:
+                    e_sg = siglas_pl.setdefault(sg, {"n": 0, "ej": []})
+                    e_sg["n"] += 1
+                    if len(e_sg["ej"]) < 6:
+                        e_sg["ej"].append({
+                            "id": p_pl["id"], "nom": p_pl.get("nom", ""),
+                            "sug": p_pl.get("sug", ""), "edo": est_pl,
+                            "lat": p_pl["lat"], "lon": p_pl["lon"],
+                        })
+        save_json(os.path.join(PLACES_DIR, "siglas.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "total": len(siglas_pl),
+            "casos": sum(v["n"] for v in siglas_pl.values()),
+            "siglas": siglas_pl,
         }, compact=True)
         return resumen
 
