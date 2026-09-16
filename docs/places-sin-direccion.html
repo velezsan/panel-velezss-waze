@@ -163,8 +163,14 @@
     filtrar();
   }
 
+  // ríos, lagunas, puentes y demás: ahí no aplica una calle. El escáner ya no
+  // los junta, y esto además limpia lo que quedó publicado antes del cambio.
+  const EXENTAS=new Set(['RIVER_STREAM','SEA_LAKE_POOL','CANAL','DAM','ISLAND','FOREST_GROVE',
+    'SWAMP_MARSH','HILL_MOUNTAIN','BEACH','TUNNEL','BRIDGE','JUNCTION_INTERCHANGE',
+    'RAILROAD_CROSSING','SCENIC_LOOKOUT_VIEWPOINT']);
   // solo los de esta regla: los que no traen calle
-  const sinCalle=()=>Object.values((datos&&datos.places)||{}).filter(p=>p.sd);
+  const sinCalle=()=>Object.values((datos&&datos.places)||{})
+    .filter(p=>p.sd&&!(p.cat||[]).some(c=>EXENTAS.has(c)));
 
   function filtrar(){
     if(!datos)return;
