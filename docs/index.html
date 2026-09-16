@@ -152,6 +152,11 @@
         <div class="d">Places sin calle, o con una calle sin nombre: no se encuentran por dirección.</div>
         <div class="n" id="n-places-sd"></div>
       </a>
+      <a class="seccion" href="siglas.html">
+        <div class="t">🔠 Siglas por revisar</div>
+        <div class="d">Las mayúsculas que la corrección aplastaría, una por una, para curar la lista.</div>
+        <div class="n" id="n-siglas"></div>
+      </a>
       <a class="seccion" href="comentarios.html">
         <div class="t">💬 Comentarios de mapa</div>
         <div class="d">Notas del mapa con asunto, descripción, bloqueo, creador y último editor.</div>
@@ -238,6 +243,11 @@
       pon('n-places-sd', fmt(d.sin_dir||0)+' places en '+((d.estados||[]).filter(e=>e.sin_dir>0).length)+' estados');
     })
     .catch(()=>{ pon('pl-orto','—'); pon('pl-sd','—'); pon('n-places','sin datos todavía'); pon('n-places-sd','sin datos todavía'); });
+
+  fetch('data/places/siglas.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{ pon('n-siglas', fmt(d.total||0)+' palabras por decidir'); })
+    .catch(()=>{ pon('n-siglas','sin datos todavía'); });
 
   fetch('data/comentarios/index.json',{cache:'no-store'})
     .then(r=>{if(!r.ok)throw 0;return r.json();})
