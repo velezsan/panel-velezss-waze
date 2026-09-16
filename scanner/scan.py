@@ -29,6 +29,2269 @@ except ImportError:
     print("Falta la librería 'requests' (pip install requests)", file=sys.stderr)
     sys.exit(1)
 
+# reglas de los places (ortografía y sin dirección): viven en places.py
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from places import fix_grammar, necesita_correccion, siglas_aplastadas
+
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CONFIG_PATH = os.path.join(BASE, "scanner", "config.json")
+GEOJSON_PATH = os.path.join(BASE, "scanner", "mx_estados.geojson")
+STATE_PATH = os.path.join(BASE, "state", "scan_state.json")
+LASTRUN_PATH = os.path.join(BASE, "state", "last_run.json")
+DEBUG_PATH = os.path.join(BASE, "state", "debug_ultimo_error.txt")
+DATA_DIR = os.path.join(BASE, "docs", "data")
+ESTADOS_DIR = os.path.join(DATA_DIR, "estados")
+CANDADOS_DIR = os.path.join(DATA_DIR, "candados")
+PASES_DIR = os.path.join(DATA_DIR, "pases")
+COMENTARIOS_DIR = os.path.join(DATA_DIR, "comentarios")
+ORTOGRAFIA_DIR = os.path.join(DATA_DIR, "ortografia")
+VELOCIDADES_DIR = os.path.join(DATA_DIR, "velocidades")
+PLACES_DIR = os.path.join(DATA_DIR, "places")
+PALABRAS_PATH = os.path.join(BASE, "scanner", "palabras_mal_escritas.json")
+
+# Servidores del WME. México vive en el entorno "row" (Rest of World).
+# El parámetro sandbox=true es el que usa el modo práctica: permite leer
+# los datos del mapa sin iniciar sesión.
+ENDPOINTS = {
+    "row": "https://www.waze.com/row-Descartes/app/Features",
+    "usa": "https://www.waze.com/Descartes/app/Features",
+}
+ORDEN_ENTORNOS = ("row", "usa")
+EDITOR_PAGES = {
+    "usa": "https://www.waze.com/editor?env=usa",
+    "row": "https://www.waze.com/editor?env=row",
+}
+
+HEADERS = {
+    "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                   "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"),
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "Accept-Language": "es-MX,es;q=0.9,en;q=0.8",
+    "Referer": "https://www.waze.com/editor",
+    "X-Requested-With": "XMLHttpRequest",
+}
+
+# Tipos de vía que DEBEN tener nombre (los demás pueden ir sin nombre):
+# 1 Calle (ST), 2 Avenida principal (PS)
+ROAD_TYPE_NAMES = {
+    1: "Calle", 2: "Avenida principal", 3: "Autopista", 4: "Rampa",
+    5: "Sendero peatonal", 6: "Carretera mayor", 7: "Carretera menor",
+    8: "Terracería", 10: "Andador", 15: "Ferry", 16: "Escaleras",
+    17: "Camino privado", 18: "Vía de tren", 19: "Pista de aterrizaje",
+    20: "Camino de estacionamiento", 22: "Callejón",
+}
+
+BBOX_PRUEBA = [-103.43, 20.655, -103.28, 20.695]  # Guadalajara centro (triple)
+
+# Línea fronteriza México-EUA (aprox). Cerca de ella hay una franja cuyos
+# datos viven en el servidor NA; esas celdas se verifican contra ambos.
+FRONTERA_USA = [
+    (-117.13, 32.54), (-114.72, 32.72), (-111.07, 31.33), (-108.21, 31.33),
+    (-108.21, 31.78), (-106.53, 31.79), (-104.92, 30.61), (-104.40, 29.57),
+    (-103.11, 29.03), (-102.40, 29.85), (-101.40, 29.77), (-100.96, 29.35),
+    (-99.51, 27.60), (-99.11, 26.42), (-98.20, 26.06), (-97.14, 25.87),
+]
+
+
+def distancia_a_frontera(lon, lat):
+    """Distancia aproximada (en grados) del punto a la frontera con EUA."""
+    best = 1e9
+    for (x1, y1), (x2, y2) in zip(FRONTERA_USA, FRONTERA_USA[1:]):
+        dx, dy = x2 - x1, y2 - y1
+        den = dx * dx + dy * dy
+        t = 0.0 if den == 0 else max(0.0, min(1.0, ((lon - x1) * dx + (lat - y1) * dy) / den))
+        px, py = x1 + t * dx, y1 + t * dy
+        d = ((lon - px) ** 2 + (lat - py) ** 2) ** 0.5
+        if d < best:
+            best = d
+    return best
+
+# ------------------------------------------------------------- INEGI (GAIA)
+# Réplica de la consulta del script "WME INEGI GAIA": WMS GetFeatureInfo
+# sobre la capa de vialidades c112, en hasta 5 puntos del segmento.
+INEGI_WMS = "https://gaia.inegi.org.mx/NLB/tunnel/wms/wms61"
+INEGI_LAYER = "c112"
+# Celdas que fallan al pedirlas al WME: cuánto esperar antes de reintentarlas
+# y cuántos intentos se hacen dentro de una misma corrida.
+ESPERA_REINTENTO = 600
+MAX_INTENTOS = 3
+# Tope de celdas rezagadas que se recogen al arrancar, para que una corrida no
+# se vaya entera en reintentos si alguna vez se acumulan muchas.
+MAX_REZAGADAS = 200
+
+INEGI_DELTA = 0.00004
+
+BLACKLIST_INEGI = {
+    "calle", "calles", "avenida", "av", "privada", "priv", "cda", "cerrada",
+    "retorno", "andador", "vialidad", "vialidades", "no", "si", "null", "s/n",
+    "sin nombre", "callejón", "bulevar", "boulevard", "blvd", "camino",
+    "carretera", "autopista", "periférico", "circuito", "viaducto", "calzada",
+    "prolongación", "diagonal", "paseo", "0", "1",
+    "mapserver", "inegi", "nombre", "nomvial", "tipovial", "texto",
+    "objectid", "shape", "length", "cvegeo", "shape_length",
+    "the_geom", "cve_mun", "cve_loc", "cve_ent", "ambito", "ninguno",
+}
+
+RE_TH_TD = re.compile(r"<th[^>]*>([\s\S]*?)</th>\s*<td[^>]*>([\s\S]*?)</td>", re.I)
+RE_TD = re.compile(r"<td[^>]*>([\s\S]*?)</td>", re.I)
+RE_TAGS = re.compile(r"<[^>]+>")
+
+_MINUSCULAS = {"de", "del", "la", "las", "los", "el", "en", "y", "a", "e", "o", "u"}
+
+
+def _title_case(texto):
+    """Réplica de toTitleCase de GAIA (minúsculas conectoras, romanos en alta)."""
+    palabras = texto.lower().split()
+    out = []
+    for i, w in enumerate(palabras):
+        if i > 0 and w in _MINUSCULAS:
+            out.append(w)
+        elif re.fullmatch(r"[ivxlcdm]{2,7}", w):
+            out.append(w.upper())
+        else:
+            out.append(w[:1].upper() + w[1:])
+    return " ".join(out)
+
+
+def _normalizar_nombre(nombre):
+    """Réplica de normalizeStreetName de GAIA ("31"→"Calle 31", Avenida→Av., etc.)."""
+    if not nombre:
+        return nombre
+    t = nombre.strip()
+    t = re.sub(r"^C\.?\s+", "", t, flags=re.I)
+    t = re.sub(r"^Avenida\b", "Av.", t, flags=re.I)
+    t = re.sub(r"^Boulevard\b", "Blvd.", t, flags=re.I)
+    t = re.sub(r"\bGeneral\b", "Gral.", t, flags=re.I)
+    t = re.sub(r"\bPriv\.?\b", "Privada", t, flags=re.I)
+    t = re.sub(r"^(\d+)(?:ta|da|ra|va|na|ma)\.?\b", r"\1a.", t, flags=re.I)
+    t = re.sub(r"^(\d+)(?:to|do|ro|vo|no|mo|er)\.?\b", r"\1o.", t, flags=re.I)
+    if not re.match(r"^\d", t):
+        return t
+    if re.match(r"^\d+[ao]\.\s", t) or re.fullmatch(r"\d+[ao]\.", t):
+        return t
+    m = re.match(r"^(\d+-[A-Za-z0-9]*)\s*(.*)$", t) or re.match(r"^(\d+)\s*(.*)$", t)
+    if not m:
+        return t
+    num, resto = m.group(1), (m.group(2) or "").strip()
+    if re.match(r"^de\b", resto, flags=re.I):
+        return t
+    if not resto:
+        return "Calle " + num
+    return "Calle " + num + " " + resto
+
+
+def _limpiar_valor(val, nombres, vistos):
+    """Réplica de addClean de GAIA: filtra IDs, coordenadas y palabras basura."""
+    if not val or len(val) > 100:
+        return
+    v = val.strip()
+    if re.match(r"^\d+\.\d{4,}", v):
+        return  # coordenadas
+    if re.fullmatch(r"\d{4,}", v):
+        return  # IDs numéricos largos
+    if re.fullmatch(r"\d+\s+[A-Za-z]", v) and int(re.match(r"^\d+", v).group()) > 999:
+        return
+    if v.lower() in BLACKLIST_INEGI:
+        return
+    if re.search(r"mapserver|inegi|objectid|shape_len|cvegeo", v, flags=re.I):
+        return
+    limpio = _normalizar_nombre(_title_case(v))
+    if not limpio or len(limpio) < 2:
+        return
+    if re.fullmatch(r"[A-Za-z]{1,3}\d+", limpio):
+        return  # códigos tipo "A1"
+    m = re.match(r"^Calle (\d+)", limpio)
+    if m and int(m.group(1)) > 999:
+        return
+    if limpio.lower() not in vistos:
+        vistos.add(limpio.lower())
+        nombres.append(limpio)
+
+
+def parse_wms(html):
+    """Réplica de parseWMS de GAIA: extrae nombres de vialidad del HTML."""
+    if not html or len(html) < 30:
+        return []
+    nombres, vistos = [], set()
+    for m in RE_TH_TD.finditer(html):
+        header = RE_TAGS.sub("", m.group(1)).strip().lower()
+        val = RE_TAGS.sub("", m.group(2)).strip()
+        if (header in ("nomvial", "nombre", "nom_calle", "nombre_vialidad", "nom_vial")
+                or re.search(r"vial", header, flags=re.I)
+                or re.match(r"^nom_?v", header, flags=re.I)
+                or re.match(r"^nombre", header, flags=re.I)):
+            _limpiar_valor(val, nombres, vistos)
+    if not nombres:
+        for m in RE_TD.finditer(html):
+            _limpiar_valor(RE_TAGS.sub("", m.group(1)).strip(), nombres, vistos)
+    # si un nombre es prefijo de otro más largo, gana el más específico
+    filtrados = []
+    for f, nf in enumerate(nombres):
+        es_prefijo = any(
+            g != f and ng.lower().startswith(nf.lower()) and len(ng) > len(nf)
+            for g, ng in enumerate(nombres)
+        )
+        if not es_prefijo:
+            filtrados.append(nf)
+    return filtrados
+
+
+# etiquetas que usa el INEGI cuando no tiene el nombre de la vialidad
+_RE_SIN_NOMBRE = re.compile(
+    r"ninguno|sin nombre|no disponible|no aplica|"
+    r"n\s?/\s?[ad]|n\s?\.?\s?d\s?\.?|s\s?/\s?[dn]",
+    flags=re.I)
+
+
+def _nombre_invalido(n):
+    return bool(_RE_SIN_NOMBRE.fullmatch((n or "").strip()))
+
+
+def puntos_consulta(coords):
+    """Réplica de getQueryPoints: inicio, ¼, mitad, ¾ y fin de la geometría."""
+    n = len(coords)
+    if n == 0:
+        return []
+    if n == 1:
+        return [coords[0]]
+    indices = [0]
+    if n > 2:
+        indices.append(int(n * 0.25))
+    indices.append(int(n * 0.5))
+    if n > 2:
+        indices.append(int(n * 0.75))
+    indices.append(n - 1)
+    unicos, vistos = [], set()
+    for i in indices:
+        i = min(i, n - 1)
+        if i not in vistos:
+            vistos.add(i)
+            unicos.append(coords[i])
+    return unicos
+
+
+class ConsultorINEGI:
+    """Consulta el WMS del INEGI con caché por coordenada y pausa entre llamadas."""
+
+    def __init__(self, pausa=0.15):
+        self.sesion = requests.Session()
+        self.sesion.headers.update({"User-Agent": HEADERS["User-Agent"]})
+        self.cache = {}
+        self.pausa = pausa
+        self.peticiones = 0
+        self.errores = 0
+
+    def nombres_en(self, lon, lat):
+        key = (round(lon, 6), round(lat, 6))
+        if key in self.cache:
+            return self.cache[key]
+        # 7 decimales, igual que el script GAIA de Santiago. Con 6 el bbox
+        # queda corrido unos centímetros y el INEGI llega a devolver también
+        # la calle que cruza, lo que inflaba la confianza (el 290671259 salía
+        # al 100% cuando en realidad es 50%). Medido en 24 puntos: mismos
+        # nombres con 6 y con 7 decimales, salvo justo esos casos de borde.
+        bbox = (f"{lon - INEGI_DELTA:.7f},{lat - INEGI_DELTA:.7f},"
+                f"{lon + INEGI_DELTA:.7f},{lat + INEGI_DELTA:.7f}")
+        params = {
+            "SERVICE": "WMS", "VERSION": "1.1.1", "REQUEST": "GetFeatureInfo",
+            "LAYERS": INEGI_LAYER, "QUERY_LAYERS": INEGI_LAYER,
+            "SRS": "EPSG:4326", "BBOX": bbox,
+            "WIDTH": "5", "HEIGHT": "5", "X": "2", "Y": "2",
+            "INFO_FORMAT": "text/html", "FEATURE_COUNT": "5",
+        }
+        time.sleep(self.pausa)
+        self.peticiones += 1
+        try:
+            r = self.sesion.get(INEGI_WMS, params=params, timeout=10)
+            r.encoding = "utf-8"  # el INEGI responde UTF-8 sin declararlo
+            if r.status_code != 200:
+                self.errores += 1
+                return None  # no contestó: distinto de "contestó y no hay nombre"
+            nombres = parse_wms(r.text)
+            self.cache[key] = nombres
+            return nombres
+        except requests.RequestException:
+            self.errores += 1
+            return None
+
+    def sugerir(self, coords):
+        """Réplica del flujo por etapas de GAIA con aborto temprano.
+
+        Devuelve (nombre, confianza 0-100, empatado, falló_el_inegi). La
+        confianza es el % de puntos del segmento donde el INEGI regresó ese
+        mismo nombre.
+        """
+        pts = puntos_consulta(coords)
+        if not pts:
+            return "", 0, False, False
+        total = len(pts)
+        conteo = {}
+        candidatos = None
+        fallo = False
+        for i, p in enumerate(pts):
+            nombres = self.nombres_en(p[0], p[1])
+            if i == 0 and nombres == []:
+                # la sonda regresó vacío: puede ser zona sin cobertura o un
+                # rechazo silencioso del INEGI; reintentamos una vez
+                self.cache.pop((round(p[0], 6), round(p[1], 6)), None)
+                time.sleep(max(self.pausa, 0.4))
+                nombres = self.nombres_en(p[0], p[1])
+            if nombres is None:  # el INEGI no contestó
+                fallo = True
+                break
+            for n in nombres:
+                conteo[n] = conteo.get(n, 0) + 1
+            validos = [n for n in nombres if not _nombre_invalido(n)]
+            if candidatos is None:
+                candidatos = validos
+            else:
+                lset = {n.lower() for n in validos}
+                candidatos = [n for n in candidatos if n.lower() in lset]
+            if not candidatos:
+                break  # el 100% ya es imposible (o zona sin cobertura): abortar
+        mejor, mejor_n = None, 0
+        for n, c in conteo.items():
+            if not _nombre_invalido(n) and c > mejor_n:
+                mejor, mejor_n = n, c
+        conf = round(100.0 * mejor_n / total) if mejor else 0
+        perfectos = sum(1 for n, c in conteo.items()
+                        if not _nombre_invalido(n) and round(100.0 * c / total) >= 100)
+        return (mejor or "", conf, perfectos > 1, fallo)
+
+
+# ---------------------------------------------------------------- utilidades
+def log(msg):
+    print(f"[{datetime.now(timezone.utc).strftime('%H:%M:%S')}] {msg}", flush=True)
+
+
+def slugify(text):
+    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+    text = re.sub(r"[^a-zA-Z0-9]+", "-", text).strip("-").lower()
+    return text or "sin-estado"
+
+
+def load_json(path, default):
+    if os.path.exists(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return default
+    return default
+
+
+def save_json(path, data, compact=False):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        if compact:
+            json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+        else:
+            json.dump(data, f, ensure_ascii=False, indent=1)
+
+
+# ------------------------------------------------- estados (punto en polígono)
+class EstadosMX:
+    """Determina el estado mexicano de una coordenada (ray casting)."""
+
+    def __init__(self, geojson_path):
+        gj = load_json(geojson_path, {"features": []})
+        self.features = []
+        for f in gj.get("features", []):
+            name = f.get("properties", {}).get("name", "¿?")
+            geom = f.get("geometry", {})
+            polys = []
+            if geom.get("type") == "Polygon":
+                polys = [geom["coordinates"]]
+            elif geom.get("type") == "MultiPolygon":
+                polys = geom["coordinates"]
+            rings = []
+            for poly in polys:
+                if poly:
+                    ring = poly[0]  # anillo exterior
+                    xs = [p[0] for p in ring]
+                    ys = [p[1] for p in ring]
+                    rings.append((min(xs), min(ys), max(xs), max(ys), ring))
+            self.features.append((name, rings))
+        self._cache = {}
+
+    @staticmethod
+    def _inside(lon, lat, ring):
+        n = len(ring)
+        inside = False
+        j = n - 1
+        for i in range(n):
+            xi, yi = ring[i][0], ring[i][1]
+            xj, yj = ring[j][0], ring[j][1]
+            if (yi > lat) != (yj > lat):
+                x_cross = (xj - xi) * (lat - yi) / (yj - yi) + xi
+                if lon < x_cross:
+                    inside = not inside
+            j = i
+        return inside
+
+    def estado_de(self, lon, lat):
+        key = (round(lon, 3), round(lat, 3))
+        if key in self._cache:
+            return self._cache[key]
+        found = None
+        for name, rings in self.features:
+            for (minx, miny, maxx, maxy, ring) in rings:
+                if minx <= lon <= maxx and miny <= lat <= maxy and self._inside(lon, lat, ring):
+                    found = name
+                    break
+            if found:
+                break
+        if not found:
+            # punto fuera de todo polígono (costa, frontera): el más cercano por bbox
+            best, bestd = None, 1e9
+            for name, rings in self.features:
+                for (minx, miny, maxx, maxy, _r) in rings:
+                    cx, cy = (minx + maxx) / 2, (miny + maxy) / 2
+                    d = (cx - lon) ** 2 + (cy - lat) ** 2
+                    if d < bestd:
+                        bestd, best = d, name
+            found = best or "Sin estado"
+        self._cache[key] = found
+        return found
+
+    def dentro_de_alguno(self, lon, lat):
+        """True solo si el punto cae DENTRO de algún estado (sin 'más cercano')."""
+        key = ("in", round(lon, 3), round(lat, 3))
+        if key in self._cache:
+            return self._cache[key]
+        res = False
+        for _name, rings in self.features:
+            for (minx, miny, maxx, maxy, ring) in rings:
+                if minx <= lon <= maxx and miny <= lat <= maxy and self._inside(lon, lat, ring):
+                    res = True
+                    break
+            if res:
+                break
+        self._cache[key] = res
+        return res
+
+
+# ------------------------------------------------------------------ API Waze
+class AuthError(Exception):
+    pass
+
+
+class AreaError(Exception):
+    pass
+
+
+def nueva_sesion(env):
+    s = requests.Session()
+    s.headers.update(HEADERS)
+    try:  # visita la página del editor (modo práctica) para obtener cookies
+        s.get(EDITOR_PAGES[env], timeout=30)
+    except requests.RequestException:
+        pass
+    return s
+
+
+_RE_TOKEN = re.compile(r"[0-9A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+")
+
+
+def _plano(s):
+    """Minúsculas, sin acentos y con la eñe vuelta n."""
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    return s.replace("ñ", "n").replace("Ñ", "N").lower()
+
+
+def revisar_ortografia(nombre):
+    """Busca palabras mal escritas en un nombre de calle.
+
+    Devuelve (sugerencia, [palabras corregidas]); ("", []) si no hay nada que
+    corregir. Respeta las mayúsculas del original: JUAREZ -> JUÁREZ,
+    Juarez -> Juárez, juarez -> juárez.
+    """
+    if not nombre or not PALABRAS_MAL:
+        return "", []
+    encontradas = []
+
+    def _cambia(m):
+        t = m.group(0)
+        # se busca sin acentos ni eñes, para cazar también las medio corregidas
+        # (Zuñiga, que tiene la eñe pero le falta el acento de Zúñiga)
+        bien = PALABRAS_MAL.get(_plano(t))
+        if not bien:
+            return t
+        if t.isupper() and len(t) > 1:
+            nuevo = bien.upper()
+        elif t[0].isupper():
+            nuevo = bien[0].upper() + bien[1:]
+        else:
+            nuevo = bien.lower()
+        if nuevo == t:  # ya estaba bien escrita
+            return t
+        encontradas.append(bien)
+        return nuevo
+
+    sug = _RE_TOKEN.sub(_cambia, nombre)
+    if not encontradas or sug == nombre:
+        return "", []
+    return sug, encontradas
+
+
+def _fecha_corta(v):
+    """Waze mezcla epoch en milisegundos y texto; devuelve AAAA-MM-DD."""
+    if isinstance(v, (int, float)) and v > 0:
+        try:
+            return datetime.fromtimestamp(v / 1000, timezone.utc).strftime("%Y-%m-%d")
+        except (ValueError, OSError, OverflowError):
+            return ""
+    if isinstance(v, str) and len(v) >= 10:
+        return v[:10]
+    return ""
+
+
+def centro_geometria(geo):
+    """Promedio de los vértices de una geometría (punto, línea o polígono)."""
+    puntos = []
+    def _rec(v):
+        if isinstance(v, (list, tuple)):
+            if len(v) == 2 and all(isinstance(x, (int, float)) for x in v):
+                puntos.append((float(v[0]), float(v[1])))
+            else:
+                for x in v:
+                    _rec(x)
+    if isinstance(geo, dict):
+        _rec(geo.get("coordinates"))
+    if not puntos:
+        return None, None
+    return (sum(p[0] for p in puntos) / len(puntos),
+            sum(p[1] for p in puntos) / len(puntos))
+
+
+def _objetos(data, clave):
+    v = data.get(clave)
+    if isinstance(v, dict):
+        v = v.get("objects", [])
+    if not isinstance(v, list):
+        return []
+    out = []
+    for o in v:
+        if isinstance(o, dict) and "attributes" in o and isinstance(o["attributes"], dict):
+            merged = dict(o["attributes"])
+            merged.setdefault("id", o.get("id"))
+            out.append(merged)
+        else:
+            out.append(o)
+    return out
+
+
+def pedir_celda(sesion, env, bbox, pausa, tipos=None):
+    """Pide los features de un bbox. Devuelve dict con segments/streets/cities."""
+    # pedimos también los tipos vecinos (avenidas, carreteras, rampas) para
+    # que las sugerencias de nombre tengan contexto, aunque no se reporten
+    solicitados = sorted(set(tipos or [1, 2]) | {1, 2, 3, 4, 6, 7})
+    params = {
+        "bbox": f"{bbox[0]:.6f},{bbox[1]:.6f},{bbox[2]:.6f},{bbox[3]:.6f}",
+        "language": "es",
+        "v": "2",
+        "apiV2": "true",
+        "roadTypes": ",".join(str(t) for t in solicitados),
+        "zoomLevel": "17",
+        "sandbox": "true",  # el truco del modo práctica: lectura sin login
+    }
+    if PEDIR_COMENTARIOS:
+        # trae las notas de mapa en la misma petición, sin llamadas extra
+        params["mapComments"] = "true"
+    if PEDIR_PLACES:
+        # los places vienen en la misma respuesta: los tres parámetros van
+        # juntos o no llega ninguno. venueFilter debe traer exactamente cuatro
+        # enteros, y venueLevel es el que decide cuántos se devuelven (8 = todos).
+        params["venues"] = "true"
+        params["venueFilter"] = "1,1,1,1"
+        params["venueLevel"] = "8"
+    time.sleep(pausa)
+    r = sesion.get(ENDPOINTS[env], params=params, timeout=60)
+    texto = r.text[:2000]
+    if r.status_code in (401, 403):
+        raise AuthError(f"HTTP {r.status_code}: {texto[:300]}")
+    if r.status_code == 400 or "maximum" in texto.lower() or "exceed" in texto.lower():
+        if "bbox" in texto.lower() or "area" in texto.lower() or "exceed" in texto.lower():
+            raise AreaError(texto[:300])
+    r.raise_for_status()
+    try:
+        data = r.json()
+    except ValueError:
+        raise RuntimeError(f"Respuesta no-JSON: {texto[:300]}")
+    if isinstance(data, dict) and "error" in data:
+        err = str(data["error"])
+        if "area" in err.lower() or "exceed" in err.lower() or "large" in err.lower():
+            raise AreaError(err[:300])
+        raise RuntimeError(err[:300])
+    if isinstance(data, dict):
+        data["_bbox_pedido"] = list(bbox)  # para saber si la zona restringida cubre todo
+    return data
+
+
+def nombre_de_calle(street):
+    if not street:
+        return ""
+    if street.get("isEmpty"):
+        return ""
+    return (street.get("name") or "").strip()
+
+
+def punto_medio(seg):
+    """Mitad del segmento medida sobre el trazo, no el vértice de en medio.
+
+    Antes se devolvía coords[len//2]. En una calle recta, que son dos puntos,
+    ese índice es 1: el final del segmento, o sea la esquina. Por eso el pin
+    del Live Map y del WME caía en el cruce y no sobre la calle. Ahora se
+    recorre la geometría acumulando distancia y se devuelve el punto que deja
+    la mitad del largo de cada lado, interpolando dentro del tramo que toca.
+    """
+    geom = seg.get("geometry") or seg.get("geoJSONGeometry") or seg.get("geom") or {}
+    coords = geom.get("coordinates") or []
+    if not coords:
+        return None, None
+    try:
+        pts = [(float(p[0]), float(p[1])) for p in coords]
+    except (TypeError, ValueError, IndexError):
+        return None, None
+    if len(pts) == 1:
+        return pts[0]
+
+    # Distancias planas: a esta escala (metros) la diferencia con la fórmula
+    # esférica no mueve el punto, y el coseno corrige el achatamiento en x.
+    cos_lat = math.cos(math.radians(pts[0][1])) or 1.0
+    def dist(a, b):
+        return math.hypot((b[0] - a[0]) * cos_lat, b[1] - a[1])
+
+    tramos = [dist(a, b) for a, b in zip(pts, pts[1:])]
+    total = sum(tramos)
+    if total <= 0:
+        return pts[0]
+
+    objetivo = total / 2.0
+    recorrido = 0.0
+    for (a, b), largo in zip(zip(pts, pts[1:]), tramos):
+        if recorrido + largo >= objetivo:
+            f = (objetivo - recorrido) / largo if largo else 0.0
+            return a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f
+        recorrido += largo
+    return pts[-1]
+
+
+def largo_metros(seg):
+    """Longitud del segmento en metros (usa el dato del servidor o la geometría)."""
+    largo = seg.get("length")
+    if isinstance(largo, (int, float)) and largo > 0:
+        return float(largo)
+    geom = seg.get("geometry") or seg.get("geoJSONGeometry") or {}
+    coords = geom.get("coordinates") or []
+    total = 0.0
+    for a, b in zip(coords, coords[1:]):
+        try:
+            lon1, lat1, lon2, lat2 = map(math.radians, (a[0], a[1], b[0], b[1]))
+        except (TypeError, ValueError, IndexError):
+            return None
+        h = (math.sin((lat2 - lat1) / 2) ** 2
+             + math.cos(lat1) * math.cos(lat2) * math.sin((lon2 - lon1) / 2) ** 2)
+        total += 2 * 6371000 * math.asin(math.sqrt(h))
+    return total if total > 0 else None
+
+
+ALIAS_ESTADOS = {
+    "veracruz de ignacio de la llave": "Veracruz",
+    "coahuila de zaragoza": "Coahuila",
+    "michoacan de ocampo": "Michoacán",
+    "michoacán de ocampo": "Michoacán",
+    "queretaro de arteaga": "Querétaro",
+    "querétaro de arteaga": "Querétaro",
+    "estado de mexico": "México",
+    "estado de méxico": "México",
+    "distrito federal": "Ciudad de México",
+    "mexico city": "Ciudad de México",
+}
+
+
+def normalizar_estado(nombre, estados_mx):
+    """Convierte el nombre de estado que reporta Waze al nombre corto del panel."""
+    if not nombre:
+        return ""
+    n = nombre.strip()
+    low = n.lower()
+    if low in ALIAS_ESTADOS:
+        return ALIAS_ESTADOS[low]
+    for k, _r in estados_mx.features:
+        if k.lower() == low:
+            return k
+    return n
+
+
+CHAMPS_MX = {
+    "arielorellana", "arturoae", "camachista", "carloslaso", "davidabarca",
+    "drysoft", "editorbcmx", "eumirgarciac2", "maalrivba", "manufc212",
+    "gwm_", "hector_hf",
+}
+VENTANA_CHAMPS_DIAS = 60
+_champs_celda = {}  # userName -> ids de segmentos editados (se vacía por celda)
+
+# candado mínimo esperado por tipo de vía (etapa 1: sin PS)
+REQ_CANDADO = {3: 5, 6: 4, 4: 4, 7: 3}  # FW, MH, Ramp, mH
+# tipos extra que solo revisa el Panel NA (el de México los añadirá después):
+# las avenidas principales (PS) deben tener al menos candado 2, así que
+# aparecen en la lista las que están en nivel 1.
+REQ_CANDADO_EXTRA = {}
+_candados_celda = {}  # id -> registro de candado bajo (se vacía por celda)
+_pases_celda = {}  # id -> segmento con pases de peaje (se vacía por celda)
+_comentarios_celda = {}  # id -> comentario de mapa (se vacía por celda)
+_ortografia_celda = {}  # idCalle -> calle mal escrita (se vacía por celda)
+_velocidades_celda = {}  # id -> segmento con velocidad rara (se vacía por celda)
+_places_celda = {}  # id -> place con problema (se vacía por celda)
+# revisión de ortografía en los nombres de calle (solo Panel NA por ahora)
+REVISAR_ORTOGRAFIA = False
+PALABRAS_MAL = {}  # forma incorrecta en minúsculas -> forma correcta
+# los comentarios de mapa (map notes) solo se piden en el Panel NA por ahora
+PEDIR_COMENTARIOS = False
+# los places (venues) se piden en la misma llamada; lo enciende main()
+PEDIR_PLACES = False
+
+# Pases de peaje de México tal como los nombra Waze en las restricciones.
+# La lista es solo para mostrarlos bonito: si aparece uno nuevo se guarda igual.
+PASES_CONOCIDOS = {
+    "iave-mexico": "IAVE",
+    "tag-pase-mexico": "PASE",
+    "televia-mexico": "TELEVía",
+    "viapass-mexico": "VIAPASS",
+    "easytrip-mexico": "easytrip",
+}
+
+
+def velocidad_rara(v):
+    """¿Ese límite de velocidad está mal puesto?
+
+    En México los límites se ponen en múltiplos de 5, así que uno que no
+    termine en 0 ni en 5 (11, 38, 47...) es casi siempre un dedazo. El 0 y el
+    vacío significan "sin límite puesto", que es otra cosa y no se reporta.
+    """
+    if isinstance(v, bool) or not isinstance(v, int):
+        return False
+    if v <= 0:
+        return False
+    return v % 5 != 0
+
+
+def velocidades_raras(seg):
+    """Límites mal puestos del segmento, por sentido."""
+    malas = {}
+    for lado, campo in (("ida", "fwdMaxSpeed"), ("regreso", "revMaxSpeed")):
+        v = seg.get(campo)
+        if velocidad_rara(v):
+            malas[lado] = v
+    return malas
+
+
+def pases_de_segmento(seg):
+    """Suscripciones de peaje que trae la restricción del segmento."""
+    subs = set()
+    for r in seg.get("restrictions") or []:
+        for lista in ((r or {}).get("driveProfiles") or {}).values():
+            if not isinstance(lista, list):
+                continue
+            for item in lista:
+                if isinstance(item, dict):
+                    for sub in item.get("subscriptions") or []:
+                        if sub:
+                            subs.add(str(sub))
+    return sorted(subs)
+
+
+def _ciudad_estado(seg, streets, cities, states):
+    """Calle, ciudad y estado del segmento según el catálogo de la respuesta."""
+    st = streets.get(seg.get("primaryStreetID"))
+    ciudad = edo = ""
+    if st and st.get("cityID") in cities:
+        c = cities[st.get("cityID")]
+        if not c.get("isEmpty"):
+            ciudad = (c.get("name") or "").strip()
+        e = states.get(c.get("stateID"))
+        if e:
+            edo = (e.get("name") or "").strip()
+    return st, ciudad, edo
+
+
+FILTRAR_RESTRINGIDAS = False  # lo enciende el Panel NA
+
+
+def _punto_en_anillo(lon, lat, anillo):
+    """Point-in-polygon clásico (rayo horizontal)."""
+    dentro = False
+    n = len(anillo)
+    j = n - 1
+    for i in range(n):
+        xi, yi = anillo[i][0], anillo[i][1]
+        xj, yj = anillo[j][0], anillo[j][1]
+        if (yi > lat) != (yj > lat):
+            corte = (xj - xi) * (lat - yi) / ((yj - yi) or 1e-12) + xi
+            if lon < corte:
+                dentro = not dentro
+        j = i
+    return dentro
+
+
+def areas_restringidas(data):
+    """Polígonos que el propio Waze marca como NO editables en este entorno.
+
+    En la respuesta vienen como restrictedEditingAreas con type INVALID_ENV:
+    son las zonas que pertenecen al otro servidor (copias huérfanas que se ven
+    en el editor pero no existen en el mapa vivo). Solo se aplica al Panel NA.
+    """
+    if not FILTRAR_RESTRINGIDAS:
+        return []
+    anillos = []
+    for a in _objetos(data, "restrictedEditingAreas"):
+        geo = (a or {}).get("geometry") or {}
+        coords = geo.get("coordinates") or []
+        if geo.get("type") == "Polygon":
+            coords = [coords]
+        for poly in coords:
+            if poly and len(poly[0]) >= 4:
+                anillos.append(poly[0])  # anillo exterior
+    # Waze recorta el polígono al bbox pedido, y además devuelve segmentos que
+    # solo TOCAN ese bbox (su punto medio puede caer fuera). Si la zona
+    # restringida cubre el bbox completo, la celda entera es del otro servidor:
+    # nada de lo que venga en esa respuesta se puede editar aquí.
+    bb = data.get("_bbox_pedido") if isinstance(data, dict) else None
+    if anillos and bb:
+        eps = 1e-6
+        for anillo in anillos:
+            xs = [p[0] for p in anillo]
+            ys = [p[1] for p in anillo]
+            if (min(xs) <= bb[0] + eps and max(xs) >= bb[2] - eps
+                    and min(ys) <= bb[1] + eps and max(ys) >= bb[3] - eps):
+                return "TODO"
+    return anillos
+
+
+def en_area_restringida(anillos, lon, lat):
+    return any(_punto_en_anillo(lon, lat, a) for a in anillos)
+
+
+def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
+    """Extrae de la respuesta los segmentos sin nombre + sugerencia de nombre."""
+    segs = _objetos(data, "segments")
+    # descartar lo que cae en zonas no editables de este entorno (Panel NA)
+    _restr = areas_restringidas(data)
+    if _restr == "TODO":
+        segs = []  # la celda completa pertenece al otro servidor
+    elif _restr:
+        _vivos = []
+        for _s in segs:
+            _lo, _la = punto_medio(_s)
+            if _lo is None or not en_area_restringida(_restr, _lo, _la):
+                _vivos.append(_s)
+        segs = _vivos
+    streets = {s.get("id"): s for s in _objetos(data, "streets")}
+    cities = {c.get("id"): c for c in _objetos(data, "cities")}
+    states = {s.get("id"): s for s in _objetos(data, "states")}
+
+    # conteo de ediciones recientes de los Local Champs (cualquier tipo de vía)
+    usuarios = {u.get("id"): (u.get("userName") or "") for u in _objetos(data, "users")}
+    corte = (time.time() - VENTANA_CHAMPS_DIAS * 86400) * 1000
+    for seg in segs:
+        if (seg.get("updatedOn") or 0) >= corte:
+            un = usuarios.get(seg.get("updatedBy"), "")
+            if un and un.lower() in CHAMPS_MX:
+                _champs_celda.setdefault(un, set()).add(seg.get("id"))
+
+    # candados bajos en vías importantes (FW, MH, Ramp, mH)
+    for seg in segs:
+        req = REQ_CANDADO.get(seg.get("roadType")) or REQ_CANDADO_EXTRA.get(seg.get("roadType"))
+        if not req:
+            continue
+        lr = seg.get("lockRank")
+        lock = lr + 1 if isinstance(lr, int) else 1
+        if lock >= req:
+            continue
+        lon_c, lat_c = punto_medio(seg)
+        if lon_c is None:
+            continue
+        ciudad_c, edo_c = "", ""
+        stc = streets.get(seg.get("primaryStreetID"))
+        nombre_c = nombre_de_calle(stc) or ""
+        if seg.get("roadType") == 2 and not nombre_c:
+            # una avenida principal sin nombre se atiende en la lista de
+            # segmentos sin nombre, no en la de bloqueos
+            continue
+        if stc and stc.get("cityID") in cities:
+            cc = cities[stc.get("cityID")]
+            if not cc.get("isEmpty"):
+                ciudad_c = (cc.get("name") or "").strip()
+            edoo = states.get(cc.get("stateID"))
+            if edoo:
+                edo_c = (edoo.get("name") or "").strip()
+        _candados_celda[seg.get("id")] = {
+            "id": seg.get("id"), "lat": round(lat_c, 6), "lon": round(lon_c, 6),
+            "rt": seg.get("roadType"), "lk": lock, "req": req,
+            "ciudad": ciudad_c, "edo": edo_c,
+            "nombre": nombre_c,
+        }
+
+    # nombres de calle mal escritos (una entrada por calle, no por segmento)
+    if REVISAR_ORTOGRAFIA:
+        for seg in segs:
+            sid = seg.get("primaryStreetID")
+            if sid is None:
+                continue
+            if str(sid) in _ortografia_celda:  # otro tramo de la misma calle
+                _ortografia_celda[str(sid)]["n"] += 1
+                continue
+            st_o, ciudad_o, edo_o = _ciudad_estado(seg, streets, cities, states)
+            nom_o = nombre_de_calle(st_o)
+            if not nom_o:
+                continue
+            sug_o, palabras_o = revisar_ortografia(nom_o)
+            if not sug_o:
+                continue
+            lon_o, lat_o = punto_medio(seg)
+            if lon_o is None:
+                continue
+            _ortografia_celda[str(sid)] = {
+                "sid": str(sid), "id": seg.get("id"),
+                "lat": round(lat_o, 6), "lon": round(lon_o, 6),
+                "nombre": nom_o, "sug": sug_o,
+                "pal": sorted(set(palabras_o)),
+                "rt": seg.get("roadType"),
+                "ciudad": ciudad_o, "edo": edo_o,
+                "n": 1,  # tramos con ese nombre (se van sumando)
+            }
+
+    # comentarios de mapa (map notes): asunto, descripción, candado y autores
+    if PEDIR_COMENTARIOS:
+        for com in _objetos(data, "mapComments"):
+            lon_m, lat_m = centro_geometria(com.get("geometry"))
+            if lon_m is None:
+                continue
+            lr_m = com.get("lockRank")
+            _cre = _fecha_corta(com.get("createdOn"))
+            _act = _fecha_corta(com.get("updatedOn"))
+            _fin = _fecha_corta(com.get("endDate"))
+            conv = []
+            for msg in (com.get("conversation") or []):
+                if not isinstance(msg, dict):
+                    continue
+                txt = (msg.get("text") or "").strip()
+                if not txt:
+                    continue
+                conv.append({
+                    "u": usuarios.get(msg.get("userID"), "") or "",
+                    "t": txt[:400],
+                    "f": _fecha_corta(msg.get("createdOn")),
+                })
+            reg_m = {
+                "id": str(com.get("id")),
+                "lat": round(lat_m, 6), "lon": round(lon_m, 6),
+                "asunto": (com.get("subject") or "").strip()[:150],
+                "desc": (com.get("body") or "").strip()[:400],
+                "lk": (lr_m + 1 if isinstance(lr_m, int) else 1),
+                "autor": usuarios.get(com.get("createdBy"), "") or "",
+                "editor": usuarios.get(com.get("updatedBy"), "") or "",
+                "creado": _cre, "editado": _act, "fin": _fin,
+            }
+            if conv:
+                reg_m["conv"] = conv[:60]  # hilos larguísimos se recortan
+            _comentarios_celda[str(com.get("id"))] = reg_m
+
+    # segmentos con restricción de pases de peaje (IAVE, PASE, TELEVía, VIAPASS…)
+    for seg in segs:
+        subs = pases_de_segmento(seg)
+        if not subs:
+            continue
+        lon_p, lat_p = punto_medio(seg)
+        if lon_p is None:
+            continue
+        stp, ciudad_p, edo_p = _ciudad_estado(seg, streets, cities, states)
+        _pases_celda[seg.get("id")] = {
+            "id": seg.get("id"), "lat": round(lat_p, 6), "lon": round(lon_p, 6),
+            "rt": seg.get("roadType"), "pases": subs,
+            "lk": (seg.get("lockRank") + 1) if isinstance(seg.get("lockRank"), int) else 1,
+            "ciudad": ciudad_p, "edo": edo_p,
+            "nombre": nombre_de_calle(stp) or "",
+        }
+
+    # segmentos con límite de velocidad mal puesto (no termina en 0 ni en 5)
+    for seg in segs:
+        malas = velocidades_raras(seg)
+        if not malas:
+            continue
+        lon_v, lat_v = punto_medio(seg)
+        if lon_v is None:
+            continue
+        stv, ciudad_v, edo_v = _ciudad_estado(seg, streets, cities, states)
+        _velocidades_celda[seg.get("id")] = {
+            "id": seg.get("id"), "lat": round(lat_v, 6), "lon": round(lon_v, 6),
+            "rt": seg.get("roadType"),
+            "vel": malas,   # {"ida": 11} o {"ida": 11, "regreso": 38}
+            "lk": (seg.get("lockRank") + 1) if isinstance(seg.get("lockRank"), int) else 1,
+            "ciudad": ciudad_v, "edo": edo_v,
+            "nombre": nombre_de_calle(stv) or "",
+        }
+
+    # places (venues): nombres mal escritos y places sin calle
+    if PEDIR_PLACES and _restr != "TODO":
+        for ven in _objetos(data, "venues"):
+            vid = ven.get("id")
+            if vid is None:
+                continue
+            lon_pl, lat_pl = centro_geometria(ven.get("geometry"))
+            if lon_pl is None:
+                continue
+            if _restr and en_area_restringida(_restr, lon_pl, lat_pl):
+                continue
+            nom_pl = (ven.get("name") or "").strip()
+            st_pl = streets.get(ven.get("streetID"))
+            calle_pl = nombre_de_calle(st_pl)
+            sin_dir = 0 if calle_pl else 1   # "sin dirección" = sin calle, como su script
+            sug_pl = fix_grammar(nom_pl) if necesita_correccion(nom_pl) else ""
+            if sug_pl == nom_pl:
+                sug_pl = ""
+            if not sin_dir and not sug_pl:
+                continue
+            ciudad_pl = edo_pl = ""
+            if st_pl and st_pl.get("cityID") in cities:
+                c_pl = cities[st_pl.get("cityID")]
+                if not c_pl.get("isEmpty"):
+                    ciudad_pl = (c_pl.get("name") or "").strip()
+                e_pl = states.get(c_pl.get("stateID"))
+                if e_pl:
+                    edo_pl = (e_pl.get("name") or "").strip()
+            lr_pl = ven.get("lockRank")
+            reg_pl = {
+                "id": str(vid),
+                "lat": round(lat_pl, 6), "lon": round(lon_pl, 6),
+                "nom": nom_pl[:140],
+                "calle": calle_pl[:140],
+                "ciudad": ciudad_pl, "edo": edo_pl,
+                "lk": (lr_pl + 1) if isinstance(lr_pl, int) else 1,
+                "cat": [str(c) for c in (ven.get("categories") or [])[:3]],
+                "area": 1 if (ven.get("geometry") or {}).get("type") != "Point" else 0,
+            }
+            if sin_dir:
+                reg_pl["sd"] = 1
+            if sug_pl:
+                reg_pl["sug"] = sug_pl[:140]
+                # siglas que la propuesta aplastaría: casi siempre significa que
+                # falta esa palabra en la lista de permitidas, no que esté mal
+                _sig_pl = siglas_aplastadas(nom_pl, sug_pl)
+                if _sig_pl:
+                    reg_pl["sig"] = _sig_pl[:6]
+            if ven.get("residential"):
+                reg_pl["res"] = 1   # punto de domicilio (RPP)
+            if ven.get("houseNumber"):
+                reg_pl["num"] = str(ven.get("houseNumber"))[:20]
+            _places_celda[str(vid)] = reg_pl
+
+    # nombre por segmento (para sugerencias) y conectividad por nodos
+    nombre_seg = {}
+    nodos = {}  # nodeID -> [segmento_ids]
+    info = {}
+    for seg in segs:
+        sid = seg.get("id")
+        if sid is None:
+            continue
+        st = streets.get(seg.get("primaryStreetID"))
+        nombre_seg[sid] = nombre_de_calle(st)
+        info[sid] = seg
+        for nk in ("fromNodeID", "toNodeID"):
+            nid = seg.get(nk)
+            if nid is not None:
+                nodos.setdefault(nid, []).append(sid)
+
+    hallazgos = []
+    for seg in segs:
+        sid = seg.get("id")
+        if sid is None:
+            continue
+        rt = seg.get("roadType")
+        if rt not in tipos_con_nombre:
+            continue
+        if seg.get("junctionID"):  # rotonda: puede ir sin nombre
+            continue
+        if nombre_seg.get(sid):
+            continue  # sí tiene nombre
+        if min_metros:
+            largo = largo_metros(seg)
+            if largo is not None and largo < min_metros:
+                continue  # segmento muy corto: no se reporta
+        lon, lat = punto_medio(seg)
+        if lon is None:
+            continue
+
+        # sugerencia estilo GAIA: nombre de la vialidad conectada que continúa
+        sugerencias = {}
+        for nk in ("fromNodeID", "toNodeID"):
+            nid = seg.get(nk)
+            for vecino in nodos.get(nid, []):
+                if vecino == sid:
+                    continue
+                nom = nombre_seg.get(vecino, "")
+                if not nom:
+                    continue
+                peso = 1
+                if info[vecino].get("roadType") == rt:
+                    peso += 2  # mismo tipo de vía: probable continuación
+                sugerencias[nom] = sugerencias.get(nom, 0) + peso
+        sugerido = max(sugerencias, key=sugerencias.get) if sugerencias else ""
+
+        ciudad = ""
+        estado_wz = ""
+        st = streets.get(seg.get("primaryStreetID"))
+        if st and st.get("cityID") in cities:
+            c = cities[st.get("cityID")]
+            if not c.get("isEmpty"):
+                ciudad = (c.get("name") or "").strip()
+            edo = states.get(c.get("stateID"))
+            if edo:
+                estado_wz = (edo.get("name") or "").strip()
+
+        geom = seg.get("geometry") or seg.get("geoJSONGeometry") or {}
+        hallazgos.append({
+            "id": sid,
+            "lat": round(lat, 6),
+            "lon": round(lon, 6),
+            "rt": rt,
+            "ciudad": ciudad,
+            "edo": estado_wz,   # estado según Waze (el dato bueno)
+            "sug": "",          # nombre según INEGI (se llena después)
+            "conf": 0,           # % de confianza INEGI
+            "vec": sugerido,     # respaldo: nombre de la vialidad vecina
+            "_coords": geom.get("coordinates") or [],
+        })
+    return hallazgos, len(segs)
+
+
+def enriquecer_con_inegi(hallazgos, inegi, limite, previas=None):
+    """Consulta el INEGI (como GAIA) para cada segmento sin nombre encontrado.
+
+    Solo se conservan los segmentos con nombre del INEGI al 100% y sin
+    empate (los mismos que GAIA marca como aplicables). Si el INEGI no
+    responde hoy pero el segmento ya tenía nombre al 100% en una corrida
+    anterior, se conserva ese nombre (el INEGI a veces contesta vacío).
+    """
+    for h in hallazgos:
+        coords = h.pop("_coords", [])
+        if inegi is None or time.time() >= limite:
+            continue
+        nombre, conf, empatado, fallo = inegi.sugerir(coords)
+        # como GAIA: solo valen los resultados al 100% y sin empate
+        if not fallo and nombre and conf >= 100 and not empatado:
+            h["sug"] = nombre
+            h["conf"] = 100
+        elif fallo and previas and str(h["id"]) in previas:
+            # el INEGI no contestó hoy: conservamos el nombre de otra corrida.
+            # Si contestó y ya no da el 100%, el segmento se cae solo: así una
+            # sugerencia vieja no se queda pegada para siempre.
+            h["sug"] = previas[str(h["id"])]
+            h["conf"] = 100
+    if inegi is None:
+        return hallazgos
+    return [h for h in hallazgos if h.get("sug")]
+
+
+def escanear_bbox(sesion, env, bbox, tipos, pausa, contador, profundidad=0, min_metros=0):
+    """Escanea un bbox; si el servidor dice que es muy grande, lo parte en 4."""
+    try:
+        data = pedir_celda(sesion, env, bbox, pausa, tipos)
+        contador["req"] += 1
+        h, n = analizar_respuesta(data, tipos, min_metros)
+        contador["segs"] += n
+        return h
+    except AreaError:
+        contador["req"] += 1
+        if profundidad >= 5:
+            return []
+        x1, y1, x2, y2 = bbox
+        mx, my = (x1 + x2) / 2, (y1 + y2) / 2
+        out = []
+        for sub in ([x1, y1, mx, my], [mx, y1, x2, my],
+                    [x1, my, mx, y2], [mx, my, x2, y2]):
+            out.extend(escanear_bbox(sesion, env, sub, tipos, pausa,
+                                     contador, profundidad + 1, min_metros))
+        return out
+
+
+def detectar_entorno(cfg, pausa):
+    """Averigua en qué servidor (usa/row) vive México y si hay acceso sin login."""
+    errores = {}
+    for env in ORDEN_ENTORNOS:
+        try:
+            s = nueva_sesion(env)
+            data = pedir_celda(s, env, BBOX_PRUEBA, pausa)
+            segs = _objetos(data, "segments")
+            log(f"Entorno '{env}': {len(segs)} segmentos en la zona de prueba")
+            if segs:
+                return env, s
+        except AreaError:
+            # área excedida = el servidor SÍ respondió; probamos un bbox chico
+            try:
+                s = nueva_sesion(env)
+                chico = [-103.37, 20.665, -103.36, 20.672]
+                data = pedir_celda(s, env, chico, pausa)
+                if _objetos(data, "segments"):
+                    return env, s
+            except Exception as e2:
+                errores[env] = repr(e2)
+        except Exception as e:
+            errores[env] = repr(e)
+            log(f"Entorno '{env}' falló: {e}")
+    raise AuthError(f"Ningún servidor respondió con datos. Detalle: {errores}")
+
+
+# ------------------------------------------------------------------- almacén
+def cargar_almacen():
+    """Carga docs/data/estados/*.json -> {estado: {seg_id_str: registro}}"""
+    almacen = {}
+    if os.path.isdir(ESTADOS_DIR):
+        for fn in os.listdir(ESTADOS_DIR):
+            if fn.endswith(".json"):
+                d = load_json(os.path.join(ESTADOS_DIR, fn), {})
+                estado = d.get("estado")
+                if estado:
+                    almacen[estado] = d.get("segmentos", {})
+    return almacen
+
+
+def guardar_almacen(almacen, meta):
+    os.makedirs(ESTADOS_DIR, exist_ok=True)
+    resumen_estados = []
+    slugs_actuales = set()
+    for estado, segmentos in sorted(almacen.items()):
+        # etiquetas del INEGI ("Nd", "Ninguno") que se colaron como nombre
+        # en corridas viejas: se limpian al guardar, sin esperar el re-escaneo
+        for _sid in [k for k, r in segmentos.items()
+                     if _nombre_invalido(r.get("sug") or "")]:
+            del segmentos[_sid]
+        slug = slugify(estado)
+        slugs_actuales.add(slug)
+        ciudades = {}
+        for reg in segmentos.values():
+            c = reg.get("ciudad") or "(sin ciudad)"
+            ciudades[c] = ciudades.get(c, 0) + 1
+        save_json(os.path.join(ESTADOS_DIR, f"{slug}.json"),
+                  {"estado": estado, "segmentos": segmentos}, compact=True)
+        resumen_estados.append({
+            "estado": estado, "slug": slug, "total": len(segmentos),
+            "ciudades": len(ciudades),
+        })
+    # borrar archivos de estados que ya no tienen segmentos
+    for fn in os.listdir(ESTADOS_DIR):
+        if fn.endswith(".json") and fn[:-5] not in slugs_actuales:
+            os.remove(os.path.join(ESTADOS_DIR, fn))
+    resumen = {
+        "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "env": meta.get("env", "usa"),
+        "total": sum(e["total"] for e in resumen_estados),
+        "estados": resumen_estados,
+        "progreso": meta.get("progreso", {}),
+        "aviso": meta.get("aviso", ""),
+        "tipos": {str(k): v for k, v in ROAD_TYPE_NAMES.items()},
+    }
+    save_json(os.path.join(DATA_DIR, "resumen.json"), resumen)
+    return resumen
+
+
+# ---------------------------------------------------------------------- main
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--modo", choices=["test", "completo"], default="completo")
+    ap.add_argument("--minutos", type=float, default=240)
+    ap.add_argument("--zona", default="",
+                    help='Re-escaneo prioritario: nombre de estado, "lat,lon" o "lon1,lat1,lon2,lat2"')
+    ap.add_argument("--panel", choices=["row", "na"], default="row",
+                    help="na = Panel SVS NA: la franja fronteriza que vive en el servidor NA")
+    args = ap.parse_args()
+
+    # el Panel NA usa sus propios archivos de estado y datos (docs/data-na)
+    global STATE_PATH, LASTRUN_PATH, DEBUG_PATH, DATA_DIR, ESTADOS_DIR, CANDADOS_DIR
+    global PASES_DIR, REQ_CANDADO_EXTRA, COMENTARIOS_DIR, PEDIR_COMENTARIOS
+    global ORTOGRAFIA_DIR, REVISAR_ORTOGRAFIA, PALABRAS_MAL, VELOCIDADES_DIR
+    global PLACES_DIR, PEDIR_PLACES
+    global FILTRAR_RESTRINGIDAS
+    panel_na = args.panel == "na"
+    # secciones que corren en los dos paneles
+    PEDIR_COMENTARIOS = True  # notas de mapa
+    PEDIR_PLACES = True  # places mal escritos y sin dirección
+    REVISAR_ORTOGRAFIA = True  # calles mal escritas
+    PALABRAS_MAL = {k.lower(): v for k, v in
+                    (load_json(PALABRAS_PATH, {}).get("palabras") or {}).items()}
+    log(f"revisión de ortografía: {len(PALABRAS_MAL)} palabras cargadas")
+    # Las avenidas principales (PS) deben tener candado 2, así que salen las que
+    # están en nivel 1. Empezó solo en el Panel NA y desde hoy corre en los dos.
+    # Las PS sin nombre no entran aquí: esas se atienden en segmentos sin nombre.
+    REQ_CANDADO_EXTRA = {2: 2}
+    if panel_na:
+        FILTRAR_RESTRINGIDAS = True  # descartar lo que Waze marca como no editable
+        STATE_PATH = os.path.join(BASE, "state", "scan_state_na.json")
+        LASTRUN_PATH = os.path.join(BASE, "state", "last_run_na.json")
+        DEBUG_PATH = os.path.join(BASE, "state", "debug_na.txt")
+        DATA_DIR = os.path.join(BASE, "docs", "data-na")
+        ESTADOS_DIR = os.path.join(DATA_DIR, "estados")
+        CANDADOS_DIR = os.path.join(DATA_DIR, "candados")
+        PASES_DIR = os.path.join(DATA_DIR, "pases")
+        COMENTARIOS_DIR = os.path.join(DATA_DIR, "comentarios")
+        ORTOGRAFIA_DIR = os.path.join(DATA_DIR, "ortografia")
+        VELOCIDADES_DIR = os.path.join(DATA_DIR, "velocidades")
+        PLACES_DIR = os.path.join(DATA_DIR, "places")
+
+    cfg = load_json(CONFIG_PATH, {})
+    bbox_mx = cfg.get("bbox", [-118.45, 14.5, -86.65, 32.75])
+    celda = cfg.get("celda_grados", 0.2)
+    pausa = cfg.get("pausa_segundos", 0.25)
+    tipos = set(cfg.get("tipos_con_nombre", [1]))
+    min_metros = cfg.get("longitud_minima_metros", 30)
+    ciclos_vacia = cfg.get("reescanear_vacias_cada", 5)
+    solo_estados = set(cfg.get("solo_estados") or [])
+    franja_umbral = cfg.get("franja_umbral_grados", 0.5)
+    franja_na = cfg.get("franja_na_grados", 0.6)  # ancho de la franja del Panel NA
+    usar_inegi = cfg.get("sugerencias_inegi", True)
+    inegi = ConsultorINEGI(cfg.get("pausa_inegi_segundos", 0.15)) if usar_inegi else None
+
+    inicio = time.time()
+    limite = inicio + args.minutos * 60
+    estados_mx = EstadosMX(GEOJSON_PATH)
+    # nombres válidos de estados mexicanos (para descartar lo que caiga en EUA)
+    nombres_mx = {k for k, _r in estados_mx.features} | set(ALIAS_ESTADOS.values())
+    estado = load_json(STATE_PATH, {})
+    contador = {"req": 0, "segs": 0}
+
+    # --- detección de entorno / acceso sin login
+    try:
+        if panel_na:
+            env = "usa"  # el Panel NA siempre lee del servidor NA
+            sesion = nueva_sesion(env)
+            estado["env"] = env
+        elif estado.get("env"):
+            env = estado["env"]
+            sesion = nueva_sesion(env)
+        else:
+            env, sesion = detectar_entorno(cfg, pausa)
+            estado["env"] = env
+        log(f"Usando entorno '{env}' (sin login, como el modo práctica)")
+    except Exception as e:
+        log(f"ERROR de acceso: {e}")
+        os.makedirs(os.path.dirname(DEBUG_PATH), exist_ok=True)
+        with open(DEBUG_PATH, "w", encoding="utf-8") as f:
+            f.write(f"{datetime.now(timezone.utc).isoformat()}\n{repr(e)}\n")
+        almacen = cargar_almacen()
+        guardar_almacen(almacen, {"env": estado.get("env", "usa"),
+                                  "aviso": "No se pudo acceder a los datos de Waze en la última corrida. "
+                                           "Revisa state/debug_ultimo_error.txt"})
+        save_json(LASTRUN_PATH, {"ok": False, "error": repr(e),
+                                 "fecha": datetime.now(timezone.utc).isoformat()})
+        sys.exit(0)
+
+    almacen = cargar_almacen()
+    # nombres INEGI al 100% de corridas anteriores (memoria anti-fallas)
+    sugs_previas = {}
+    for _est, _m in almacen.items():
+        for _k, _v in _m.items():
+            if _v.get("sug"):
+                sugs_previas[_k] = _v["sug"]
+
+    # --- malla
+    lon1, lat1, lon2, lat2 = bbox_mx
+    cols = max(1, math.ceil((lon2 - lon1) / celda))
+    filas = max(1, math.ceil((lat2 - lat1) / celda))
+    total_celdas = cols * filas
+    # normalizar los ids de celda del almacén al grid actual (por si cambió la malla,
+    # p. ej. al pasar de un estado al país completo, sin perder lo ya encontrado)
+    for _est, _m in almacen.items():
+        for _v in _m.values():
+            _c = int((_v["lon"] - lon1) // celda)
+            _f = int((_v["lat"] - lat1) // celda)
+            if 0 <= _c < cols and 0 <= _f < filas:
+                _v["celda"] = str(_f * cols + _c)
+    celdas_info = estado.get("celdas", {})  # idx -> {"n": segs, "c": ciclo}
+    champs_info = estado.get("champs", {})  # idx -> {userName: segs editados}
+    candados_info = estado.get("candados", {})  # idx -> [registros de candado bajo]
+    pases_info = estado.get("pases", {})  # idx -> [segmentos con pases de peaje]
+    comentarios_info = estado.get("comentarios", {})  # idx -> [notas de mapa]
+    ortografia_info = estado.get("ortografia", {})  # idx -> [calles mal escritas]
+    velocidades_info = estado.get("velocidades", {})  # idx -> [velocidades raras]
+    places_info = estado.get("places", {})  # idx -> [places con problema]
+    cursor = estado.get("cursor", 0)
+    ciclo = estado.get("ciclo", 1)
+    if (estado.get("celda_grados") not in (None, celda)
+            or estado.get("bbox_escaneo") not in (None, bbox_mx)):
+        log("Cambió la zona o el tamaño de celda: reiniciando el recorrido")
+        celdas_info, cursor, ciclo = {}, 0, 1
+        champs_info = {}
+        candados_info = {}
+        pases_info = {}
+        comentarios_info = {}
+        ortografia_info = {}
+        velocidades_info = {}
+        places_info = {}
+
+    if args.modo == "test":
+        log("MODO PRUEBA: escaneando solo el centro de Guadalajara")
+        # en rebanadas de 0.05° porque el servidor recorta las áreas grandes
+        celdas_a_escanear = []
+        _x1, _y1, _x2, _y2 = BBOX_PRUEBA
+        _x, _i = _x1, 0
+        while _x < _x2:
+            celdas_a_escanear.append((f"test{_i}", [_x, _y1, min(_x + 0.05, _x2), _y2]))
+            _x += 0.05
+            _i += 1
+    else:
+        celdas_a_escanear = None  # se generan sobre la marcha
+
+    def bbox_de(idx):
+        f, c = divmod(idx, cols)
+        x1 = lon1 + c * celda
+        y1 = lat1 + f * celda
+        m = 0.002  # margen para que las sugerencias vean calles vecinas
+        return [x1 - m, y1 - m, min(x1 + celda, lon2) + m, min(y1 + celda, lat2) + m]
+
+    # --- re-escaneo prioritario de una zona (estado, punto o bbox)
+    indices_zona = []
+    if args.zona.strip() and args.modo == "completo":
+        z = args.zona.strip()
+        estados_nombres = {n.lower(): n for n, _r in estados_mx.features}
+        zona_bbox = None
+        zona_estado = None
+        partes = [p.strip() for p in z.split(",")]
+        if z.lower() in estados_nombres:
+            zona_estado = estados_nombres[z.lower()]
+        elif len(partes) == 4:
+            try:
+                a, b, c, d = map(float, partes)
+                zona_bbox = [min(a, c), min(b, d), max(a, c), max(b, d)]
+            except ValueError:
+                pass
+        elif len(partes) == 2:
+            try:
+                la, lo = map(float, partes)  # formato lat,lon (como el WME)
+                zona_bbox = [lo - 0.15, la - 0.15, lo + 0.15, la + 0.15]
+            except ValueError:
+                pass
+        for idx in range(total_celdas):
+            f, c = divmod(idx, cols)
+            x1 = lon1 + c * celda
+            y1 = lat1 + f * celda
+            x2, y2 = min(x1 + celda, lon2), min(y1 + celda, lat2)
+            if zona_bbox is not None:
+                if x1 <= zona_bbox[2] and x2 >= zona_bbox[0] and y1 <= zona_bbox[3] and y2 >= zona_bbox[1]:
+                    indices_zona.append(idx)
+            elif zona_estado is not None:
+                mxp, myp = (x1 + x2) / 2, (y1 + y2) / 2
+                pts9 = [(mxp, myp), (x1, y1), (x2, y1), (x1, y2), (x2, y2),
+                        (mxp, y1), (mxp, y2), (x1, myp), (x2, myp)]
+                if any(estados_mx.estado_de(px, py) == zona_estado for px, py in pts9):
+                    indices_zona.append(idx)
+        if indices_zona:
+            log(f"RE-ESCANEO PRIORITARIO de '{z}': {len(indices_zona)} celdas en cola")
+        else:
+            log(f"Zona '{z}' no reconocida (usa nombre de estado, lat,lon o bbox); "
+                "se hará el barrido normal")
+
+    escaneadas = []
+    hallados_run = 0
+    fallos_seguidos = 0
+    sesion_usa = None
+    celdas_run = set()
+
+    # Celdas que fallaron al pedirlas al WME. Antes se saltaban sin más: el
+    # cursor avanzaba y la celda no volvía a tocarse hasta la siguiente vuelta
+    # completa al país (semanas), y si volvía a fallar ahí, otra vuelta. Así se
+    # quedaron once celdas congeladas desde julio. Ahora se reintentan más
+    # adelante en la misma corrida y, si aun así fallan, encabezan la siguiente.
+    falladas = deque()       # (idx, intentos) listas para reintentarse ya
+    en_espera = []           # (cuándo, idx, intentos) esperando su turno
+    para_siguiente = []      # agotaron sus intentos: van a la próxima corrida
+    por_cola = set()         # celdas ya rehechas por la cola en esta corrida
+    for _p in estado.get("celdas_falladas", []):
+        try:
+            _i = int(_p[0] if isinstance(_p, (list, tuple)) else _p)
+        except (TypeError, ValueError, IndexError):
+            continue
+        if 0 <= _i < total_celdas:
+            falladas.append((_i, 0))
+    # Rezagadas: celdas de las que seguimos publicando segmentos pero que el
+    # cursor ya dejó atrás dos vueltas o más sin conseguir re-escanearlas. Se
+    # recorren desde el almacén, no desde celdas_info, porque una celda que
+    # nunca logró escanearse bien no tiene entrada ahí (así estaba la 54360, de
+    # Querétaro: 24 segmentos publicados con la foto del 28 de julio).
+    # Atraso normal es una vuelta; dos o más significa que algo falló.
+    _ya = {i for i, _n in falladas}
+    _con_segmentos = {r.get("celda") for _m in almacen.values() for r in _m.values()}
+    _rezagadas = []
+    for _c in _con_segmentos:
+        try:
+            _i = int(_c)
+        except (TypeError, ValueError):
+            continue
+        if not (0 <= _i < total_celdas) or _i in _ya:
+            continue
+        _v = celdas_info.get(str(_i))
+        if _v is None or ciclo - _v.get("c", 0) >= 2:
+            _rezagadas.append(_i)
+    for _i in sorted(_rezagadas)[:MAX_REZAGADAS]:
+        falladas.append((_i, 0))
+    if falladas:
+        log(f"{len(falladas)} celdas atrasadas o fallidas: van primero"
+            + (f" (de {len(_rezagadas)} rezagadas, el resto en la próxima corrida)"
+               if len(_rezagadas) > MAX_REZAGADAS else ""))
+
+    def cola_pendiente():
+        """Lo que falta reintentar, para guardarlo en el estado."""
+        vistas, salida = set(), []
+        for _i, _n in (list(falladas) + [(i, n) for _c, i, n in en_espera]
+                       + [(i, 0) for i in para_siguiente]):
+            if _i not in vistas:
+                vistas.add(_i)
+                salida.append([_i, _n])
+        return salida
+
+    def sello_celda(n):
+        """Registro de celda escaneada, con fecha y hora (para el mapa)."""
+        return {"n": n, "c": ciclo,
+                "t": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")}
+    pub_cada = cfg.get("publicar_cada_minutos", 40)
+    ultima_pub = inicio
+    celdas_aplicadas = 0
+
+    def aplicar_pendientes():
+        """Vuelca lo escaneado al almacén y guarda los archivos del panel."""
+        nonlocal escaneadas, celdas_aplicadas
+        celdas_aplicadas += len(escaneadas)
+        hoy = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+        # fecha en que se detectó cada segmento por primera vez (se conserva)
+        vistos_prev = {}
+        for _e, _m in almacen.items():
+            for _k, _v in _m.items():
+                vistos_prev[_k] = _v.get("visto", "")
+        celdas_re = {c for c, _b, _h in escaneadas}
+        es_test = args.modo == "test"
+        if celdas_re:
+            for est in list(almacen.keys()):
+                seg_map = almacen[est]
+                for k in [k for k, v in seg_map.items()
+                          if v.get("celda") in celdas_re
+                          or (es_test and str(v.get("celda", "")).startswith("test"))]:
+                    del seg_map[k]
+                if not seg_map:
+                    del almacen[est]
+        for celda_id, _bb, hallazgos in escaneadas:
+            for h in hallazgos:
+                # estado según Waze (autoridad); el mapa propio solo de respaldo
+                est = (normalizar_estado(h.get("edo", ""), estados_mx)
+                       or estados_mx.estado_de(h["lon"], h["lat"]))
+                if panel_na:
+                    # Panel NA: solo segmentos en territorio mexicano
+                    if est not in nombres_mx:
+                        continue  # Waze lo reporta en un estado de EUA
+                    if not h.get("edo") and not estados_mx.dentro_de_alguno(h["lon"], h["lat"]):
+                        continue  # sin estado de Waze y el punto cae fuera de México
+                if solo_estados and est not in solo_estados:
+                    continue
+                reg = dict(h)
+                reg.pop("edo", None)
+                reg["celda"] = celda_id
+                sid = str(h["id"])
+                reg["visto"] = vistos_prev[sid] if sid in vistos_prev else hoy
+                reg["rev"] = hoy  # última vez que se escaneó (siempre se actualiza)
+                almacen.setdefault(est, {})[sid] = reg
+        escaneadas = []
+        if panel_na:
+            # purgar grupos que no sean estados mexicanos (p. ej. Texas de corridas previas)
+            for _e in [e for e in list(almacen) if e not in nombres_mx]:
+                del almacen[_e]
+        celdas_hechas = len([1 for v in celdas_info.values()])
+        progreso = {
+            "ciclo": ciclo,
+            "celdas_escaneadas": celdas_hechas,
+            "celdas_total": total_celdas,
+            "porcentaje": round(100.0 * min(celdas_hechas, total_celdas) / total_celdas, 1),
+            # avance de la vuelta actual: posición del cursor en el barrido
+            "porcentaje_vuelta": round(100.0 * min(cursor, total_celdas) / total_celdas, 1),
+            "modo": args.modo,
+        }
+        resumen = guardar_almacen(almacen, {"env": env, "progreso": progreso})
+        estado.update({"cursor": cursor, "ciclo": ciclo, "celdas": celdas_info,
+                       "champs": champs_info, "candados": candados_info,
+                       "pases": pases_info, "comentarios": comentarios_info,
+                       "ortografia": ortografia_info,
+                       "velocidades": velocidades_info,
+                       "places": places_info,
+                       "celdas_falladas": cola_pendiente(),
+                       "env": env, "celda_grados": celda, "bbox_escaneo": bbox_mx})
+        save_json(STATE_PATH, estado, compact=True)
+        # datos para el mapa de escaneo del panel
+        save_json(os.path.join(DATA_DIR, "celdas.json"), {
+            "bbox": bbox_mx, "celda": celda, "cols": cols, "filas": filas,
+            "actualizado": datetime.now(timezone.utc).isoformat(),
+            "celdas": {k: [v.get("n", 0), v.get("t", "")]
+                       for k, v in celdas_info.items()},
+        }, compact=True)
+        # datos para la página de Local Champs
+        tot_champs = {}
+        for _m in champs_info.values():
+            for _k, _v in _m.items():
+                tot_champs[_k] = tot_champs.get(_k, 0) + _v
+        save_json(os.path.join(DATA_DIR, "champs.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(),
+            "ventana_dias": VENTANA_CHAMPS_DIAS,
+            "celdas_con_ediciones": len(champs_info),
+            "porcentaje_pais": progreso.get("porcentaje"),
+            "totales": tot_champs,
+        }, compact=True)
+        # panel de candados bajos: reagrupar por estado
+        cand_por_estado = {}
+        for regs in candados_info.values():
+            for r in regs:
+                if r.get("rt") == 2 and not (r.get("nombre") or "").strip():
+                    continue  # PS sin nombre: va en la lista de segmentos sin nombre
+                est_c = (normalizar_estado(r.get("edo", ""), estados_mx)
+                         or estados_mx.estado_de(r["lon"], r["lat"]))
+                if panel_na:
+                    if est_c not in nombres_mx:
+                        continue  # candado del lado de EUA: no se incluye
+                    if not r.get("edo") and not estados_mx.dentro_de_alguno(r["lon"], r["lat"]):
+                        continue
+                reg_c = {k: v for k, v in r.items() if k != "edo"}
+                cand_por_estado.setdefault(est_c, {})[str(r["id"])] = reg_c
+        os.makedirs(CANDADOS_DIR, exist_ok=True)
+        slugs_c = set()
+        lista_c = []
+        for est_c, segs_c in sorted(cand_por_estado.items()):
+            slug_c = slugify(est_c)
+            slugs_c.add(slug_c)
+            save_json(os.path.join(CANDADOS_DIR, f"{slug_c}.json"),
+                      {"estado": est_c, "segmentos": segs_c}, compact=True)
+            lista_c.append({"estado": est_c, "slug": slug_c, "total": len(segs_c)})
+        for fn in os.listdir(CANDADOS_DIR):
+            if fn.endswith(".json") and fn[:-5] != "index" and fn[:-5] not in slugs_c:
+                os.remove(os.path.join(CANDADOS_DIR, fn))
+        save_json(os.path.join(CANDADOS_DIR, "index.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "total": sum(e["total"] for e in lista_c),
+            "estados": lista_c,
+            "tipos": {str(k): v for k, v in ROAD_TYPE_NAMES.items()},
+        }, compact=True)
+        # panel de calles mal escritas: reagrupar por estado
+        orto_por_estado = {}
+        for regs in ortografia_info.values():
+            for r in regs:
+                est_o = (normalizar_estado(r.get("edo", ""), estados_mx)
+                         or estados_mx.estado_de(r["lon"], r["lat"]))
+                if panel_na:
+                    if est_o not in nombres_mx:
+                        continue  # calle del lado de EUA: en inglés no lleva acentos
+                    if not r.get("edo") and not estados_mx.dentro_de_alguno(r["lon"], r["lat"]):
+                        continue
+                reg_o = {k: v for k, v in r.items() if k != "edo"}
+                calles_o = orto_por_estado.setdefault(est_o, {})
+                previa = calles_o.get(r["sid"])
+                if previa:
+                    # la calle cruza varias celdas: se suman sus tramos y se
+                    # conserva la detección más vieja y la revisión más nueva
+                    previa["n"] = previa.get("n", 1) + reg_o.get("n", 1)
+                    if reg_o.get("v") and (not previa.get("v") or reg_o["v"] < previa["v"]):
+                        previa["v"] = reg_o["v"]
+                    if reg_o.get("r") and reg_o["r"] > previa.get("r", ""):
+                        previa["r"] = reg_o["r"]
+                else:
+                    calles_o[r["sid"]] = reg_o
+        os.makedirs(ORTOGRAFIA_DIR, exist_ok=True)
+        slugs_o = set()
+        lista_o = []
+        for est_o, calles_o in sorted(orto_por_estado.items()):
+            slug_o = slugify(est_o)
+            slugs_o.add(slug_o)
+            save_json(os.path.join(ORTOGRAFIA_DIR, f"{slug_o}.json"),
+                      {"estado": est_o, "calles": calles_o}, compact=True)
+            lista_o.append({"estado": est_o, "slug": slug_o, "total": len(calles_o)})
+        for fn in os.listdir(ORTOGRAFIA_DIR):
+            if fn.endswith(".json") and fn[:-5] != "index" and fn[:-5] not in slugs_o:
+                os.remove(os.path.join(ORTOGRAFIA_DIR, fn))
+        save_json(os.path.join(ORTOGRAFIA_DIR, "index.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "total": sum(e["total"] for e in lista_o),
+            "estados": lista_o,
+            "palabras": PALABRAS_MAL,  # la lista completa, para mostrarla en la página
+        }, compact=True)
+        # panel de comentarios de mapa (map notes): reagrupar por estado
+        coms_por_estado = {}
+        for regs in comentarios_info.values():
+            for r in regs:
+                est_m = estados_mx.estado_de(r["lon"], r["lat"])
+                if panel_na:
+                    if est_m not in nombres_mx:
+                        continue  # nota del lado de EUA: no se incluye
+                    if not estados_mx.dentro_de_alguno(r["lon"], r["lat"]):
+                        continue
+                coms_por_estado.setdefault(est_m, {})[r["id"]] = r
+        os.makedirs(COMENTARIOS_DIR, exist_ok=True)
+        slugs_m = set()
+        lista_m = []
+        for est_m, coms_m in sorted(coms_por_estado.items()):
+            slug_m = slugify(est_m)
+            slugs_m.add(slug_m)
+            save_json(os.path.join(COMENTARIOS_DIR, f"{slug_m}.json"),
+                      {"estado": est_m, "comentarios": coms_m}, compact=True)
+            lista_m.append({"estado": est_m, "slug": slug_m, "total": len(coms_m)})
+        for fn in os.listdir(COMENTARIOS_DIR):
+            if fn.endswith(".json") and fn[:-5] != "index" and fn[:-5] not in slugs_m:
+                os.remove(os.path.join(COMENTARIOS_DIR, fn))
+        save_json(os.path.join(COMENTARIOS_DIR, "index.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "total": sum(e["total"] for e in lista_m),
+            "estados": lista_m,
+        }, compact=True)
+        # panel de pases de peaje: reagrupar por estado
+        pases_por_estado = {}
+        for regs in pases_info.values():
+            for r in regs:
+                est_p = (normalizar_estado(r.get("edo", ""), estados_mx)
+                         or estados_mx.estado_de(r["lon"], r["lat"]))
+                if panel_na:
+                    if est_p not in nombres_mx:
+                        continue  # del lado de EUA: no se incluye
+                    if not r.get("edo") and not estados_mx.dentro_de_alguno(r["lon"], r["lat"]):
+                        continue
+                reg_p = {k: v for k, v in r.items() if k != "edo"}
+                pases_por_estado.setdefault(est_p, {})[str(r["id"])] = reg_p
+        os.makedirs(PASES_DIR, exist_ok=True)
+        slugs_p = set()
+        lista_p = []
+        for est_p, segs_p in sorted(pases_por_estado.items()):
+            slug_p = slugify(est_p)
+            slugs_p.add(slug_p)
+            save_json(os.path.join(PASES_DIR, f"{slug_p}.json"),
+                      {"estado": est_p, "segmentos": segs_p}, compact=True)
+            lista_p.append({"estado": est_p, "slug": slug_p, "total": len(segs_p)})
+        for fn in os.listdir(PASES_DIR):
+            if fn.endswith(".json") and fn[:-5] != "index" and fn[:-5] not in slugs_p:
+                os.remove(os.path.join(PASES_DIR, fn))
+        save_json(os.path.join(PASES_DIR, "index.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "total": sum(e["total"] for e in lista_p),
+            "estados": lista_p,
+            "tipos": {str(k): v for k, v in ROAD_TYPE_NAMES.items()},
+            "nombres_pases": PASES_CONOCIDOS,
+        }, compact=True)
+        # panel de velocidades mal puestas: reagrupar por estado
+        vel_por_estado = {}
+        for regs in velocidades_info.values():
+            for r in regs:
+                est_v = (normalizar_estado(r.get("edo", ""), estados_mx)
+                         or estados_mx.estado_de(r["lon"], r["lat"]))
+                if panel_na:
+                    if est_v not in nombres_mx:
+                        continue  # del lado de EUA: no se incluye
+                    if not r.get("edo") and not estados_mx.dentro_de_alguno(r["lon"], r["lat"]):
+                        continue
+                reg_v = {k: v for k, v in r.items() if k != "edo"}
+                vel_por_estado.setdefault(est_v, {})[str(r["id"])] = reg_v
+        os.makedirs(VELOCIDADES_DIR, exist_ok=True)
+        slugs_v = set()
+        lista_v = []
+        for est_v, segs_v in sorted(vel_por_estado.items()):
+            slug_v = slugify(est_v)
+            slugs_v.add(slug_v)
+            save_json(os.path.join(VELOCIDADES_DIR, f"{slug_v}.json"),
+                      {"estado": est_v, "segmentos": segs_v}, compact=True)
+            lista_v.append({"estado": est_v, "slug": slug_v, "total": len(segs_v)})
+        for fn in os.listdir(VELOCIDADES_DIR):
+            if fn.endswith(".json") and fn[:-5] != "index" and fn[:-5] not in slugs_v:
+                os.remove(os.path.join(VELOCIDADES_DIR, fn))
+        save_json(os.path.join(VELOCIDADES_DIR, "index.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "total": sum(e["total"] for e in lista_v),
+            "estados": lista_v,
+            "tipos": {str(k): v for k, v in ROAD_TYPE_NAMES.items()},
+        }, compact=True)
+        # panel de places (mal escritos y sin dirección): reagrupar por estado
+        places_por_estado = {}
+        for regs in places_info.values():
+            for r in regs:
+                est_pl = (normalizar_estado(r.get("edo", ""), estados_mx)
+                          or estados_mx.estado_de(r["lon"], r["lat"]))
+                if panel_na:
+                    if est_pl not in nombres_mx:
+                        continue  # del lado de EUA: no se incluye
+                    if not r.get("edo") and not estados_mx.dentro_de_alguno(r["lon"], r["lat"]):
+                        continue
+                reg_pl = {k: v for k, v in r.items() if k != "edo"}
+                places_por_estado.setdefault(est_pl, {})[str(r["id"])] = reg_pl
+        os.makedirs(PLACES_DIR, exist_ok=True)
+        slugs_pl = set()
+        lista_pl = []
+        for est_pl, plcs in sorted(places_por_estado.items()):
+            slug_pl = slugify(est_pl)
+            slugs_pl.add(slug_pl)
+            save_json(os.path.join(PLACES_DIR, f"{slug_pl}.json"),
+                      {"estado": est_pl, "places": plcs}, compact=True)
+            lista_pl.append({
+                "estado": est_pl, "slug": slug_pl, "total": len(plcs),
+                "orto": len([1 for p in plcs.values() if p.get("sug")]),
+                "sin_dir": len([1 for p in plcs.values() if p.get("sd")]),
+            })
+        for fn in os.listdir(PLACES_DIR):
+            if fn.endswith(".json") and fn[:-5] != "index" and fn[:-5] not in slugs_pl:
+                os.remove(os.path.join(PLACES_DIR, fn))
+        save_json(os.path.join(PLACES_DIR, "index.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "total": sum(e["total"] for e in lista_pl),
+            "orto": sum(e["orto"] for e in lista_pl),
+            "sin_dir": sum(e["sin_dir"] for e in lista_pl),
+            "estados": lista_pl,
+        }, compact=True)
+        return resumen
+
+    def _git(*args_git):
+        return subprocess.run(["git", *args_git], cwd=BASE, capture_output=True, text=True)
+
+    def _motivo_git(r):
+        """Resume el error de un comando git para poder verlo en la bitácora."""
+        txt = ((r.stderr or "") + " " + (r.stdout or "")).strip()
+        txt = " ".join(txt.split())
+        return txt[-220:] if txt else f"código {r.returncode}"
+
+    def _rutas_propias():
+        """Rutas que publica este panel (cada panel tiene las suyas, no se pisan)."""
+        rutas = []
+        for p in (DATA_DIR, STATE_PATH, LASTRUN_PATH, DEBUG_PATH):
+            rel = os.path.relpath(p, BASE)
+            if os.path.exists(p) or _git("ls-files", "--error-unmatch", rel).returncode == 0:
+                rutas.append(rel)
+        return rutas
+
+    def publicar_git(etiqueta):
+        """Commit y push intermedios (solo dentro de GitHub Actions).
+
+        Se publica SIN rebase: se coloca la rama sobre origin/main y se vuelven
+        a marcar solo las rutas de este panel. Antes se hacía rebase con
+        -X theirs, que no sabe resolver los conflictos borrado/modificación
+        (cuando el escáner elimina el archivo de un estado que quedó vacío) y
+        dejaba de publicar durante horas.
+        """
+        if not os.environ.get("GITHUB_ACTIONS"):
+            return
+        try:
+            _git("rebase", "--abort")  # limpia cualquier rebase atorado de un intento previo
+            _git("config", "user.name", "escaner-bot")
+            _git("config", "user.email", "actions@users.noreply.github.com")
+            motivo = ""
+            for _ in range(5):
+                f = _git("fetch", "origin", "main")
+                if f.returncode != 0:
+                    motivo = "fetch -> " + _motivo_git(f)
+                    time.sleep(5)
+                    continue
+                _git("reset", "--mixed", "origin/main")
+                _git("add", "-A", *_rutas_propias())
+                if _git("diff", "--cached", "--quiet").returncode == 0:
+                    return  # nada nuevo que publicar
+                c = _git("commit", "-m", etiqueta)
+                if c.returncode != 0:
+                    motivo = "commit -> " + _motivo_git(c)
+                    time.sleep(5)
+                    continue
+                q = _git("push", "origin", "HEAD:main")
+                if q.returncode == 0:
+                    log(f"Publicación parcial hecha: {etiqueta}")
+                    return
+                motivo = "push -> " + _motivo_git(q)
+                time.sleep(5)
+            log(f"No se pudo publicar parcial ({motivo}); se reintentará en la siguiente")
+        except Exception as e:
+            log(f"No se pudo publicar parcial ({e}); se publicará al final")
+
+    try:
+        if args.modo == "test":
+            for nombre, bb in celdas_a_escanear:
+                h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
+                                  min_metros=min_metros)
+                h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
+                escaneadas.append((nombre, bb, h))
+                hallados_run += len(h)
+        elif indices_zona:
+            for idx in indices_zona:
+                if time.time() >= limite:
+                    log("Se acabó el tiempo; el resto de la zona queda para otra corrida")
+                    break
+                bb = bbox_de(idx)
+                x1c, y1c, x2c, y2c = bb
+                mxc, myc = (x1c + x2c) / 2, (y1c + y2c) / 2
+                usa_n = None
+                if not panel_na and distancia_a_frontera(mxc, myc) < franja_umbral:
+                    try:
+                        if sesion_usa is None:
+                            sesion_usa = nueva_sesion("usa")
+                        d_usa = pedir_celda(sesion_usa, "usa", bb, pausa, tipos)
+                        contador["req"] += 1
+                        usa_n = len(_objetos(d_usa, "segments"))
+                    except Exception:
+                        usa_n = None
+                _champs_celda.clear()
+                _candados_celda.clear()
+                _pases_celda.clear()
+                _velocidades_celda.clear()
+                _places_celda.clear()
+                _comentarios_celda.clear()
+                _ortografia_celda.clear()
+                segs_antes = contador["segs"]
+                try:
+                    h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
+                                      min_metros=min_metros)
+                    fallos_seguidos = 0
+                except AuthError:
+                    raise
+                except Exception as e:
+                    fallos_seguidos += 1
+                    log(f"Celda {idx} falló ({e})")
+                    if fallos_seguidos >= 8:
+                        log("Demasiados fallos seguidos; se detiene y se guarda el avance")
+                        break
+                    time.sleep(3)
+                    continue
+                segs_en_celda = contador["segs"] - segs_antes
+                if panel_na and segs_en_celda < 5:
+                    # regla espejo: con tan pocos datos en NA, la celda vive en ROW
+                    h = []
+                    segs_en_celda = 0
+                    _champs_celda.clear()
+                    _candados_celda.clear()
+                    _pases_celda.clear()
+                    _velocidades_celda.clear()
+                    _places_celda.clear()
+                    _comentarios_celda.clear()
+                    _ortografia_celda.clear()
+                # si el servidor NA tiene datos significativos ahí, la zona es suya
+                # (NA devuelve 0 en todo el México que sí es de ROW)
+                if usa_n is not None and usa_n >= 5:
+                    h = []
+                    segs_en_celda = 0
+                    _champs_celda.clear()  # celda del servidor NA: no cuenta
+                    _candados_celda.clear()
+                    _pases_celda.clear()
+                    _velocidades_celda.clear()
+                    _places_celda.clear()
+                    _comentarios_celda.clear()
+                    _ortografia_celda.clear()
+                else:
+                    h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
+                if _champs_celda:
+                    champs_info[str(idx)] = {k: len(v) for k, v in _champs_celda.items()}
+                else:
+                    champs_info.pop(str(idx), None)
+                if _candados_celda:
+                    _hoy_c = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_c = {p.get("id"): p.get("v", "")
+                               for p in candados_info.get(str(idx), [])}
+                    for _rc in _candados_celda.values():
+                        _rc["v"] = _prev_c.get(_rc["id"]) or _hoy_c
+                        _rc["r"] = _hoy_c
+                    candados_info[str(idx)] = list(_candados_celda.values())
+                else:
+                    candados_info.pop(str(idx), None)
+                if _pases_celda:
+                    _hoy_p = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_p = {p.get("id"): p.get("v", "")
+                               for p in pases_info.get(str(idx), [])}
+                    for _rp in _pases_celda.values():
+                        _rp["v"] = _prev_p.get(_rp["id"]) or _hoy_p
+                        _rp["r"] = _hoy_p
+                    pases_info[str(idx)] = list(_pases_celda.values())
+                else:
+                    pases_info.pop(str(idx), None)
+                if _comentarios_celda:
+                    comentarios_info[str(idx)] = list(_comentarios_celda.values())
+                else:
+                    comentarios_info.pop(str(idx), None)
+                if _ortografia_celda:
+                    _hoy_o = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_o = {p.get("sid"): p.get("v", "")
+                               for p in ortografia_info.get(str(idx), [])}
+                    for _ro in _ortografia_celda.values():
+                        _ro["v"] = _prev_o.get(_ro["sid"]) or _hoy_o  # primera vez que se vio
+                        _ro["r"] = _hoy_o  # última revisión
+                    ortografia_info[str(idx)] = list(_ortografia_celda.values())
+                else:
+                    ortografia_info.pop(str(idx), None)
+                if _velocidades_celda:
+                    _hoy_v = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_v = {p.get("id"): p.get("v", "")
+                               for p in velocidades_info.get(str(idx), [])}
+                    for _rv in _velocidades_celda.values():
+                        _rv["v"] = _prev_v.get(_rv["id"]) or _hoy_v  # primera vez que se vio
+                        _rv["r"] = _hoy_v  # última revisión
+                    velocidades_info[str(idx)] = list(_velocidades_celda.values())
+                else:
+                    velocidades_info.pop(str(idx), None)
+                if _places_celda:
+                    _hoy_pl = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_pl = {p.get("id"): p.get("v", "")
+                                for p in places_info.get(str(idx), [])}
+                    for _rp in _places_celda.values():
+                        _rp["v"] = _prev_pl.get(_rp["id"]) or _hoy_pl  # primera vez que se vio
+                        _rp["r"] = _hoy_pl  # última revisión
+                    places_info[str(idx)] = list(_places_celda.values())
+                else:
+                    places_info.pop(str(idx), None)
+                celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
+                escaneadas.append((str(idx), bb, h))
+                hallados_run += len(h)
+                if len(escaneadas) % 200 == 0:
+                    log(f"zona: {len(escaneadas)}/{len(indices_zona)} celdas | "
+                        f"{hallados_run} sin nombre")
+                if pub_cada and time.time() - ultima_pub >= pub_cada * 60 and escaneadas:
+                    aplicar_pendientes()
+                    publicar_git(f"Publicación parcial {datetime.now(timezone.utc).strftime('%H:%M UTC')}")
+                    ultima_pub = time.time()
+        else:
+            while time.time() < limite:
+                # las que ya cumplieron su espera vuelven a la cola
+                _ahora = time.time()
+                while en_espera and en_espera[0][0] <= _ahora:
+                    _c, _i, _n = en_espera.pop(0)
+                    falladas.append((_i, _n))
+                de_cola = bool(falladas)
+                if de_cola:
+                    idx, intentos = falladas.popleft()
+                    por_cola.add(idx)
+                else:
+                    intentos = 0
+                    if cursor >= total_celdas:
+                        cursor = 0
+                        ciclo += 1
+                        por_cola.clear()   # empieza otra vuelta: todas cuentan de nuevo
+                        log(f"Vuelta completa al país. Iniciando ciclo {ciclo}")
+                    idx = cursor
+                    cursor += 1
+                    if idx in por_cola:
+                        continue  # ya se rehízo por la cola en esta misma corrida
+                    if str(idx) in celdas_run:
+                        log("Toda la zona quedó cubierta en esta corrida; terminando")
+                        break
+                    celdas_run.add(str(idx))
+                info = celdas_info.get(str(idx))
+                # celdas que salieron vacías se revisan solo de vez en cuando
+                if info and info.get("n", 0) == 0 and ciclo - info.get("c", 0) < ciclos_vacia:
+                    continue
+                bb = bbox_de(idx)
+                # saltar celdas fuera de México (o fuera de los estados elegidos)
+                x1c, y1c, x2c, y2c = bb
+                mxc, myc = (x1c + x2c) / 2, (y1c + y2c) / 2
+                puntos_chk = [(mxc, myc), (x1c, y1c), (x2c, y1c), (x1c, y2c), (x2c, y2c),
+                              (mxc, y1c), (mxc, y2c), (x1c, myc), (x2c, myc)]
+                if solo_estados:
+                    dentro = any(estados_mx.estado_de(px, py) in solo_estados
+                                 for px, py in puntos_chk)
+                else:
+                    dentro = any(estados_mx.dentro_de_alguno(px, py)
+                                 for px, py in puntos_chk)
+                if dentro and panel_na and distancia_a_frontera(mxc, myc) >= franja_na:
+                    dentro = False  # Panel NA: solo la franja fronteriza
+                if not dentro:
+                    celdas_info[str(idx)] = sello_celda(0)
+                    continue
+                # franja fronteriza: si el servidor NA tiene más datos ahí,
+                # esa zona vive en el otro servidor y no se debe reportar
+                usa_n = None
+                if not panel_na and distancia_a_frontera(mxc, myc) < franja_umbral:
+                    try:
+                        if sesion_usa is None:
+                            sesion_usa = nueva_sesion("usa")
+                        d_usa = pedir_celda(sesion_usa, "usa", bb, pausa, tipos)
+                        contador["req"] += 1
+                        usa_n = len(_objetos(d_usa, "segments"))
+                    except Exception:
+                        usa_n = None
+                _champs_celda.clear()
+                _candados_celda.clear()
+                _pases_celda.clear()
+                _velocidades_celda.clear()
+                _places_celda.clear()
+                _comentarios_celda.clear()
+                _ortografia_celda.clear()
+                segs_antes = contador["segs"]
+                try:
+                    h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
+                                      min_metros=min_metros)
+                    fallos_seguidos = 0
+                except AuthError:
+                    raise
+                except Exception as e:
+                    fallos_seguidos += 1
+                    intentos += 1
+                    if intentos < MAX_INTENTOS:
+                        en_espera.append((time.time() + ESPERA_REINTENTO, idx, intentos))
+                        log(f"Celda {idx} falló ({e}); reintento {intentos} "
+                            f"en {ESPERA_REINTENTO // 60} min")
+                    else:
+                        para_siguiente.append(idx)  # ya no se reintenta en esta corrida
+                        log(f"Celda {idx} falló {intentos} veces ({e}); "
+                            "queda al principio de la próxima corrida")
+                    por_cola.discard(idx)
+                    if fallos_seguidos >= 8:
+                        log("Demasiados fallos seguidos; se detiene y se guarda el avance")
+                        break
+                    if not de_cola:
+                        cursor = max(cursor, idx + 1)
+                    time.sleep(3)
+                    continue
+                segs_en_celda = contador["segs"] - segs_antes
+                if panel_na and segs_en_celda < 5:
+                    # regla espejo: con tan pocos datos en NA, la celda vive en ROW
+                    h = []
+                    segs_en_celda = 0
+                    _champs_celda.clear()
+                    _candados_celda.clear()
+                    _pases_celda.clear()
+                    _velocidades_celda.clear()
+                    _places_celda.clear()
+                    _comentarios_celda.clear()
+                    _ortografia_celda.clear()
+                # si el servidor NA tiene datos significativos ahí, la zona es suya
+                # (NA devuelve 0 en todo el México que sí es de ROW)
+                if usa_n is not None and usa_n >= 5:
+                    log(f"Celda {idx}: franja del servidor NA "
+                        f"({usa_n} segs en NA vs {segs_en_celda} en ROW); se omite")
+                    h = []
+                    segs_en_celda = 0  # tratarla como vacía: re-checar solo de vez en cuando
+                    _champs_celda.clear()  # celda del servidor NA: no cuenta
+                    _candados_celda.clear()
+                    _pases_celda.clear()
+                    _velocidades_celda.clear()
+                    _places_celda.clear()
+                    _comentarios_celda.clear()
+                    _ortografia_celda.clear()
+                else:
+                    h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
+                if _champs_celda:
+                    champs_info[str(idx)] = {k: len(v) for k, v in _champs_celda.items()}
+                else:
+                    champs_info.pop(str(idx), None)
+                if _candados_celda:
+                    _hoy_c = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_c = {p.get("id"): p.get("v", "")
+                               for p in candados_info.get(str(idx), [])}
+                    for _rc in _candados_celda.values():
+                        _rc["v"] = _prev_c.get(_rc["id"]) or _hoy_c
+                        _rc["r"] = _hoy_c
+                    candados_info[str(idx)] = list(_candados_celda.values())
+                else:
+                    candados_info.pop(str(idx), None)
+                if _pases_celda:
+                    _hoy_p = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_p = {p.get("id"): p.get("v", "")
+                               for p in pases_info.get(str(idx), [])}
+                    for _rp in _pases_celda.values():
+                        _rp["v"] = _prev_p.get(_rp["id"]) or _hoy_p
+                        _rp["r"] = _hoy_p
+                    pases_info[str(idx)] = list(_pases_celda.values())
+                else:
+                    pases_info.pop(str(idx), None)
+                if _comentarios_celda:
+                    comentarios_info[str(idx)] = list(_comentarios_celda.values())
+                else:
+                    comentarios_info.pop(str(idx), None)
+                if _ortografia_celda:
+                    _hoy_o = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_o = {p.get("sid"): p.get("v", "")
+                               for p in ortografia_info.get(str(idx), [])}
+                    for _ro in _ortografia_celda.values():
+                        _ro["v"] = _prev_o.get(_ro["sid"]) or _hoy_o  # primera vez que se vio
+                        _ro["r"] = _hoy_o  # última revisión
+                    ortografia_info[str(idx)] = list(_ortografia_celda.values())
+                else:
+                    ortografia_info.pop(str(idx), None)
+                if _velocidades_celda:
+                    _hoy_v = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_v = {p.get("id"): p.get("v", "")
+                               for p in velocidades_info.get(str(idx), [])}
+                    for _rv in _velocidades_celda.values():
+                        _rv["v"] = _prev_v.get(_rv["id"]) or _hoy_v  # primera vez que se vio
+                        _rv["r"] = _hoy_v  # última revisión
+                    velocidades_info[str(idx)] = list(_velocidades_celda.values())
+                else:
+                    velocidades_info.pop(str(idx), None)
+                if _places_celda:
+                    _hoy_pl = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_pl = {p.get("id"): p.get("v", "")
+                                for p in places_info.get(str(idx), [])}
+                    for _rp in _places_celda.values():
+                        _rp["v"] = _prev_pl.get(_rp["id"]) or _hoy_pl  # primera vez que se vio
+                        _rp["r"] = _hoy_pl  # última revisión
+                    places_info[str(idx)] = list(_places_celda.values())
+                else:
+                    places_info.pop(str(idx), None)
+                celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
+                escaneadas.append((str(idx), bb, h))
+                hallados_run += len(h)
+                if len(escaneadas) % 200 == 0:
+                    log(f"{len(escaneadas)} celdas | {contador['req']} peticiones | "
+                        f"{hallados_run} sin nombre | cursor {cursor}/{total_celdas}")
+                if pub_cada and time.time() - ultima_pub >= pub_cada * 60 and escaneadas:
+                    aplicar_pendientes()
+                    publicar_git(f"Publicación parcial {datetime.now(timezone.utc).strftime('%H:%M UTC')}")
+                    ultima_pub = time.time()
+    except AuthError as e:
+        log(f"El servidor dejó de aceptar peticiones: {e}")
+    except KeyboardInterrupt:
+        pass
+    except Exception as e:
+        log(f"Error inesperado (se guarda el avance): {e}")
+
+    # --- volcado final al almacén y archivos del panel
+    resumen = aplicar_pendientes()
+    save_json(LASTRUN_PATH, {
+        "ok": True, "fecha": datetime.now(timezone.utc).isoformat(),
+        "modo": args.modo, "celdas": celdas_aplicadas,
+        "peticiones": contador["req"], "segmentos_vistos": contador["segs"],
+        "sin_nombre_en_corrida": hallados_run, "total_acumulado": resumen["total"],
+        "peticiones_inegi": inegi.peticiones if inegi else 0,
+        "errores_inegi": inegi.errores if inegi else 0,
+        "minutos": round((time.time() - inicio) / 60, 1),
+    })
+    log(f"Listo: {celdas_aplicadas} celdas, {contador['req']} peticiones, "
+        f"{hallados_run} segmentos sin nombre en esta corrida, "
+        f"{resumen['total']} acumulados en total.")
+
+
+if __name__ == "__main__":
+    main()
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Escáner de segmentos sin nombre en Waze (México).
+Consulta la API pública del Waze Map Editor (la misma que usa el modo
+práctica, sin necesidad de iniciar sesión), recorre el país en una malla
+de celdas y guarda los segmentos sin nombre en docs/data/ para que la
+página web (GitHub Pages) los muestre.
+
+Uso:
+  python scanner/scan.py --modo test               # zona de prueba (Guadalajara centro)
+  python scanner/scan.py --modo completo --minutos 240
+"""
+import argparse
+import json
+import math
+import os
+import re
+import subprocess
+import sys
+import time
+import unicodedata
+from collections import deque
+from datetime import datetime, timezone
+
+try:
+    import requests
+except ImportError:
+    print("Falta la librería 'requests' (pip install requests)", file=sys.stderr)
+    sys.exit(1)
+
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(BASE, "scanner", "config.json")
 GEOJSON_PATH = os.path.join(BASE, "scanner", "mx_estados.geojson")
