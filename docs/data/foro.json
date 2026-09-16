@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-09-15T18:58:27+00:00",
+ "actualizado": "2026-09-16T16:10:57+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 127,
- "peticiones": 136,
+ "temas_revisados": 128,
+ "peticiones": 137,
  "errores": 0,
  "champs": {
   "eumirgarciac2": {
@@ -49,11 +49,11 @@
   "maalrivba": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 5
+    "respuestas": 4
    },
    "otras": {
     "temas": 0,
-    "respuestas": 4
+    "respuestas": 2
    }
   },
   "davidabarca": {
@@ -103,17 +103,17 @@
    },
    "otras": {
     "temas": 0,
-    "respuestas": 3
+    "respuestas": 1
    }
   }
  },
  "otros_frecuentes": {
-  "velezss": 88,
+  "velezss": 85,
   "LuisCav29": 34,
   "jcog69": 13,
   "TheSammirs": 9,
+  "JorgeLAB": 5,
   "system": 5,
-  "JorgeLAB": 4,
   "ideastisp": 3,
   "Fronyshout": 3,
   "usa_olubr1ay": 3,
