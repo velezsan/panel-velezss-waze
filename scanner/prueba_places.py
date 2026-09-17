@@ -33,7 +33,8 @@ PARES = [
     # --- las que fue marcando Santiago al revisar el panel
     ("ABL Consultores", "ABL Consultores"), ("CEDIS Bimbo", "CEDIS Bimbo"),
     ("CMD Monterrey", "CMD Monterrey"), ("HNI Torreon", "HNI Torreon"),
-    ("INNOTEC", "INNOTEC"), ("MIT Academy", "MIT Academy"),
+    ("INNOTEC", "Innotec"),   # lo descartó en la segunda revisión
+    ("MIT Academy", "MIT Academy"),
     ("DSPM Zapopan", "DSPM Zapopan"), ("HGSZMF No. 4", "HGSZMF No. 4"),
     ("FirstCash", "FirstCash"),
     ("UAS Facultad de Derecho", "UAS Facultad de Derecho"),
@@ -89,12 +90,10 @@ PARES = [
     ("GDL Centro", "Gdl Centro"), ("Farmacia GDL", "Farmacia Gdl"),
     ("Universidad CNCI - Querétaro Zaragoza", "Universidad Cnci - Querétaro Zaragoza"),
     ("SAT - ADSC Querétaro", "SAT - Adsc Querétaro"),
-    ("CTM Querétaro", "Ctm Querétaro"),
     ("ESCI", "Esci"), ("SUSPE", "Suspe"),
     ("Laboratorios LABSA", "Laboratorios Labsa"),
     ("Tayrona BTQ", "Tayrona Btq"),
     ("UADY Facultad de Medicina", "Uady Facultad de Medicina"),
-    ("BanBajio - Plaza Zaragoza", "Banbajio - Plaza Zaragoza"),
     ("GTS (GLOBAL THERMAL SOLUTIONS)", "Gts (Global Thermal Solutions)"),
     ("Citibanamex - 16 de Septiembre", "Banamex - 16 de Septiembre"),
     # --- errores de verdad
@@ -168,6 +167,18 @@ MEJORAS = [
     ("Súper y Carnes ABC", "Súper y Carnes Abc", "Súper y Carnes ABC"),
     ("CAM No. 5 Héroes Coahuilenses", "Cam No. 5 Héroes Coahuilenses",
      "CAM No. 5 Héroes Coahuilenses"),
+    ("CTM Querétaro", "Ctm Querétaro", "CTM Querétaro"),
+    ("UAC - Facultad de Ciencias", "Uac - Facultad de Ciencias",
+     "UAC - Facultad de Ciencias"),
+    # marcas con mayúscula interna: se conserva la forma exacta
+    ("BanBajio - Plaza Zaragoza", "Banbajio - Plaza Zaragoza",
+     "BanBajio - Plaza Zaragoza"),
+    ("CIBanco Torreón", "Cibanco Torreón", "CIBanco Torreón"),
+    ("AlSuper Centro", "Alsuper Centro", "AlSuper Centro"),
+    ("Sta.Ma. de Guadalupe", "Sta.ma. de Guadalupe", "Sta.Ma. de Guadalupe"),
+    # los signos de apertura también abren palabra
+    ("¡QUE TACOS!", "¡que Tacos!", "¡Que Tacos!"),
+    ("¿Donde estan los tacos?", "¿donde Estan Los Tacos?", "¿Donde Estan Los Tacos?"),
 ]
 
 # Lo ya bien escrito no debe cambiar al volver a pasarlo (idempotencia).
@@ -178,7 +189,9 @@ IDEMPOTENTES = [
     "Café de la Parroquia", "Farmacia del Ahorro", "McDonald's", "L'Occitane",
     "Pemex - ES08877", "Tiendas 3B", "C5 Sinaloa", "UAS Facultad de Derecho",
     "Caseta Las Brisas KM 110+100", "Km 22 Carretera Libre",
-    "Cargo Gas", "FirstCash", "Pemex [E] 08877", "INNOTEC", "CEDIS Bimbo",
+    "Cargo Gas", "FirstCash", "Pemex [E] 08877", "CEDIS Bimbo",
+    "BanBajio - Plaza Zaragoza", "CIBanco Torreón", "AlSuper Centro",
+    "UAC - Facultad de Ciencias", "Templo SUD", "CETIS No. 48", "Autobuses AAA",
 ]
 
 
@@ -228,7 +241,7 @@ def main():
         ("Farmacia GDL", ["GDL"]),
         ("UADY Facultad de Medicina", ["UADY"]),
         ("Tiendas 3B", []),        # ya no se aplasta: se protege el código
-        ("BanBajio - Plaza Zaragoza", ["BanBajio"]),  # mayúscula interna
+        ("BanBajio - Plaza Zaragoza", []),   # ya se respeta la marca
         ("SAT - ADSC Querétaro", ["ADSC"]),           # SAT sí está en la lista
         ("VIPS", ["VIPS"]),
         # las palabras largas en mayúsculas son un nombre a gritos, no siglas:

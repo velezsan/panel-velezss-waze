@@ -104,8 +104,27 @@ ALLOWED = {
     "S.A.P.I.", "S.R.L.", "I.A.P.", "II", "III", "IV", "VI", "VII", "VIII", "IX", "KTM",
     "AM", "PM", "SA", "CV", "SC", "AC", "SAPI", "LLC", "INC", "SOS", "IAP", "MG", "RTP", "AT&T",
     # las va agregando Santiago conforme salen en el panel
-    "ES", "UAS", "ABL", "CEDIS", "CMD", "HNI", "INNOTEC", "MIT", "DSPM", "HGSZMF",
+    "ES", "UAS", "ABL", "CEDIS", "CMD", "HNI", "MIT", "DSPM", "HGSZMF",
     "ABC", "CAM", "FMA", "CEA",
+    # segunda tanda, de la revisión una por una en el panel
+    "UAC", "GM", "CB", "CSU", "SNTE", "CETIS", "GS", "SUD", "AAA", "DNA", "FC", "S.A", "TV",
+    "ATR", "CONALEP", "CTM", "EMMSA", "FINSA", "HC", "ITL", "LTH", "MS", "MX", "ODM", "OK",
+    "RR", "TRP", "UANE", "UJED", "UMAA", "UNID", "A.P.I.N.", "AA", "ABM", "ADL", "ADM",
+    "ADOSA", "ALILA", "AP", "AR", "ARAF", "ATM", "AVL", "BARF", "BBQ", "BCD", "BCM", "BOC",
+    "BPS", "BS", "C.B.T.A.", "C.V", "CAB", "CAPT", "CAT", "CBC", "CBH", "CBTA", "CDE",
+    "CECAP", "CECATI", "CEMI", "CENDI", "CEO", "CIAC", "CIDT", "CIMEC", "CINSA", "CIVET",
+    "CN", "CNC", "COCEEEPA", "COECYT", "COGA", "COMIMSA", "CSN", "CSR", "CT", "CTN", "DAR",
+    "DASA", "DAZ", "DIC", "DILL", "DSJ", "DSM", "DT", "DYLSA", "EA", "EBDI", "EIYSE",
+    "ESMED", "ESSEX", "FCA", "FEM", "GAMA", "GHSP", "GI", "GNC", "GP", "GUECSA", "GWM",
+    "HDI", "HFL", "HQ", "HR", "IAC", "IBLC", "ICR", "IDEA", "IDEHSA", "IESEC", "IESIZ",
+    "IFM", "IMES", "IMPAC", "ING", "ISAE", "ISISA", "ISMA", "ISS", "ISSTE", "IT", "J.C.",
+    "JAC", "JR", "JS", "LCD", "LG", "M.F.C.", "M.G.", "MAS", "MED", "MEX", "MJB", "ML", "MQ",
+    "MSA", "MVP", "N.L.", "NDIAC", "NG", "OC", "OCP", "OMNIA", "OS", "OTR", "OV", "PC",
+    "PEPI", "PFP", "PGJE", "PHOR", "PICS", "PISA", "PMW", "PRONNIF", "PVC", "QAHWA", "QX",
+    "RBJ", "RCG", "REYSI", "RG", "RGM", "RH", "RHI", "RL", "RT", "S.C.L.", "S.O.S.", "SDS",
+    "SEAT", "SEMEFO", "SIBSA", "SNTSA", "SNTSS", "SOFEN", "SPA", "STAM", "TA", "TAD", "TAP",
+    "TEPSA", "TLE", "TNT", "TRC", "TSM", "UAAAN", "UFI", "UNEA", "UNILAM", "UNIVAS", "UPL",
+    "USA", "UTEST", "UTT", "UVM", "VF", "VMV", "XCF", "XV", "YMCA",
 }
 
 # Categorías donde una calle no aplica: son accidentes geográficos y obras, no
@@ -122,7 +141,21 @@ LOWERS = {"a", "de", "del", "y", "o", "en", "con", "por", "para", "al", "un", "u
 CONDITIONAL_ARTICLES = {"el", "la", "los", "las"}
 PREPOSITIONS = {"de", "del", "a", "en", "por", "con", "para", "al"}
 # Marcas que se dejan tal cual, y solo en estas formas exactas (distingue mayúsculas)
-KEEP_AS_IS = ["OXXO", "Oxxo", "Toks", "Tok's", "FirstCash"]
+KEEP_AS_IS = [
+    "OXXO", "Oxxo", "Toks", "Tok's", "FirstCash",
+    # marcas con mayúscula interna que marcó Santiago en el panel
+    "CIBanco", "Back2Back", "SushiStar", "ABControl", "AlSuper", "BanBajio", "BanBajío",
+    "BarberShop", "BocaPalma", "CADHaus", "CECyTeC", "CircleK", "CombuGas", "ConstruAlianza",
+    "CrossSport", "DeMueble", "EnelX", "EvoFit", "FlexTec", "FullOK", "GamePlanet", "GmbH",
+    "HairStyle", "IIbérica", "InnovaSport", "KickOff", "KinderClinik", "KiwiGo", "L’Anfora",
+    "LagAcero", "LagunAcero", "LaserMex", "MacStore", "MiGasolina", "MiPlaza", "MyTAAC",
+    "NoManches", "PetroLaguna", "PowerFit", "PressoTechnik", "ProFit", "ProHumanidad",
+    "RamosPlanta", "SantaRita", "ServicePoint", "SkinMedical", "SonyGas", "Sta.Ma.",
+    "Tee*Zone",
+]
+# Se arman en un solo patrón (van más de cincuenta): una pasada en vez de una
+# por marca, que con miles de places sí se nota.
+_RE_KEEP = None
 # Palabras que se quedan como vengan escritas, sin proponer cambio de
 # mayúsculas: "KM 110+100" se queda en KM y "Km 22" se queda en Km. Lo pidió
 # Santiago: la forma la decide quien capturó el place, no nosotros.
@@ -175,7 +208,8 @@ LETRA = "A-Za-zÀ-ÿ"          # las mismas clases que usa el JavaScript
 _RE_BBVA = re.compile(r"\bBBVA\s+Bancomer\b", re.I)
 _RE_PAN = re.compile(r"\bPAN\b")
 # primera letra de cada palabra: inicio de cadena o tras uno de esos separadores
-_RE_CAPITALIZA = re.compile(r"(?:^|[\s\-\(\"/“”&]|'(?!s\b))([a-zÀ-ÿ])")
+# se agregan ¡ y ¿ a los separadores: sin ellos "¡QUE TACOS!" quedaba "¡que Tacos!"
+_RE_CAPITALIZA = re.compile(r"(?:^|[\s\-\(\"/“”&¡¿]|'(?!s\b))([a-zÀ-ÿ])")
 _RE_PALABRA = re.compile(r"([a-zA-ZÀ-ÿ.]+(?:'[a-zA-ZÀ-ÿ]+)?)")
 _RE_PUNTOS = re.compile(r"[.,:;()\"“”]")
 MARCA_INI = chr(0xE000)   # zona privada de Unicode: no aparece en nombres reales
@@ -203,19 +237,26 @@ def se_respeta(tok):
     return tok.lower() in RESPETAR_FORMA
 
 
+def _patron_keep():
+    """Patrón con todas las marcas de KEEP_AS_IS, de la más larga a la más corta."""
+    global _RE_KEEP
+    if _RE_KEEP is None:
+        piezas = "|".join(re.escape(t) for t in sorted(KEEP_AS_IS, key=len, reverse=True))
+        _RE_KEEP = re.compile("(^|[^" + LETRA + "])(" + piezas + ")(?=[^" + LETRA + "]|$)")
+    return _RE_KEEP
+
+
 def fix_grammar(texto):
     """Misma salida que fixGrammar() del userscript."""
     guardadas = []
     src = str(texto)
-    for tok in KEEP_AS_IS:
-        patron = re.compile("(^|[^" + LETRA + "])(" + re.escape(tok) + ")(?=[^" + LETRA + "]|$)")
 
-        def _guardar(m):
-            marcador = MARCA_INI + str(len(guardadas)) + MARCA_FIN
-            guardadas.append(m.group(2))
-            return m.group(1) + marcador
+    def _guardar(m):
+        marcador = MARCA_INI + str(len(guardadas)) + MARCA_FIN
+        guardadas.append(m.group(2))
+        return m.group(1) + marcador
 
-        src = patron.sub(_guardar, src)
+    src = _patron_keep().sub(_guardar, src)
 
     def _guardar_codigo(m):
         tok = m.group(2)
