@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-09-16T16:10:57+00:00",
+ "actualizado": "2026-09-17T13:23:23+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 128,
- "peticiones": 137,
+ "temas_revisados": 126,
+ "peticiones": 135,
  "errores": 0,
  "champs": {
   "eumirgarciac2": {
@@ -13,7 +13,7 @@
    },
    "otras": {
     "temas": 0,
-    "respuestas": 2
+    "respuestas": 1
    }
   },
   "gwm_": {
@@ -39,7 +39,7 @@
   "camachista": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 11
+    "respuestas": 10
    },
    "otras": {
     "temas": 0,
@@ -108,7 +108,7 @@
   }
  },
  "otros_frecuentes": {
-  "velezss": 85,
+  "velezss": 83,
   "LuisCav29": 34,
   "jcog69": 13,
   "TheSammirs": 9,

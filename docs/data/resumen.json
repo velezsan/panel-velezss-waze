@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-17T12:43:55+00:00",
+ "actualizado": "2026-09-17T13:21:23+00:00",
  "env": "row",
- "total": 119212,
+ "total": 119109,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -48,8 +48,8 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 3710,
-   "ciudades": 121
+   "total": 3628,
+   "ciudades": 120
   },
   {
    "estado": "Colima",
@@ -60,8 +60,8 @@
   {
    "estado": "Durango",
    "slug": "durango",
-   "total": 1845,
-   "ciudades": 91
+   "total": 1826,
+   "ciudades": 88
   },
   {
    "estado": "Guanajuato",
@@ -150,8 +150,8 @@
   {
    "estado": "Sinaloa",
    "slug": "sinaloa",
-   "total": 1865,
-   "ciudades": 139
+   "total": 1863,
+   "ciudades": 138
   },
   {
    "estado": "Sonora",
