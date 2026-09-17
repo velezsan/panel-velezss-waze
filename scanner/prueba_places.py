@@ -163,6 +163,10 @@ MEJORAS = [
     ("CARGOGAS Norte", "Cargogas Norte", "CargoGas Norte"),
     ("BANREGIO Centro", "Banregio Centro", "BanRegio Centro"),
     ("Ecovia Linea 1", "Ecovia Linea 1", "EcoVía Linea 1"),
+    ("SuKarne Monterrey", "Sukarne Monterrey", "SuKarne Monterrey"),
+    ("ChargeNow", "Chargenow", "ChargeNow"),
+    ("DeAcero Planta", "Deacero Planta", "DeAcero Planta"),
+    ("VIP Salón", "Vip Salón", "VIP Salón"),
     ("FIRSTCASH", "Firstcash", "FirstCash"),
     # siglas que Santiago fue aprobando: ya no se aplastan
     ("Industrias ABC S.A. de C.V.", "Industrias Abc S.A. de C.V.",
@@ -202,6 +206,7 @@ IDEMPOTENTES = [
     "Caseta Las Brisas KM 110+100", "Km 22 Carretera Libre",
     "CargoGas", "FirstCash", "Pemex [E] 08877", "CEDIS Bimbo", "BanRegio Torreón",
     "TodoGas", "EcoVía Línea 1", "UDEM Campus", "Grupo NL", "MTY Centro",
+    "SuKarne Monterrey", "ChargeNow", "DeAcero Planta", "VIP Salón", "FullOk",
     "BanBajio - Plaza Zaragoza", "CIBanco Torreón", "AlSuper Centro",
     "UAC - Facultad de Ciencias", "Templo SUD", "CETIS No. 48", "Autobuses AAA",
     "GAMA Muebles", "Gama Muebles", "Spa Relax", "Ropa USA", "La Idea",

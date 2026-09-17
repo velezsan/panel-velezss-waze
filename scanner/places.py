@@ -107,6 +107,9 @@ ALLOWED = {
     # las va agregando Santiago conforme salen en el panel
     "ES", "UAS", "ABL", "CEDIS", "CMD", "HNI", "MIT", "DSPM", "HGSZMF",
     "ABC", "CAM", "FMA", "CEA",
+    # cuarta tanda
+    "JM", "LM", "MR", "SADM", "UMM", "AG", "ERRE", "ICET", "RC", "TYM", "ADN", "JC", "VIP",
+    "CM", "EMME", "GILSA", "GNV", "HG", "IZA", "SSNL", "AIM", "CROC", "FM", "FNSI",
     # tercera tanda
     "NAR", "UDEM", "ENC", "ORG", "CED", "PAL", "ALA", "LP", "NL", "MTY", "ABP", "GE", "JT",
     # segunda tanda, de la revisión una por una en el panel
@@ -157,6 +160,8 @@ KEEP_AS_IS = [
     "Tee*Zone",
     # tercera tanda
     "BanRegio", "TodoGas", "EcoVía", "CargoGas",
+    # cuarta tanda ("FullOk" y "FullOK" andan las dos en el mapa)
+    "ChargeNow", "SuKarne", "DeAcero", "FullOk",
 ]
 # Se arman en un solo patrón (van más de cincuenta): una pasada en vez de una
 # por marca, que con miles de places sí se nota.
