@@ -1819,6 +1819,20 @@ def main():
         places_por_estado = {}
         for regs in places_info.values():
             for r in regs:
+                # Las reglas se vuelven a aplicar aquí, con las listas de hoy y
+                # sobre el nombre guardado. Antes se publicaba la propuesta tal
+                # como quedó el día que se escaneó la celda, así que al agregar
+                # una sigla los places viejos seguían saliendo hasta que el
+                # escáner volviera a pasar por ahí: semanas. Ahora la lista se
+                # limpia sola en la siguiente publicación.
+                nom_pl = r.get("nom", "")
+                sug_pl = fix_grammar(nom_pl) if necesita_correccion(nom_pl) else ""
+                if sug_pl == nom_pl:
+                    sug_pl = ""
+                exenta_pl = any(c in SIN_CALLE_EXENTAS for c in (r.get("cat") or []))
+                sin_dir_pl = 1 if (r.get("sd") and not exenta_pl) else 0
+                if not sin_dir_pl and not sug_pl:
+                    continue  # ya no tiene nada que revisar
                 est_pl = (normalizar_estado(r.get("edo", ""), estados_mx)
                           or estados_mx.estado_de(r["lon"], r["lat"]))
                 if panel_na:
@@ -1826,7 +1840,15 @@ def main():
                         continue  # del lado de EUA: no se incluye
                     if not r.get("edo") and not estados_mx.dentro_de_alguno(r["lon"], r["lat"]):
                         continue
-                reg_pl = {k: v for k, v in r.items() if k != "edo"}
+                reg_pl = {k: v for k, v in r.items()
+                          if k not in ("edo", "sug", "sig", "sd")}
+                if sin_dir_pl:
+                    reg_pl["sd"] = 1
+                if sug_pl:
+                    reg_pl["sug"] = sug_pl[:140]
+                    _sig_pub = siglas_aplastadas(nom_pl, sug_pl)
+                    if _sig_pub:
+                        reg_pl["sig"] = _sig_pub[:6]
                 places_por_estado.setdefault(est_pl, {})[str(r["id"])] = reg_pl
         os.makedirs(PLACES_DIR, exist_ok=True)
         slugs_pl = set()

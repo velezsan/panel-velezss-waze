@@ -85,7 +85,8 @@ ACCENT_FIXES = {
     "pemex": "Pemex", "bp": "BP", "shell": "Shell", "mobil": "Mobil", "g500": "G500",
     "repsol": "Repsol", "imss": "IMSS", "issste": "ISSSTE", "cfe": "CFE", "cac": "CAC",
     "fedex": "FedEx", "l'occitane": "L'Occitane", "ihop": "iHop", "hotel hi": "Hotel hi",
-    "cargogas": "Cargo Gas", "firstcash": "FirstCash",
+    "firstcash": "FirstCash", "cargogas": "CargoGas", "banregio": "BanRegio",
+    "todogas": "TodoGas", "ecovia": "EcoVía",
 }
 
 ALLOWED = {
@@ -106,6 +107,8 @@ ALLOWED = {
     # las va agregando Santiago conforme salen en el panel
     "ES", "UAS", "ABL", "CEDIS", "CMD", "HNI", "MIT", "DSPM", "HGSZMF",
     "ABC", "CAM", "FMA", "CEA",
+    # tercera tanda
+    "NAR", "UDEM", "ENC", "ORG", "CED", "PAL", "ALA", "LP", "NL", "MTY", "ABP", "GE", "JT",
     # segunda tanda, de la revisión una por una en el panel
     "UAC", "GM", "CB", "CSU", "SNTE", "CETIS", "GS", "SUD", "AAA", "DNA", "FC", "S.A", "TV",
     "ATR", "CONALEP", "CTM", "EMMSA", "FINSA", "HC", "ITL", "LTH", "MS", "MX", "ODM",
@@ -152,6 +155,8 @@ KEEP_AS_IS = [
     "NoManches", "PetroLaguna", "PowerFit", "PressoTechnik", "ProFit", "ProHumanidad",
     "RamosPlanta", "SantaRita", "ServicePoint", "SkinMedical", "SonyGas", "Sta.Ma.",
     "Tee*Zone",
+    # tercera tanda
+    "BanRegio", "TodoGas", "EcoVía", "CargoGas",
 ]
 # Se arman en un solo patrón (van más de cincuenta): una pasada en vez de una
 # por marca, que con miles de places sí se nota.

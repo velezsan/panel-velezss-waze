@@ -157,9 +157,12 @@ MEJORAS = [
     ("Km 22 Carretera Libre", "Km 22 Carretera Libre", "Km 22 Carretera Libre"),
     # lo que va entre corchetes es una etiqueta, no una palabra
     ("Pemex [E] 08877", "Pemex [e] 08877", "Pemex [E] 08877"),
-    # Cargogas son dos palabras, lo dijo Santiago
-    ("Cargogas", "Cargogas", "Cargo Gas"),
-    ("CARGOGAS Norte", "Cargogas Norte", "Cargo Gas Norte"),
+    # CargoGas: primero lo puso como dos palabras y luego lo aprobó tal cual
+    # en el panel, así que se queda con su mayúscula interna
+    ("CargoGas", "Cargogas", "CargoGas"),
+    ("CARGOGAS Norte", "Cargogas Norte", "CargoGas Norte"),
+    ("BANREGIO Centro", "Banregio Centro", "BanRegio Centro"),
+    ("Ecovia Linea 1", "Ecovia Linea 1", "EcoVía Linea 1"),
     ("FIRSTCASH", "Firstcash", "FirstCash"),
     # siglas que Santiago fue aprobando: ya no se aplastan
     ("Industrias ABC S.A. de C.V.", "Industrias Abc S.A. de C.V.",
@@ -197,7 +200,8 @@ IDEMPOTENTES = [
     "Café de la Parroquia", "Farmacia del Ahorro", "McDonald's", "L'Occitane",
     "Pemex - ES08877", "Tiendas 3B", "C5 Sinaloa", "UAS Facultad de Derecho",
     "Caseta Las Brisas KM 110+100", "Km 22 Carretera Libre",
-    "Cargo Gas", "FirstCash", "Pemex [E] 08877", "CEDIS Bimbo",
+    "CargoGas", "FirstCash", "Pemex [E] 08877", "CEDIS Bimbo", "BanRegio Torreón",
+    "TodoGas", "EcoVía Línea 1", "UDEM Campus", "Grupo NL", "MTY Centro",
     "BanBajio - Plaza Zaragoza", "CIBanco Torreón", "AlSuper Centro",
     "UAC - Facultad de Ciencias", "Templo SUD", "CETIS No. 48", "Autobuses AAA",
     "GAMA Muebles", "Gama Muebles", "Spa Relax", "Ropa USA", "La Idea",
