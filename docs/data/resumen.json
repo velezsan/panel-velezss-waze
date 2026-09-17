@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-17T18:18:18+00:00",
+ "actualizado": "2026-09-17T18:58:42+00:00",
  "env": "row",
- "total": 119101,
+ "total": 119099,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -60,8 +60,8 @@
   {
    "estado": "Durango",
    "slug": "durango",
-   "total": 1819,
-   "ciudades": 87
+   "total": 1817,
+   "ciudades": 86
   },
   {
    "estado": "Guanajuato",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 63.5,
+  "porcentaje_vuelta": 64.1,
   "modo": "completo"
  },
  "aviso": "",
