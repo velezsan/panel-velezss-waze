@@ -190,11 +190,20 @@
     else if(e.key==='ArrowLeft'){decidir('atras');e.preventDefault();}
   });
 
-  fetch('data/places/siglas.json',{cache:'no-store'})
-    .then(r=>{if(!r.ok)throw 0;return r.json();})
-    .then(d=>{
+  // Palabras que ya están en el script: no se vuelven a preguntar aunque el
+  // archivo de siglas venga de una corrida anterior al cambio.
+  let yaEnScript=()=>false;
+  Promise.all([
+    fetch('data/places/siglas.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json();}),
+    fetch('data/places-listas.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
+  ])
+    .then(([d,l])=>{
+      if(l){
+        const A=new Set(l.allowed||[]), K=new Set(l.keep||[]), R=new Set(l.respetar||[]);
+        yaEnScript=t=>A.has(t.toUpperCase())||K.has(t)||R.has(t.toLowerCase());
+      }
       datos=d;
-      orden=Object.keys(d.siglas||{}).sort((a,b)=>
+      orden=Object.keys(d.siglas||{}).filter(t=>!yaEnScript(t)).sort((a,b)=>
         (d.siglas[b].n-d.siglas[a].n)||a.localeCompare(b,'es'));
       pintar();
     })
