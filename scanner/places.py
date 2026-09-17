@@ -108,23 +108,23 @@ ALLOWED = {
     "ABC", "CAM", "FMA", "CEA",
     # segunda tanda, de la revisión una por una en el panel
     "UAC", "GM", "CB", "CSU", "SNTE", "CETIS", "GS", "SUD", "AAA", "DNA", "FC", "S.A", "TV",
-    "ATR", "CONALEP", "CTM", "EMMSA", "FINSA", "HC", "ITL", "LTH", "MS", "MX", "ODM", "OK",
+    "ATR", "CONALEP", "CTM", "EMMSA", "FINSA", "HC", "ITL", "LTH", "MS", "MX", "ODM",
     "RR", "TRP", "UANE", "UJED", "UMAA", "UNID", "A.P.I.N.", "AA", "ABM", "ADL", "ADM",
-    "ADOSA", "ALILA", "AP", "AR", "ARAF", "ATM", "AVL", "BARF", "BBQ", "BCD", "BCM", "BOC",
-    "BPS", "BS", "C.B.T.A.", "C.V", "CAB", "CAPT", "CAT", "CBC", "CBH", "CBTA", "CDE",
+    "ADOSA", "ALILA", "ARAF", "ATM", "AVL", "BARF", "BBQ", "BCD", "BCM", "BOC",
+    "BPS", "BS", "C.B.T.A.", "C.V", "CAPT", "CBC", "CBH", "CBTA", "CDE",
     "CECAP", "CECATI", "CEMI", "CENDI", "CEO", "CIAC", "CIDT", "CIMEC", "CINSA", "CIVET",
-    "CN", "CNC", "COCEEEPA", "COECYT", "COGA", "COMIMSA", "CSN", "CSR", "CT", "CTN", "DAR",
-    "DASA", "DAZ", "DIC", "DILL", "DSJ", "DSM", "DT", "DYLSA", "EA", "EBDI", "EIYSE",
-    "ESMED", "ESSEX", "FCA", "FEM", "GAMA", "GHSP", "GI", "GNC", "GP", "GUECSA", "GWM",
-    "HDI", "HFL", "HQ", "HR", "IAC", "IBLC", "ICR", "IDEA", "IDEHSA", "IESEC", "IESIZ",
+    "CN", "CNC", "COCEEEPA", "COECYT", "COGA", "COMIMSA", "CSN", "CSR", "CT", "CTN",
+    "DASA", "DAZ", "DILL", "DSJ", "DSM", "DT", "DYLSA", "EA", "EBDI", "EIYSE",
+    "ESMED", "ESSEX", "FCA", "FEM", "GHSP", "GI", "GNC", "GP", "GUECSA", "GWM",
+    "HDI", "HFL", "HQ", "HR", "IAC", "IBLC", "ICR", "IDEHSA", "IESEC", "IESIZ",
     "IFM", "IMES", "IMPAC", "ING", "ISAE", "ISISA", "ISMA", "ISS", "ISSTE", "IT", "J.C.",
-    "JAC", "JR", "JS", "LCD", "LG", "M.F.C.", "M.G.", "MAS", "MED", "MEX", "MJB", "ML", "MQ",
-    "MSA", "MVP", "N.L.", "NDIAC", "NG", "OC", "OCP", "OMNIA", "OS", "OTR", "OV", "PC",
-    "PEPI", "PFP", "PGJE", "PHOR", "PICS", "PISA", "PMW", "PRONNIF", "PVC", "QAHWA", "QX",
+    "JAC", "JR", "JS", "LCD", "LG", "M.F.C.", "M.G.", "MEX", "MJB", "ML", "MQ",
+    "MSA", "MVP", "N.L.", "NDIAC", "NG", "OC", "OCP", "OMNIA", "OTR", "OV", "PC",
+    "PEPI", "PFP", "PGJE", "PHOR", "PICS", "PMW", "PRONNIF", "PVC", "QAHWA", "QX",
     "RBJ", "RCG", "REYSI", "RG", "RGM", "RH", "RHI", "RL", "RT", "S.C.L.", "S.O.S.", "SDS",
-    "SEAT", "SEMEFO", "SIBSA", "SNTSA", "SNTSS", "SOFEN", "SPA", "STAM", "TA", "TAD", "TAP",
+    "SEAT", "SEMEFO", "SIBSA", "SNTSA", "SNTSS", "SOFEN", "STAM", "TAD", "TAP",
     "TEPSA", "TLE", "TNT", "TRC", "TSM", "UAAAN", "UFI", "UNEA", "UNILAM", "UNIVAS", "UPL",
-    "USA", "UTEST", "UTT", "UVM", "VF", "VMV", "XCF", "XV", "YMCA",
+    "UTEST", "UTT", "UVM", "VF", "VMV", "XCF", "XV", "YMCA",
 }
 
 # Categorías donde una calle no aplica: son accidentes geográficos y obras, no
@@ -156,10 +156,15 @@ KEEP_AS_IS = [
 # Se arman en un solo patrón (van más de cincuenta): una pasada en vez de una
 # por marca, que con miles de places sí se nota.
 _RE_KEEP = None
-# Palabras que se quedan como vengan escritas, sin proponer cambio de
-# mayúsculas: "KM 110+100" se queda en KM y "Km 22" se queda en Km. Lo pidió
-# Santiago: la forma la decide quien capturó el place, no nosotros.
-RESPETAR_FORMA = {"km", "kms"}
+# Palabras indiferentes: se quedan como vengan escritas y no se proponen ni se
+# marcan. "KM 110+100" se queda en KM y "Km 22" se queda en Km; igual con las
+# siglas que también son palabras normales, para que "GAMA Muebles" y "Gama
+# Muebles" convivan sin que ninguna de las dos salga en la lista. Solo aplica
+# si la palabra ya traía alguna mayúscula: en un nombre todo en minúsculas sí
+# se le pone la inicial, como a cualquier otra palabra.
+RESPETAR_FORMA = {"km", "kms",
+                  "dar", "gama", "idea", "mas", "med", "dic", "cat", "cab",
+                  "pisa", "spa", "usa", "ok", "ar", "ap", "ta", "os"}
 
 # ---------------------------------------------------------------------------
 # Dos arreglos respecto al JavaScript original, pedidos por Santiago
@@ -233,8 +238,12 @@ def es_codigo(tok):
 
 
 def se_respeta(tok):
-    """Palabra que se deja con las mayúsculas que ya traía (KM / Km)."""
-    return tok.lower() in RESPETAR_FORMA
+    """Palabra que se deja con las mayúsculas que ya traía (KM / Km, GAMA / Gama).
+
+    Si viene toda en minúsculas no se protege: ahí no hay nada que respetar y
+    le toca la mayúscula inicial como a cualquier palabra del nombre.
+    """
+    return tok.lower() in RESPETAR_FORMA and tok != tok.lower()
 
 
 def _patron_keep():

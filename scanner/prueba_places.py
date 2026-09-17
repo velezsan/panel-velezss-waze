@@ -179,6 +179,14 @@ MEJORAS = [
     # los signos de apertura también abren palabra
     ("¡QUE TACOS!", "¡que Tacos!", "¡Que Tacos!"),
     ("¿Donde estan los tacos?", "¿donde Estan Los Tacos?", "¿Donde Estan Los Tacos?"),
+    # palabras indiferentes: las siglas que también son palabras normales se
+    # quedan como vengan, ni se corrigen ni se marcan
+    ("GAMA Muebles", "Gama Muebles", "GAMA Muebles"),
+    ("Farmacia MAS", "Farmacia Mas", "Farmacia MAS"),
+    ("Ropa USA", "Ropa Usa", "Ropa USA"),
+    ("SPA Relax", "Spa Relax", "SPA Relax"),
+    # y si el nombre viene todo en minúsculas, sí le toca su mayúscula inicial
+    ("gama muebles", "Gama Muebles", "Gama Muebles"),
 ]
 
 # Lo ya bien escrito no debe cambiar al volver a pasarlo (idempotencia).
@@ -192,6 +200,7 @@ IDEMPOTENTES = [
     "Cargo Gas", "FirstCash", "Pemex [E] 08877", "CEDIS Bimbo",
     "BanBajio - Plaza Zaragoza", "CIBanco Torreón", "AlSuper Centro",
     "UAC - Facultad de Ciencias", "Templo SUD", "CETIS No. 48", "Autobuses AAA",
+    "GAMA Muebles", "Gama Muebles", "Spa Relax", "Ropa USA", "La Idea",
 ]
 
 
@@ -254,6 +263,7 @@ def main():
         ("McDonald's", []),
         ("Medievo XXI", []),
         ("Pemex - ES08877", []),
+        ("GAMA Muebles", []),        # indiferente: ni se corrige ni se marca
     ]
     print("\nmarca de siglas aplastadas:")
     malos = 0
