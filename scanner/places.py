@@ -176,6 +176,25 @@ RESPETAR_FORMA = {"km", "kms",
                   "dar", "gama", "idea", "mas", "med", "dic", "cat", "cab",
                   "pisa", "spa", "usa", "ok", "ar", "ap", "ta", "os"}
 
+# Palabras que Santiago revisó y descartó: la corrección está bien y no son
+# siglas. No cambian nada de la ortografía, solo sirven para que la página de
+# revisión no las vuelva a preguntar, en cualquier navegador.
+NO_SON_SIGLAS = {
+    "AIR", "ALO!", "ARCA", "ARCO", "AROVA", "ARSA", "ARTEAGA", "AXA", "BANCO", "BANORTE",
+    "CARE", "CAUSA", "CEMEX", "CESAME", "CHAPA", "COCACOLA", "COPY", "CREE", "Chilorio'S",
+    "CoSinaloa", "DANSA", "DE", "DELTAPLAST", "DEM", "DENTAL", "DIMAC", "DK", "EJIDO", "EL",
+    "EPCA", "EXA", "FE", "FED", "FERSA", "FESTO", "Fisher'S", "GALES", "GAS", "GIS", "GISA",
+    "GNZLZ", "GOMA", "GOVI", "GRILL", "GST", "GVE", "GYM", "GÜERO", "IHOP", "IN", "INBURSA",
+    "INNOTEC", "IPOC", "IRSA", "ISUZU", "JAPASA", "JDF", "JESUS", "JIBE", "JIS", "JOSE",
+    "JUANA", "KIA", "KID'S", "KMIN", "LAGUNA", "LALA", "LALO", "LAMSA", "LUMEN", "LYRBA",
+    "LaLa", "MADRE", "MAPFRE", "MAQCER", "MAVITHA", "MAY", "MEDICAB", "MEZE", "MILSA",
+    "MINSA", "MUMA", "MUR", "NAN", "NET", "NGFIT", "NORCAST", "ORAL", "OSC", "OSEA",
+    "PArque", "PEMEX", "PLANO", "PLIMSA", "POWER", "PRAISA", "PUNTO", "PaPa", "REMI",
+    "RENTA", "REPSA", "RIVA", "SACSA", "SALIN", "SEKKAN", "SHORE", "SIMAS", "SIMSA", "SIX",
+    "SOSA", "SUPERIOR", "SURA", "SURMAN", "SUSPE", "TOJI", "TOKA", "TYCSA", "URBAN", "VARA",
+    "VELEZ", "VERSA", "VIMSA", "VOSS", "WALK", "WalMart", "XFIT", "iGUi",
+}
+
 # ---------------------------------------------------------------------------
 # Dos arreglos respecto al JavaScript original, pedidos por Santiago
 # ---------------------------------------------------------------------------

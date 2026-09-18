@@ -32,7 +32,8 @@ except ImportError:
 # reglas de los places (ortografía y sin dirección): viven en places.py
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from places import (fix_grammar, necesita_correccion, siglas_aplastadas,
-                    SIN_CALLE_EXENTAS, ALLOWED, KEEP_AS_IS, RESPETAR_FORMA)
+                    SIN_CALLE_EXENTAS, ALLOWED, KEEP_AS_IS, RESPETAR_FORMA,
+                    NO_SON_SIGLAS)
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(BASE, "scanner", "config.json")
@@ -1895,6 +1896,7 @@ def main():
             "allowed": sorted(ALLOWED),
             "keep": sorted(KEEP_AS_IS),
             "respetar": sorted(RESPETAR_FORMA),
+            "descartadas": sorted(NO_SON_SIGLAS),
         }, compact=True)
         save_json(os.path.join(PLACES_DIR, "siglas.json"), {
             "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
