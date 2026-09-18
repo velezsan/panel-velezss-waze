@@ -67,13 +67,12 @@ ACCENT_FIXES = {
     "kfc": "KFC", "burger king": "Burger King", "mcdonalds": "McDonald's",
     "mcdonald's": "McDonald's", "subway": "Subway", "starbucks": "Starbucks",
     "dominos": "Domino's Pizza", "pizza hut": "Pizza Hut", "little caesars": "Little Caesars",
-    "vips": "Vips", "sanborns": "Sanborns", "chilis": "Chili's", "italiannis": "Italianni's",
+    "sanborns": "Sanborns", "chilis": "Chili's", "italiannis": "Italianni's",
     "7-eleven": "7-Eleven", "seven eleven": "7-Eleven", "extra": "Tiendas Extra",
-    "circulo k": "Círculo K", "chedraui": "Chedraui", "soriana": "Soriana", "walmart": "Walmart",
-    "aurrera": "Bodega Aurrerá", "superama": "Superama", "costco": "Costco", "sams": "Sam's Club",
+    "circulo k": "Círculo K", "chedraui": "Chedraui", "soriana": "Soriana", "aurrera": "Bodega Aurrerá", "superama": "Superama", "costco": "Costco", "sams": "Sam's Club",
     "city club": "City Club", "liverpool": "Liverpool",
     "palacio de hierro": "El Palacio de Hierro", "sears": "Sears", "coppel": "Coppel",
-    "elektra": "Elektra", "famsa": "Famsa", "woolworth": "Woolworth",
+    "elektra": "Elektra", "woolworth": "Woolworth",
     "home depot": "The Home Depot", "office depot": "Office Depot", "officemax": "OfficeMax",
     "autozone": "AutoZone", "farmacia guadalajara": "Farmacia Guadalajara",
     "farmacia del ahorro": "Farmacia del Ahorro", "farmacias similares": "Farmacias Similares",
@@ -82,9 +81,9 @@ ACCENT_FIXES = {
     "inbursa": "Inbursa", "banco azteca": "Banco Azteca", "telcel": "Telcel",
     "movistar": "Movistar", "at&t": "AT&T", "megacable": "Megacable", "izzi": "Izzi",
     "totalplay": "Totalplay", "sky": "SKY", "dish": "Dish", "infinitum": "Infinitum",
-    "pemex": "Pemex", "bp": "BP", "shell": "Shell", "mobil": "Mobil", "g500": "G500",
+    "bp": "BP", "shell": "Shell", "mobil": "Mobil", "g500": "G500",
     "repsol": "Repsol", "imss": "IMSS", "issste": "ISSSTE", "cfe": "CFE", "cac": "CAC",
-    "fedex": "FedEx", "l'occitane": "L'Occitane", "ihop": "iHop", "hotel hi": "Hotel hi",
+    "fedex": "FedEx", "l'occitane": "L'Occitane", "hotel hi": "Hotel hi",
     "firstcash": "FirstCash", "cargogas": "CargoGas", "banregio": "BanRegio",
     "todogas": "TodoGas", "ecovia": "EcoVía",
 }
@@ -195,6 +194,9 @@ ALLOWED = {
     "SEAT", "SEMEFO", "SIBSA", "SNTSA", "SNTSS", "SOFEN", "STAM", "TAD", "TAP",
     "TEPSA", "TLE", "TNT", "TRC", "TSM", "UAAAN", "UFI", "UNEA", "UNILAM", "UNIVAS", "UPL",
     "UTEST", "UTT", "UVM", "VF", "VMV", "XCF", "XV", "YMCA",
+    # séptima tanda: iniciales con punto (la corrección las volvía "JV") y marcas
+    # que solo existen en mayúsculas
+    "AHMSA", "IHOP", "J.V.",
 }
 
 # Categorías donde una calle no aplica: son accidentes geográficos y obras, no
@@ -299,6 +301,8 @@ KEEP_AS_IS = [
     "pARQUE", "vVsta",
     # quinta tanda
     "TecMilenio", "@Destination", "5àSec", "DePrizza", "MercaDía", "SwissLab", "AlEn",
+    # séptima tanda
+    "CECyTEC",
 ]
 # Se arman en un solo patrón (van más de cincuenta): una pasada en vez de una
 # por marca, que con miles de places sí se nota.
@@ -370,26 +374,31 @@ RESPETAR_FORMA = {"km", "kms",
                   "tymsa", "uabcs", "uanle", "ubim", "udat", "umeb", "umega", "upes",
                   "urrea", "usem", "ussa", "utec", "utres", "uvne", "vaeo", "veca", "vima",
                   "vipa", "vipet", "vw&man", "waxx", "weir", "woory", "xcien", "xkin",
-                  "xxvi", "yosi", "zeiss", "zenda", "zuri",}
+                  "xxvi", "yosi", "zeiss", "zenda", "zuri",
+                  # séptima tanda: palabras que son marca y palabra normal a la vez,
+                  # se quedan como vengan escritas
+                  "alfa", "arca", "arco", "care", "gas", "gym", "kia", "lala", "six",
+                  "vips", "walmart",
+                  # las marcas en mayúsculas: se respeta lo que escribió el editor,
+                  # ni se aplastan ni se fuerzan
+                  "axa", "cemex", "famsa", "femsa", "ixe", "pemex", "suspe",}
 
 # Palabras que Santiago revisó y descartó: la corrección está bien y no son
 # siglas. No cambian nada de la ortografía, solo sirven para que la página de
 # revisión no las vuelva a preguntar, en cualquier navegador.
 NO_SON_SIGLAS = {
-    "AIR", "ALO!", "ARCA", "ARCO", "AROVA", "ARSA", "ARTEAGA", "AXA", "BANCO", "BANORTE",
-    "CARE", "CAUSA", "CEMEX", "CESAME", "CHAPA", "COCACOLA", "COPY", "CREE", "Chilorio'S",
+    "AIR", "ALO!", "AROVA", "ARSA", "ARTEAGA", "BANCO", "BANORTE",
+    "CAUSA", "CESAME", "CHAPA", "COCACOLA", "COPY", "CREE", "Chilorio'S",
     "CoSinaloa", "DANSA", "DE", "DELTAPLAST", "DEM", "DENTAL", "DIMAC", "DK", "EJIDO", "EL",
-    "EPCA", "EXA", "FE", "FED", "FERSA", "FESTO", "Fisher'S", "GALES", "GAS", "GIS", "GISA",
-    "GNZLZ", "GOMA", "GOVI", "GRILL", "GST", "GVE", "GYM", "GÜERO", "IHOP", "IN", "INBURSA",
+    "EPCA", "EXA", "FE", "FED", "FERSA", "FESTO", "Fisher'S", "GALES", "GIS", "GISA",
+    "GNZLZ", "GOMA", "GOVI", "GRILL", "GST", "GVE", "GÜERO", "IN", "INBURSA",
     "INNOTEC", "IPOC", "IRSA", "ISUZU", "JAPASA", "JDF", "JESUS", "JIBE", "JIS", "JOSE",
-    "JUANA", "KIA", "KID'S", "KMIN", "LAGUNA", "LALA", "LALO", "LAMSA", "LUMEN", "LYRBA",
-    "LaLa", "MADRE", "MAPFRE", "MAQCER", "MAVITHA", "MAY", "MEDICAB", "MEZE", "MILSA",
+    "JUANA", "KID'S", "KMIN", "LAGUNA", "LALO", "LAMSA", "LUMEN", "LYRBA",
+    "MADRE", "MAPFRE", "MAQCER", "MAVITHA", "MAY", "MEDICAB", "MEZE", "MILSA",
     "MINSA", "MUMA", "MUR", "NAN", "NET", "NGFIT", "NORCAST", "ORAL", "OSC", "OSEA",
-    "PArque", "PEMEX", "PLANO", "PLIMSA", "POWER", "PRAISA", "PUNTO", "PaPa", "REMI",
-    "RENTA", "REPSA", "RIVA", "SACSA", "SALIN", "SEKKAN", "SHORE", "SIMAS", "SIMSA", "SIX",
-    "SOSA", "SUPERIOR", "SURA", "SURMAN", "SUSPE", "TOJI", "TOKA", "TYCSA", "URBAN", "VARA",
-    "VELEZ", "VERSA", "VIMSA", "VOSS", "WALK", "WalMart", "XFIT", "iGUi",
-    "ALFA", "FAMSA", "FEMSA", "IXE",
+    "PArque", "PLANO", "PLIMSA", "POWER", "PRAISA", "PUNTO", "PaPa", "REMI",
+    "RENTA", "REPSA", "RIVA", "SACSA", "SALIN", "SEKKAN", "SHORE", "SIMAS", "SIMSA", "SOSA", "SUPERIOR", "SURA", "SURMAN", "TOJI", "TOKA", "TYCSA", "URBAN", "VARA",
+    "VELEZ", "VERSA", "VIMSA", "VOSS", "WALK", "XFIT", "iGUi",
     # sexta tanda: palabras y nombres escritos a gritos, la corrección es la buena
     "11:ONCE", "ABEL", "ALTA", "AMA", "AMOR", "APOYO", "AQUI", "AREA", "ARENA", "AS", "ASI",
     "CANTÚ", "CASA", "CASTA", "CLARA", "CLUB", "COLOR", "CORTE", "CRUZ", "DATA", "DEEP",
@@ -638,4 +647,5 @@ def siglas_aplastadas(antes, despues):
 
     despues_piezas = piezas(despues)
     return [t for t in piezas(antes)
-            if _parece_sigla(t) and t not in despues_piezas]
+            if _parece_sigla(t) and t not in despues_piezas
+            and t not in NO_SON_SIGLAS and t.upper() not in NO_SON_SIGLAS]

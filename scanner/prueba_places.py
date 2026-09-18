@@ -44,7 +44,6 @@ PARES = [
     ("l'occitane", "L'Occitane"),
     ("El Palacio de Hierro", "El Palacio de Hierro"),
     ("7-eleven", "7-Eleven"),
-    ("ihop", "iHop"),
     # --- acentos
     ("Café de la Parroquia", "Café de la Parroquia"),
     ("cafe de la parroquia", "Café de la Parroquia"),
@@ -88,7 +87,7 @@ PARES = [
     ("a", "A"), ("de", "De"), ("y", "Y"), ("EL", "El"),
     # --- siglas que el script aplasta (lo que Santiago irá curando)
     ("SAT - ADSC Querétaro", "SAT - Adsc Querétaro"),
-    ("ESCI", "Esci"), ("SUSPE", "Suspe"),
+    ("ESCI", "Esci"),
     ("Laboratorios LABSA", "Laboratorios Labsa"),
     ("Tayrona BTQ", "Tayrona Btq"),
     ("UADY Facultad de Medicina", "Uady Facultad de Medicina"),
@@ -104,7 +103,6 @@ PARES = [
     ("MASTER inovacion electronica", "Master Inovacion Electronica"),
     ("Panificadora CENTENO", "Panificadora Centeno"),
     ("Instituto de belleza IMAGEN", "Instituto de Belleza Imagen"),
-    ("VIPS", "Vips"), ("Vips", "Vips"), ("vips", "Vips"),
     ("Cocina económica haley", "Cocina Económica Haley"),
     ("La piramide", "La Piramide"),
     ("Paleteria michoacana", "Paleteria Michoacana"),
@@ -119,6 +117,16 @@ PARES = [
 # pidió arreglar lo que se pudiera. La columna del medio es lo que daba su
 # script; la de la derecha es lo que damos ahora.
 MEJORAS = [
+    # marcas que son palabra y marca a la vez: se quedan como las escribió el editor
+    ("VIPS", "Vips", "VIPS"),
+    ("Vips", "Vips", "Vips"),
+    ("PEMEX", "Pemex", "PEMEX"),
+    ("Walmart Express", "Walmart Express", "Walmart Express"),
+    ("WalMart Express", "Walmart Express", "WalMart Express"),
+    ("CEMEX Concretos", "Cemex Concretos", "CEMEX Concretos"),
+    ("IHOP", "iHop", "IHOP"),
+    ("ihop", "iHop", "IHOP"),
+    ("SUSPE", "Suspe", "SUSPE"),
     # iniciales con punto: ya no se vuelven la preposición "a"
     ("PJENL - Sala Jorge A. Treviño", "Pjenl - Sala Jorge a Treviño",
      "PJENL - Sala Jorge A. Treviño"),
@@ -264,7 +272,7 @@ def main():
         ("Tiendas 3B", []),        # ya no se aplasta: se protege el código
         ("BanBajio - Plaza Zaragoza", []),   # ya se respeta la marca
         ("SAT - ADSC Querétaro", ["ADSC"]),           # SAT sí está en la lista
-        ("VIPS", ["VIPS"]),          # sigue pendiente: el diccionario dice "Vips"
+        ("VIPS", []),                # indiferente: se queda como venga escrita
         # las palabras largas en mayúsculas son un nombre a gritos, no siglas:
         # esas no se marcan, porque la corrección sí es la buena
         ("LIBRERÍA DE MONJAS", []),
