@@ -1,11 +1,21 @@
 {
- "actualizado": "2026-09-17T13:23:23+00:00",
+ "actualizado": "2026-09-18T10:37:14+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
  "temas_revisados": 126,
  "peticiones": 135,
  "errores": 0,
  "champs": {
+  "gwm_": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 35
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 3
+   }
+  },
   "eumirgarciac2": {
    "desbloqueos": {
     "temas": 0,
@@ -14,16 +24,6 @@
    "otras": {
     "temas": 0,
     "respuestas": 1
-   }
-  },
-  "gwm_": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 34
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 3
    }
   },
   "carloslaso": {
