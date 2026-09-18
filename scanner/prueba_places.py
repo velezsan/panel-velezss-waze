@@ -87,8 +87,6 @@ PARES = [
     ("Pastes kikos Pino Suárez", "Pastes Kikos Pino Suárez"),
     ("a", "A"), ("de", "De"), ("y", "Y"), ("EL", "El"),
     # --- siglas que el script aplasta (lo que Santiago irá curando)
-    ("GDL Centro", "Gdl Centro"), ("Farmacia GDL", "Farmacia Gdl"),
-    ("Universidad CNCI - Querétaro Zaragoza", "Universidad Cnci - Querétaro Zaragoza"),
     ("SAT - ADSC Querétaro", "SAT - Adsc Querétaro"),
     ("ESCI", "Esci"), ("SUSPE", "Suspe"),
     ("Laboratorios LABSA", "Laboratorios Labsa"),
@@ -122,7 +120,8 @@ PARES = [
 # script; la de la derecha es lo que damos ahora.
 MEJORAS = [
     # iniciales con punto: ya no se vuelven la preposición "a"
-    ("PJENL - Sala Jorge A. Treviño", "Pjenl - Sala Jorge a Treviño", "Pjenl - Sala Jorge A. Treviño"),
+    ("PJENL - Sala Jorge A. Treviño", "Pjenl - Sala Jorge a Treviño",
+     "PJENL - Sala Jorge A. Treviño"),
     ("Jorge A. Treviño", "Jorge a Treviño", "Jorge A. Treviño"),
     ("Hospital A. López Mateos", "Hospital a López Mateos", "Hospital A. López Mateos"),
     # frases del diccionario, que antes nunca se aplicaban
@@ -175,6 +174,10 @@ MEJORAS = [
     ("CAM No. 5 Héroes Coahuilenses", "Cam No. 5 Héroes Coahuilenses",
      "CAM No. 5 Héroes Coahuilenses"),
     ("CTM Querétaro", "Ctm Querétaro", "CTM Querétaro"),
+    ("GDL Centro", "Gdl Centro", "GDL Centro"),
+    ("Farmacia GDL", "Farmacia Gdl", "Farmacia GDL"),
+    ("Universidad CNCI - Querétaro Zaragoza", "Universidad Cnci - Querétaro Zaragoza",
+     "Universidad CNCI - Querétaro Zaragoza"),
     ("UAC - Facultad de Ciencias", "Uac - Facultad de Ciencias",
      "UAC - Facultad de Ciencias"),
     # marcas con mayúscula interna: se conserva la forma exacta
@@ -256,12 +259,12 @@ def main():
 
     # la marca de siglas aplastadas, que es lo que el panel resalta
     casos = [
-        ("Farmacia GDL", ["GDL"]),
+        ("Farmacia GDL", []),        # GDL ya está aprobada
         ("UADY Facultad de Medicina", ["UADY"]),
         ("Tiendas 3B", []),        # ya no se aplasta: se protege el código
         ("BanBajio - Plaza Zaragoza", []),   # ya se respeta la marca
         ("SAT - ADSC Querétaro", ["ADSC"]),           # SAT sí está en la lista
-        ("VIPS", ["VIPS"]),
+        ("VIPS", ["VIPS"]),          # sigue pendiente: el diccionario dice "Vips"
         # las palabras largas en mayúsculas son un nombre a gritos, no siglas:
         # esas no se marcan, porque la corrección sí es la buena
         ("LIBRERÍA DE MONJAS", []),
