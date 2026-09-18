@@ -107,6 +107,9 @@ ALLOWED = {
     # las va agregando Santiago conforme salen en el panel
     "ES", "UAS", "ABL", "CEDIS", "CMD", "HNI", "MIT", "DSPM", "HGSZMF",
     "ABC", "CAM", "FMA", "CEA",
+    # quinta tanda
+    "HM", "MAC", "RM", "SCC", "UNEME", "ACS", "BYD", "CECAM", "CEN", "CEU", "CODE", "EDEC",
+    "HD", "HP", "IOS", "JG", "JJ", "KC", "MF", "PCM", "PGJ", "SB", "XO", "CAI",
     # cuarta tanda
     "JM", "LM", "MR", "SADM", "UMM", "AG", "ERRE", "ICET", "RC", "TYM", "ADN", "JC", "VIP",
     "CM", "EMME", "GILSA", "GNV", "HG", "IZA", "SSNL", "AIM", "CROC", "FM", "FNSI",
@@ -162,6 +165,8 @@ KEEP_AS_IS = [
     "BanRegio", "TodoGas", "EcoVía", "CargoGas",
     # cuarta tanda ("FullOk" y "FullOK" andan las dos en el mapa)
     "ChargeNow", "SuKarne", "DeAcero", "FullOk",
+    # quinta tanda
+    "TecMilenio", "@Destination", "5àSec", "DePrizza", "MercaDía", "SwissLab", "AlEn",
 ]
 # Se arman en un solo patrón (van más de cincuenta): una pasada en vez de una
 # por marca, que con miles de places sí se nota.
@@ -174,7 +179,7 @@ _RE_KEEP = None
 # se le pone la inicial, como a cualquier otra palabra.
 RESPETAR_FORMA = {"km", "kms",
                   "dar", "gama", "idea", "mas", "med", "dic", "cat", "cab",
-                  "pisa", "spa", "usa", "ok", "ar", "ap", "ta", "os"}
+                  "pisa", "spa", "usa", "ok", "ar", "ap", "ta", "os", "capa"}
 
 # Palabras que Santiago revisó y descartó: la corrección está bien y no son
 # siglas. No cambian nada de la ortografía, solo sirven para que la página de
@@ -193,6 +198,7 @@ NO_SON_SIGLAS = {
     "RENTA", "REPSA", "RIVA", "SACSA", "SALIN", "SEKKAN", "SHORE", "SIMAS", "SIMSA", "SIX",
     "SOSA", "SUPERIOR", "SURA", "SURMAN", "SUSPE", "TOJI", "TOKA", "TYCSA", "URBAN", "VARA",
     "VELEZ", "VERSA", "VIMSA", "VOSS", "WALK", "WalMart", "XFIT", "iGUi",
+    "ALFA", "FAMSA", "FEMSA", "IXE",
 }
 
 # ---------------------------------------------------------------------------
@@ -242,8 +248,9 @@ LETRA = "A-Za-zÀ-ÿ"          # las mismas clases que usa el JavaScript
 _RE_BBVA = re.compile(r"\bBBVA\s+Bancomer\b", re.I)
 _RE_PAN = re.compile(r"\bPAN\b")
 # primera letra de cada palabra: inicio de cadena o tras uno de esos separadores
-# se agregan ¡ y ¿ a los separadores: sin ellos "¡QUE TACOS!" quedaba "¡que Tacos!"
-_RE_CAPITALIZA = re.compile(r"(?:^|[\s\-\(\"/“”&¡¿]|'(?!s\b))([a-zÀ-ÿ])")
+# se agregan ¡ ¿ y @ a los separadores: sin ellos "¡QUE TACOS!" quedaba
+# "¡que Tacos!" y "@destination" no recuperaba su mayúscula
+_RE_CAPITALIZA = re.compile(r"(?:^|[\s\-\(\"/“”&¡¿@]|'(?!s\b))([a-zÀ-ÿ])")
 _RE_PALABRA = re.compile(r"([a-zA-ZÀ-ÿ.]+(?:'[a-zA-ZÀ-ÿ]+)?)")
 _RE_PUNTOS = re.compile(r"[.,:;()\"“”]")
 MARCA_INI = chr(0xE000)   # zona privada de Unicode: no aparece en nombres reales
