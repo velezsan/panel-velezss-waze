@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-18T13:26:27+00:00",
+ "actualizado": "2026-09-18T14:08:50+00:00",
  "env": "row",
- "total": 118636,
+ "total": 118635,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -36,7 +36,7 @@
   {
    "estado": "Chihuahua",
    "slug": "chihuahua",
-   "total": 2073,
+   "total": 2072,
    "ciudades": 124
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 74.6,
+  "porcentaje_vuelta": 74.9,
   "modo": "completo"
  },
  "aviso": "",
