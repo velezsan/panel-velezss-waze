@@ -197,6 +197,11 @@ ALLOWED = {
     # séptima tanda: iniciales con punto (la corrección las volvía "JV") y marcas
     # que solo existen en mayúsculas
     "AHMSA", "IHOP", "J.V.",
+    # octava tanda: siglas de universidades, comisiones y marcas que salieron
+    # en la caja de mayúsculas del panel
+    "ARPE", "ATMR", "AZ", "B.C.", "BDH", "BF", "BRP", "C.F.E", "CCC", "CEART", "CESPM",
+    "CESPT", "CU", "CUU", "ESL", "FEX", "GRN", "HMO", "HV", "IMARC", "ITSON", "OASA",
+    "R.L.", "TJ", "UABC", "UACJ", "UAT", "UGRS", "YZA",
 }
 
 # Categorías donde una calle no aplica: son accidentes geográficos y obras, no
@@ -303,6 +308,9 @@ KEEP_AS_IS = [
     "TecMilenio", "@Destination", "5àSec", "DePrizza", "MercaDía", "SwissLab", "AlEn",
     # séptima tanda
     "CECyTEC",
+    # octava tanda
+    "3Dental", "AlFaEs", "CBTis", "CECyTES", "MoldeArte", "SuperChivas", "TotalGas",
+    "ViveBús",
 ]
 # Se arman en un solo patrón (van más de cincuenta): una pasada en vez de una
 # por marca, que con miles de places sí se nota.
@@ -381,7 +389,10 @@ RESPETAR_FORMA = {"km", "kms",
                   "vips", "walmart",
                   # las marcas en mayúsculas: se respeta lo que escribió el editor,
                   # ni se aplastan ni se fuerzan
-                  "axa", "cemex", "famsa", "femsa", "ixe", "pemex", "suspe",}
+                  "axa", "cemex", "famsa", "femsa", "ixe", "pemex", "suspe",
+                  # octava tanda: marca y palabra a la vez, o siglas que también
+                  # se escriben como nombre propio
+                  "aptiv", "aura", "blink", "cut", "eni", "esfer", "uach",}
 
 # Palabras que Santiago revisó y descartó: la corrección está bien y no son
 # siglas. No cambian nada de la ortografía, solo sirven para que la página de
@@ -410,6 +421,8 @@ NO_SON_SIGLAS = {
     "ROBLE", "SALÓN", "SAME", "SAN", "SANTA", "SANTO", "SER", "SIGUE", "SOGA", "SUSHI",
     "TACOS", "TAURO", "TE", "TEAM", "THINK", "UNICA", "UNO", "VA", "VISTA", "VIVES", "VIVIR",
     "WASH",
+    # octava tanda: palabras normales escritas a gritos
+    "CAMPO", "NIÑOS", "RIO", "SALUD", "SHOP",
 }
 
 # ---------------------------------------------------------------------------
