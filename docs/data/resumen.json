@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-19T19:09:14+00:00",
+ "actualizado": "2026-09-19T19:50:00+00:00",
  "env": "row",
- "total": 117642,
+ "total": 117798,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -120,7 +120,7 @@
   {
    "estado": "Oaxaca",
    "slug": "oaxaca",
-   "total": 9166,
+   "total": 9322,
    "ciudades": 569
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 2.9,
+  "porcentaje_vuelta": 3.5,
   "modo": "completo"
  },
  "aviso": "",
