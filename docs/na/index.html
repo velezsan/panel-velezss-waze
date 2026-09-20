@@ -98,6 +98,7 @@
     <div class="tiles">
       <a class="tile" href="places.html"><div class="l">Places mal escritos</div><div class="v" id="pl-orto">—</div><div class="d">acumulados en la franja NA</div></a>
       <a class="tile" href="places-sin-direccion.html"><div class="l">Places sin dirección</div><div class="v" id="pl-sd">—</div><div class="d">sin calle o con calle sin nombre</div></a>
+      <a class="tile" href="puntos.html"><div class="l">Deberían ser área</div><div class="v" id="pl-pt">—</div><div class="d">gasolineras, estacionamientos y aeropuertos como punto</div></a>
     </div>
   </div>
 
@@ -142,6 +143,11 @@
         <div class="t">🏷️ Places sin dirección</div>
         <div class="d">Places sin calle, o con una calle sin nombre: no se encuentran por dirección.</div>
         <div class="n" id="n-places-sd"></div>
+      </a>
+      <a class="seccion" href="puntos.html">
+        <div class="t">📐 Deberían ser área</div>
+        <div class="d">Gasolineras, estacionamientos y aeropuertos puestos como punto, que en el mapa van como área.</div>
+        <div class="n" id="n-puntos"></div>
       </a>
       <a class="seccion" href="siglas.html">
         <div class="t">🔠 Siglas por revisar</div>
@@ -216,10 +222,12 @@
     .then(d=>{
       pon('pl-orto', fmt(d.orto||0));
       pon('pl-sd', fmt(d.sin_dir||0));
+      pon('pl-pt', d.puntos!=null?fmt(d.puntos):'—');
       pon('n-places', fmt(d.orto||0)+' places en '+((d.estados||[]).filter(e=>e.orto>0).length)+' estados');
       pon('n-places-sd', fmt(d.sin_dir||0)+' places en '+((d.estados||[]).filter(e=>e.sin_dir>0).length)+' estados');
+      pon('n-puntos', d.puntos!=null?fmt(d.puntos)+' places en '+((d.estados||[]).filter(e=>e.puntos>0).length)+' estados':'se llena en la próxima corrida');
     })
-    .catch(()=>{ pon('pl-orto','—'); pon('pl-sd','—'); pon('n-places','sin datos todavía'); pon('n-places-sd','sin datos todavía'); });
+    .catch(()=>{ pon('pl-orto','—'); pon('pl-sd','—'); pon('pl-pt','—'); pon('n-places','sin datos todavía'); pon('n-places-sd','sin datos todavía'); pon('n-puntos','sin datos todavía'); });
 
   fetch('../data-na/places/siglas.json',{cache:'no-store'})
     .then(r=>{if(!r.ok)throw 0;return r.json();})
