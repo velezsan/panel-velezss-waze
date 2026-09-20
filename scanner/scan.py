@@ -32,6 +32,7 @@ except ImportError:
 # reglas de los places (ortografía y sin dirección): viven en places.py
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from places import (fix_grammar, necesita_correccion, siglas_aplastadas,
+                    es_punto_que_debe_ser_area,
                     SIN_CALLE_EXENTAS, ALLOWED, KEEP_AS_IS, RESPETAR_FORMA,
                     NO_SON_SIGLAS)
 
@@ -1056,10 +1057,12 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             exenta_pl = any(c in SIN_CALLE_EXENTAS for c in cats_pl)
             # "sin dirección" = sin calle, como su script
             sin_dir = 0 if (calle_pl or exenta_pl) else 1
+            es_area_pl = (ven.get("geometry") or {}).get("type") != "Point"
+            punto_pl = 1 if es_punto_que_debe_ser_area(cats_pl, es_area_pl) else 0
             sug_pl = fix_grammar(nom_pl) if necesita_correccion(nom_pl) else ""
             if sug_pl == nom_pl:
                 sug_pl = ""
-            if not sin_dir and not sug_pl:
+            if not sin_dir and not sug_pl and not punto_pl:
                 continue
             ciudad_pl = edo_pl = ""
             if st_pl and st_pl.get("cityID") in cities:
@@ -1082,6 +1085,8 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             }
             if sin_dir:
                 reg_pl["sd"] = 1
+            if punto_pl:
+                reg_pl["pt"] = 1   # debería ser área y está como punto
             if sug_pl:
                 reg_pl["sug"] = sug_pl[:140]
                 # siglas que la propuesta aplastaría: casi siempre significa que
@@ -1832,7 +1837,9 @@ def main():
                     sug_pl = ""
                 exenta_pl = any(c in SIN_CALLE_EXENTAS for c in (r.get("cat") or []))
                 sin_dir_pl = 1 if (r.get("sd") and not exenta_pl) else 0
-                if not sin_dir_pl and not sug_pl:
+                punto_pub = 1 if es_punto_que_debe_ser_area(r.get("cat") or [],
+                                                            r.get("area")) else 0
+                if not sin_dir_pl and not sug_pl and not punto_pub:
                     continue  # ya no tiene nada que revisar
                 est_pl = (normalizar_estado(r.get("edo", ""), estados_mx)
                           or estados_mx.estado_de(r["lon"], r["lat"]))
@@ -1842,9 +1849,11 @@ def main():
                     if not r.get("edo") and not estados_mx.dentro_de_alguno(r["lon"], r["lat"]):
                         continue
                 reg_pl = {k: v for k, v in r.items()
-                          if k not in ("edo", "sug", "sig", "sd")}
+                          if k not in ("edo", "sug", "sig", "sd", "pt")}
                 if sin_dir_pl:
                     reg_pl["sd"] = 1
+                if punto_pub:
+                    reg_pl["pt"] = 1
                 if sug_pl:
                     reg_pl["sug"] = sug_pl[:140]
                     _sig_pub = siglas_aplastadas(nom_pl, sug_pl)
@@ -1863,6 +1872,7 @@ def main():
                 "estado": est_pl, "slug": slug_pl, "total": len(plcs),
                 "orto": len([1 for p in plcs.values() if p.get("sug")]),
                 "sin_dir": len([1 for p in plcs.values() if p.get("sd")]),
+                "puntos": len([1 for p in plcs.values() if p.get("pt")]),
             })
         for fn in os.listdir(PLACES_DIR):
             if (fn.endswith(".json") and fn[:-5] not in ("index", "siglas")
@@ -1873,6 +1883,7 @@ def main():
             "total": sum(e["total"] for e in lista_pl),
             "orto": sum(e["orto"] for e in lista_pl),
             "sin_dir": sum(e["sin_dir"] for e in lista_pl),
+            "puntos": sum(e["puntos"] for e in lista_pl),
             "estados": lista_pl,
         }, compact=True)
         # resumen de las mayúsculas que la corrección aplastaría, con ejemplos:
