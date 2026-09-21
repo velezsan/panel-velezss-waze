@@ -1,13 +1,13 @@
 {
  "ok": true,
- "fecha": "2026-09-21T03:53:55.184569+00:00",
+ "fecha": "2026-09-21T07:25:55.106178+00:00",
  "modo": "completo",
- "celdas": 118,
- "peticiones": 118,
- "segmentos_vistos": 121714,
+ "celdas": 378,
+ "peticiones": 378,
+ "segmentos_vistos": 124469,
  "sin_nombre_en_corrida": 0,
  "total_acumulado": 2,
- "peticiones_inegi": 22360,
+ "peticiones_inegi": 21794,
  "errores_inegi": 0,
  "minutos": 210.1
 }
