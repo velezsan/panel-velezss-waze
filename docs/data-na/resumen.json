@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-22T23:00:52+00:00",
+ "actualizado": "2026-09-22T23:46:08+00:00",
  "env": "usa",
- "total": 65,
+ "total": 72,
  "estados": [
   {
    "estado": "Baja California",
@@ -18,8 +18,8 @@
   {
    "estado": "Sonora",
    "slug": "sonora",
-   "total": 1,
-   "ciudades": 1
+   "total": 8,
+   "ciudades": 2
   },
   {
    "estado": "Tamaulipas",
@@ -33,7 +33,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 90.6,
+  "porcentaje_vuelta": 93.2,
   "modo": "completo"
  },
  "aviso": "",
