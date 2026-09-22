@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-22T12:53:18+00:00",
+ "actualizado": "2026-09-22T13:37:43+00:00",
  "env": "row",
- "total": 115005,
+ "total": 115008,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -72,8 +72,8 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 4125,
-   "ciudades": 145
+   "total": 4126,
+   "ciudades": 146
   },
   {
    "estado": "Hidalgo",
@@ -120,7 +120,7 @@
   {
    "estado": "Oaxaca",
    "slug": "oaxaca",
-   "total": 7309,
+   "total": 7311,
    "ciudades": 501
   },
   {
