@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-22T15:58:28+00:00",
+ "actualizado": "2026-09-22T16:38:55+00:00",
  "env": "row",
- "total": 114927,
+ "total": 114925,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -162,8 +162,8 @@
   {
    "estado": "Tabasco",
    "slug": "tabasco",
-   "total": 2165,
-   "ciudades": 73
+   "total": 2163,
+   "ciudades": 72
   },
   {
    "estado": "Tamaulipas",
