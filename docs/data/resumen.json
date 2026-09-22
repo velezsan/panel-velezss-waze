@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-09-22T11:32:19+00:00",
+ "actualizado": "2026-09-22T12:12:47+00:00",
  "env": "row",
  "total": 114873,
  "estados": [
@@ -73,7 +73,7 @@
    "estado": "Guerrero",
    "slug": "guerrero",
    "total": 4125,
-   "ciudades": 146
+   "ciudades": 145
   },
   {
    "estado": "Hidalgo",
