@@ -1,13 +1,13 @@
 {
- "actualizado": "2026-09-22T14:34:53+00:00",
+ "actualizado": "2026-09-22T15:14:11+00:00",
  "env": "usa",
- "total": 24,
+ "total": 27,
  "estados": [
   {
    "estado": "Baja California",
    "slug": "baja-california",
-   "total": 22,
-   "ciudades": 4
+   "total": 25,
+   "ciudades": 5
   },
   {
    "estado": "Tamaulipas",
