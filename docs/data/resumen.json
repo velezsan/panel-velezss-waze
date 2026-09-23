@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-23T18:45:16+00:00",
+ "actualizado": "2026-09-23T19:27:45+00:00",
  "env": "row",
- "total": 111442,
+ "total": 111449,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -72,8 +72,8 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 3345,
-   "ciudades": 126
+   "total": 3346,
+   "ciudades": 127
   },
   {
    "estado": "Hidalgo",
@@ -102,8 +102,8 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 8809,
-   "ciudades": 371
+   "total": 8815,
+   "ciudades": 373
   },
   {
    "estado": "Nayarit",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 21.9,
+  "porcentaje_vuelta": 22.2,
   "modo": "completo"
  },
  "aviso": "",
