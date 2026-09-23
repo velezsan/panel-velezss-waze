@@ -1,15 +1,25 @@
 {
- "actualizado": "2026-09-22T20:47:14+00:00",
+ "actualizado": "2026-09-23T18:03:30+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 125,
- "peticiones": 134,
+ "temas_revisados": 124,
+ "peticiones": 133,
  "errores": 0,
  "champs": {
+  "hector_hf": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 0
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 2
+   }
+  },
   "gwm_": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 33
+    "respuestas": 31
    },
    "otras": {
     "temas": 0,
@@ -33,7 +43,7 @@
    },
    "otras": {
     "temas": 0,
-    "respuestas": 3
+    "respuestas": 2
    }
   },
   "eumirgarciac2": {
@@ -49,7 +59,7 @@
   "maalrivba": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 3
+    "respuestas": 2
    },
    "otras": {
     "temas": 0,
@@ -95,20 +105,10 @@
     "temas": 0,
     "respuestas": 5
    }
-  },
-  "hector_hf": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 0
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 1
-   }
   }
  },
  "otros_frecuentes": {
-  "velezss": 80,
+  "velezss": 78,
   "LuisCav29": 34,
   "jcog69": 13,
   "JorgeLAB": 6,
