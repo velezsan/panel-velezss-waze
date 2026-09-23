@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-23T08:47:48+00:00",
+ "actualizado": "2026-09-23T09:32:46+00:00",
  "env": "row",
- "total": 113055,
+ "total": 113030,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -24,7 +24,7 @@
   {
    "estado": "Campeche",
    "slug": "campeche",
-   "total": 182,
+   "total": 180,
    "ciudades": 30
   },
   {
@@ -72,7 +72,7 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 3871,
+   "total": 3852,
    "ciudades": 137
   },
   {
@@ -138,8 +138,8 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 3102,
-   "ciudades": 43
+   "total": 3098,
+   "ciudades": 42
   },
   {
    "estado": "San Luis Potosí",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 20.6,
+  "porcentaje_vuelta": 20.8,
   "modo": "completo"
  },
  "aviso": "",
