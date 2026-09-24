@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-24T12:27:54+00:00",
+ "actualizado": "2026-09-24T13:09:50+00:00",
  "env": "row",
- "total": 111667,
+ "total": 111675,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -102,7 +102,7 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 8819,
+   "total": 8827,
    "ciudades": 373
   },
   {
