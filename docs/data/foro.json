@@ -1,10 +1,10 @@
 {
- "actualizado": "2026-09-24T15:20:12+00:00",
+ "actualizado": "2026-09-25T14:46:51+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
  "temas_revisados": 126,
  "peticiones": 135,
- "errores": 2,
+ "errores": 0,
  "champs": {
   "hector_hf": {
    "desbloqueos": {
@@ -19,7 +19,7 @@
   "gwm_": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 31
+    "respuestas": 32
    },
    "otras": {
     "temas": 0,
@@ -39,7 +39,7 @@
   "carloslaso": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 37
+    "respuestas": 38
    },
    "otras": {
     "temas": 0,
@@ -108,11 +108,11 @@
   }
  },
  "otros_frecuentes": {
-  "velezss": 77,
-  "LuisCav29": 32,
+  "velezss": 78,
+  "LuisCav29": 34,
   "jcog69": 13,
+  "JorgeLAB": 6,
   "world_yeh8sazm": 5,
-  "JorgeLAB": 5,
   "TheSammirs": 5,
   "system": 5,
   "world_ifjpgwib": 3,
