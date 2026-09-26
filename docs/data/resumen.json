@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-26T05:49:24+00:00",
+ "actualizado": "2026-09-26T06:30:14+00:00",
  "env": "row",
- "total": 111788,
+ "total": 111829,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -102,7 +102,7 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 8889,
+   "total": 8888,
    "ciudades": 380
   },
   {
@@ -126,8 +126,8 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 6752,
-   "ciudades": 602
+   "total": 6754,
+   "ciudades": 603
   },
   {
    "estado": "Querétaro",
@@ -174,8 +174,8 @@
   {
    "estado": "Tlaxcala",
    "slug": "tlaxcala",
-   "total": 1928,
-   "ciudades": 125
+   "total": 1968,
+   "ciudades": 126
   },
   {
    "estado": "Veracruz",
