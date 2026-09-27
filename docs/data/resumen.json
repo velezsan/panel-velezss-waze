@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-27T03:46:50+00:00",
+ "actualizado": "2026-09-27T04:27:39+00:00",
  "env": "row",
- "total": 111974,
+ "total": 111984,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -102,7 +102,7 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 8974,
+   "total": 8975,
    "ciudades": 383
   },
   {
@@ -126,8 +126,8 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 6759,
-   "ciudades": 604
+   "total": 6764,
+   "ciudades": 605
   },
   {
    "estado": "Querétaro",
@@ -174,13 +174,13 @@
   {
    "estado": "Tlaxcala",
    "slug": "tlaxcala",
-   "total": 1978,
+   "total": 1980,
    "ciudades": 129
   },
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 7398,
+   "total": 7400,
    "ciudades": 683
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 28.4,
+  "porcentaje_vuelta": 28.5,
   "modo": "completo"
  },
  "aviso": "",
