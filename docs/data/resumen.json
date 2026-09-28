@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-28T03:52:22+00:00",
+ "actualizado": "2026-09-28T04:33:19+00:00",
  "env": "row",
- "total": 112226,
+ "total": 112184,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -84,13 +84,13 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 11117,
-   "ciudades": 451
+   "total": 11121,
+   "ciudades": 452
   },
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 4447,
+   "total": 4445,
    "ciudades": 335
   },
   {
@@ -138,8 +138,8 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 3091,
-   "ciudades": 42
+   "total": 3047,
+   "ciudades": 41
   },
   {
    "estado": "San Luis Potosí",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 30.1,
+  "porcentaje_vuelta": 30.3,
   "modo": "completo"
  },
  "aviso": "",
