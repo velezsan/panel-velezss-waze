@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-09-28T11:40:18+00:00",
+ "actualizado": "2026-09-28T12:22:18+00:00",
  "env": "row",
  "total": 112279,
  "estados": [
@@ -79,7 +79,7 @@
    "estado": "Hidalgo",
    "slug": "hidalgo",
    "total": 4548,
-   "ciudades": 273
+   "ciudades": 272
   },
   {
    "estado": "Jalisco",
