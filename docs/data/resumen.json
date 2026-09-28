@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-28T17:17:34+00:00",
+ "actualizado": "2026-09-28T17:21:03+00:00",
  "env": "row",
- "total": 112084,
+ "total": 112081,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -126,8 +126,8 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 6780,
-   "ciudades": 610
+   "total": 6777,
+   "ciudades": 609
   },
   {
    "estado": "Querétaro",
