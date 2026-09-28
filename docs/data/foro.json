@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-09-27T09:24:48+00:00",
+ "actualizado": "2026-09-28T06:42:49+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 122,
- "peticiones": 131,
+ "temas_revisados": 121,
+ "peticiones": 130,
  "errores": 0,
  "champs": {
   "hector_hf": {
@@ -49,7 +49,7 @@
   "camachista": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 11
+    "respuestas": 10
    },
    "otras": {
     "temas": 0,
