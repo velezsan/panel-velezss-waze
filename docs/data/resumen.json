@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-29T17:29:24+00:00",
+ "actualizado": "2026-09-29T18:12:18+00:00",
  "env": "row",
- "total": 110792,
+ "total": 110796,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -138,7 +138,7 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 3063,
+   "total": 3066,
    "ciudades": 41
   },
   {
@@ -186,7 +186,7 @@
   {
    "estado": "Yucatán",
    "slug": "yucatan",
-   "total": 2636,
+   "total": 2637,
    "ciudades": 153
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 34.0,
+  "porcentaje_vuelta": 34.2,
   "modo": "completo"
  },
  "aviso": "",
