@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-30T09:17:14+00:00",
+ "actualizado": "2026-09-30T10:21:43+00:00",
  "env": "row",
- "total": 110453,
+ "total": 110441,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -138,7 +138,7 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 3066,
+   "total": 3054,
    "ciudades": 41
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 36.0,
+  "porcentaje_vuelta": 36.1,
   "modo": "completo"
  },
  "aviso": "",
