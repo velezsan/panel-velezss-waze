@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-09-30T17:22:16+00:00",
+ "actualizado": "2026-09-30T18:03:05+00:00",
  "env": "row",
  "total": 109277,
  "estados": [
@@ -66,8 +66,8 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 10272,
-   "ciudades": 500
+   "total": 10269,
+   "ciudades": 499
   },
   {
    "estado": "Guerrero",
@@ -180,8 +180,8 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 7528,
-   "ciudades": 699
+   "total": 7531,
+   "ciudades": 700
   },
   {
    "estado": "Yucatán",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 36.9,
+  "porcentaje_vuelta": 37.0,
   "modo": "completo"
  },
  "aviso": "",
