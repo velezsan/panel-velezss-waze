@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-09-30T05:40:58+00:00",
+ "actualizado": "2026-09-30T06:26:13+00:00",
  "env": "row",
- "total": 110876,
+ "total": 110851,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -78,7 +78,7 @@
   {
    "estado": "Hidalgo",
    "slug": "hidalgo",
-   "total": 4641,
+   "total": 4642,
    "ciudades": 274
   },
   {
@@ -186,7 +186,7 @@
   {
    "estado": "Yucatán",
    "slug": "yucatan",
-   "total": 2651,
+   "total": 2625,
    "ciudades": 155
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 35.6,
+  "porcentaje_vuelta": 35.7,
   "modo": "completo"
  },
  "aviso": "",
