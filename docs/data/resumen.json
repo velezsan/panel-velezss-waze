@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-01T13:43:42+00:00",
+ "actualizado": "2026-10-01T14:24:54+00:00",
  "env": "row",
- "total": 108928,
+ "total": 108929,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -144,7 +144,7 @@
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 3409,
+   "total": 3410,
    "ciudades": 276
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 44.4,
+  "porcentaje_vuelta": 44.8,
   "modo": "completo"
  },
  "aviso": "",
