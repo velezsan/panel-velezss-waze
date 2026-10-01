@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-01T16:32:51+00:00",
+ "actualizado": "2026-10-01T17:16:39+00:00",
  "env": "row",
- "total": 108900,
+ "total": 108888,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -192,7 +192,7 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 2918,
+   "total": 2906,
    "ciudades": 261
   }
  ],
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 45.7,
+  "porcentaje_vuelta": 45.8,
   "modo": "completo"
  },
  "aviso": "",
