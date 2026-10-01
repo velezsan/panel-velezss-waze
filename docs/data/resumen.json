@@ -1,12 +1,12 @@
 {
- "actualizado": "2026-10-01T06:42:02+00:00",
+ "actualizado": "2026-10-01T07:22:51+00:00",
  "env": "row",
- "total": 108703,
+ "total": 108735,
  "estados": [
   {
    "estado": "Aguascalientes",
    "slug": "aguascalientes",
-   "total": 1388,
+   "total": 1391,
    "ciudades": 94
   },
   {
@@ -144,7 +144,7 @@
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 3361,
+   "total": 3364,
    "ciudades": 275
   },
   {
@@ -192,7 +192,7 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 2965,
+   "total": 2991,
    "ciudades": 264
   }
  ],
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 41.5,
+  "porcentaje_vuelta": 41.8,
   "modo": "completo"
  },
  "aviso": "",
