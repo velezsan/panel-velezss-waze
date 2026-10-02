@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-02T02:00:06+00:00",
+ "actualizado": "2026-10-02T02:41:40+00:00",
  "env": "row",
- "total": 108903,
+ "total": 108910,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -150,8 +150,8 @@
   {
    "estado": "Sinaloa",
    "slug": "sinaloa",
-   "total": 1880,
-   "ciudades": 138
+   "total": 1887,
+   "ciudades": 140
   },
   {
    "estado": "Sonora",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 48.1,
+  "porcentaje_vuelta": 48.4,
   "modo": "completo"
  },
  "aviso": "",
