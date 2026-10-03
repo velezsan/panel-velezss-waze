@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-03T17:12:21+00:00",
+ "actualizado": "2026-10-03T17:53:57+00:00",
  "env": "row",
- "total": 108516,
+ "total": 108441,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -48,7 +48,7 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 3366,
+   "total": 3335,
    "ciudades": 107
   },
   {
@@ -114,8 +114,8 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 5302,
-   "ciudades": 183
+   "total": 5258,
+   "ciudades": 182
   },
   {
    "estado": "Oaxaca",
