@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-10-02T17:33:37+00:00",
+ "actualizado": "2026-10-03T14:57:27+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 118,
- "peticiones": 126,
+ "temas_revisados": 116,
+ "peticiones": 124,
  "errores": 0,
  "champs": {
   "gwm_": {
@@ -49,7 +49,7 @@
   "camachista": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 10
+    "respuestas": 6
    },
    "otras": {
     "temas": 0,
@@ -110,9 +110,9 @@
  "otros_frecuentes": {
   "velezss": 76,
   "LuisCav29": 33,
-  "jcog69": 10,
   "JorgeLAB": 6,
   "world_yeh8sazm": 5,
+  "jcog69": 5,
   "system": 5,
   "world_ifjpgwib": 3,
   "ideastisp": 3,
