@@ -26,8 +26,6 @@ PARES = [
     # --- siglas con puntos
     ("S.A. de C.V.", "S.A. de C.V."),
     ("C.F.E.", "C.F.E."), ("cfe", "CFE"),
-    ("D.H.L", "DHL"),
-    ("I.N.A.H. Centro regional de Jalisco", "INAH Centro Regional de Jalisco"),
     # --- siglas del diccionario
     ("IMSS UMF 33", "IMSS UMF 33"), ("imss umf 33", "IMSS UMF 33"),
     # --- las que fue marcando Santiago al revisar el panel
@@ -86,17 +84,10 @@ PARES = [
     ("Pastes kikos Pino Suárez", "Pastes Kikos Pino Suárez"),
     ("a", "A"), ("de", "De"), ("y", "Y"), ("EL", "El"),
     # --- siglas que el script aplasta (lo que Santiago irá curando)
-    ("SAT - ADSC Querétaro", "SAT - Adsc Querétaro"),
-    ("ESCI", "Esci"),
-    ("Laboratorios LABSA", "Laboratorios Labsa"),
-    ("Tayrona BTQ", "Tayrona Btq"),
-    ("UADY Facultad de Medicina", "Uady Facultad de Medicina"),
-    ("GTS (GLOBAL THERMAL SOLUTIONS)", "Gts (Global Thermal Solutions)"),
     ("Citibanamex - 16 de Septiembre", "Banamex - 16 de Septiembre"),
     # --- errores de verdad
     ("LIBRERÍA DE MONJAS", "Librería de Monjas"),
     ("FARMACIA FRANCESA", "Farmacia Francesa"),
-    ("THE LIT 13", "The Lit 13"),
     ("pasteleria el molino", "Pasteleria El Molino"),
     ("noun studio", "Noun Studio"),
     ("plasttel", "Plasttel"),
@@ -117,6 +108,20 @@ PARES = [
 # pidió arreglar lo que se pudiera. La columna del medio es lo que daba su
 # script; la de la derecha es lo que damos ahora.
 MEJORAS = [
+    # siglas aprobadas con el país ya escaneado: el script las aplastaba
+    ("D.H.L", "DHL", "D.H.L"),
+    ("I.N.A.H. Centro regional de Jalisco", "INAH Centro Regional de Jalisco",
+     "I.N.A.H. Centro Regional de Jalisco"),
+    ("ESCI", "Esci", "ESCI"),
+    ("Laboratorios LABSA", "Laboratorios Labsa", "Laboratorios LABSA"),
+    ("Tayrona BTQ", "Tayrona Btq", "Tayrona BTQ"),
+    ("GTS (GLOBAL THERMAL SOLUTIONS)", "Gts (Global Thermal Solutions)",
+     "GTS (Global Thermal Solutions)"),
+    ("THE LIT 13", "The Lit 13", "The LIT 13"),
+    # siglas que Santiago ya aprobó: el script las aplastaba y aquí se respetan
+    ("SAT - ADSC Querétaro", "SAT - Adsc Querétaro", "SAT - ADSC Querétaro"),
+    ("UADY Facultad de Medicina", "Uady Facultad de Medicina",
+     "UADY Facultad de Medicina"),
     # marcas que son palabra y marca a la vez: se quedan como las escribió el editor
     ("VIPS", "Vips", "VIPS"),
     ("Vips", "Vips", "Vips"),
@@ -268,10 +273,10 @@ def main():
     # la marca de siglas aplastadas, que es lo que el panel resalta
     casos = [
         ("Farmacia GDL", []),        # GDL ya está aprobada
-        ("UADY Facultad de Medicina", ["UADY"]),
+        ("UADY Facultad de Medicina", []),   # ya está en la lista: no se aplasta
         ("Tiendas 3B", []),        # ya no se aplasta: se protege el código
         ("BanBajio - Plaza Zaragoza", []),   # ya se respeta la marca
-        ("SAT - ADSC Querétaro", ["ADSC"]),           # SAT sí está en la lista
+        ("SAT - ADSC Querétaro", []),         # ADSC también entró a la lista
         ("VIPS", []),                # indiferente: se queda como venga escrita
         # las palabras largas en mayúsculas son un nombre a gritos, no siglas:
         # esas no se marcan, porque la corrección sí es la buena
