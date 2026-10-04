@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-04T22:59:00+00:00",
+ "actualizado": "2026-10-04T23:44:27+00:00",
  "env": "row",
- "total": 108568,
+ "total": 108581,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -36,7 +36,7 @@
   {
    "estado": "Chihuahua",
    "slug": "chihuahua",
-   "total": 1832,
+   "total": 1844,
    "ciudades": 117
   },
   {
@@ -48,7 +48,7 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 3394,
+   "total": 3395,
    "ciudades": 108
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 67.7,
+  "porcentaje_vuelta": 68.0,
   "modo": "completo"
  },
  "aviso": "",
