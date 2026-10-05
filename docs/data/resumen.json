@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-05T07:30:59+00:00",
+ "actualizado": "2026-10-05T08:14:43+00:00",
  "env": "row",
- "total": 108581,
+ "total": 108565,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -48,7 +48,7 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 3399,
+   "total": 3398,
    "ciudades": 110
   },
   {
@@ -156,7 +156,7 @@
   {
    "estado": "Sonora",
    "slug": "sonora",
-   "total": 407,
+   "total": 392,
    "ciudades": 31
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 73.2,
+  "porcentaje_vuelta": 73.5,
   "modo": "completo"
  },
  "aviso": "",
