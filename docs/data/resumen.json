@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-07T07:21:44+00:00",
+ "actualizado": "2026-10-07T08:04:42+00:00",
  "env": "row",
- "total": 108570,
+ "total": 108585,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -30,8 +30,8 @@
   {
    "estado": "Chiapas",
    "slug": "chiapas",
-   "total": 1546,
-   "ciudades": 154
+   "total": 1561,
+   "ciudades": 155
   },
   {
    "estado": "Chihuahua",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 9.8,
+  "porcentaje_vuelta": 10.1,
   "modo": "completo"
  },
  "aviso": "",
