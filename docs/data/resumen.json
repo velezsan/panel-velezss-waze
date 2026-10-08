@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-08T01:16:32+00:00",
+ "actualizado": "2026-10-08T01:57:42+00:00",
  "env": "row",
- "total": 108652,
+ "total": 108675,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -30,8 +30,8 @@
   {
    "estado": "Chiapas",
    "slug": "chiapas",
-   "total": 1592,
-   "ciudades": 158
+   "total": 1615,
+   "ciudades": 159
   },
   {
    "estado": "Chihuahua",
