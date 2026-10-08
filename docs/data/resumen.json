@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-08T17:05:55+00:00",
+ "actualizado": "2026-10-08T17:47:04+00:00",
  "env": "row",
  "total": 108762,
  "estados": [
@@ -72,7 +72,7 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 3367,
+   "total": 3368,
    "ciudades": 132
   },
   {
@@ -120,7 +120,7 @@
   {
    "estado": "Oaxaca",
    "slug": "oaxaca",
-   "total": 7159,
+   "total": 7158,
    "ciudades": 490
   },
   {
