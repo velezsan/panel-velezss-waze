@@ -1,11 +1,21 @@
 {
- "actualizado": "2026-10-09T23:01:35+00:00",
+ "actualizado": "2026-10-10T20:26:07+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 110,
- "peticiones": 118,
+ "temas_revisados": 111,
+ "peticiones": 119,
  "errores": 0,
  "champs": {
+  "maalrivba": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 2
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 2
+   }
+  },
   "arielorellana": {
    "desbloqueos": {
     "temas": 0,
@@ -30,16 +40,6 @@
    "desbloqueos": {
     "temas": 0,
     "respuestas": 3
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 1
-   }
-  },
-  "maalrivba": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 2
    },
    "otras": {
     "temas": 0,
@@ -108,7 +108,7 @@
   }
  },
  "otros_frecuentes": {
-  "velezss": 68,
+  "velezss": 67,
   "LuisCav29": 26,
   "JorgeLAB": 8,
   "world_yeh8sazm": 5,
@@ -122,6 +122,6 @@
   "netogrimald": 2,
   "CovidioMilaneso": 2,
   "world_0nyf3ism": 2,
-  "usa_re2igohh": 1
+  "world_79yp1s4i": 1
  }
 }
