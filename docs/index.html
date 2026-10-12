@@ -285,7 +285,7 @@
 <script>
 (function(){
   const fmt=n=>n.toLocaleString('es-MX');
-  fetch('data/urs.json',{cache:'no-store'})
+  fetch('urs-datos.json',{cache:'no-store'})
     .then(r=>{if(!r.ok)throw 0;return r.json();})
     .then(d=>{
       const n=d.n||(d.urs||[]).length;
