@@ -99,6 +99,7 @@
       <a class="tile" href="places.html"><div class="l">Places mal escritos</div><div class="v" id="pl-orto">—</div><div class="d">acumulados en todo México</div></a>
       <a class="tile" href="places-sin-direccion.html"><div class="l">Places sin dirección</div><div class="v" id="pl-sd">—</div><div class="d">sin calle o con calle sin nombre</div></a>
       <a class="tile" href="puntos.html"><div class="l">Deberían ser área</div><div class="v" id="pl-pt">—</div><div class="d">gasolineras, estacionamientos y aeropuertos como punto</div></a>
+      <a class="tile" href="urs.html"><div class="l">URs abiertos</div><div class="v" id="ur-ab">—</div><div class="d">solicitudes de los conductores, de todo el país</div></a>
     </div>
   </div>
 
@@ -157,6 +158,11 @@
         <div class="t">📐 Deberían ser área</div>
         <div class="d">Gasolineras, estacionamientos y aeropuertos puestos como punto, que en el mapa van como área.</div>
         <div class="n" id="n-puntos"></div>
+      </a>
+      <a class="seccion" href="urs.html">
+        <div class="t">🚧 URs abiertos</div>
+        <div class="d">Solicitudes de actualización de todo México: cuáles llevan más tiempo y cuáles no ha contestado nadie.</div>
+        <div class="n" id="n-urs"></div>
       </a>
       <a class="seccion" href="siglas.html">
         <div class="t">🔠 Siglas por revisar</div>
@@ -274,6 +280,19 @@
       pon('n-candados', fmt(d.total)+' pendientes en '+((d.estados||[]).length)+' estados');
     })
     .catch(()=>{ pon('c-total','—'); pon('c-estados','—'); pon('n-candados','sin datos todavía'); });
+})();
+</script>
+<script>
+(function(){
+  const fmt=n=>n.toLocaleString('es-MX');
+  fetch('data/urs.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{
+      const n=d.n||(d.urs||[]).length;
+      const sinC=(d.urs||[]).filter(u=>!d.editores[u[6]]).length;
+      const v=document.getElementById('ur-ab'); if(v)v.textContent=fmt(n);
+      const s=document.getElementById('n-urs'); if(s)s.textContent=fmt(n)+' abiertos \u00b7 '+fmt(sinC)+' sin contestar';
+    }).catch(()=>{});
 })();
 </script>
 </body>
