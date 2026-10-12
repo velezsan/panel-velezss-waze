@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>URs abiertos · velezss ROW</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#171e2e; --panel2:#1d2639; --line:#2a3550;
+    --text:#e8ecf4; --muted:#93a0b8; --accent:#4da3ff; --accent2:#7fd18c; --warn:#ffb454; --rojo:#ff7b7b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.45}
+  header{padding:24px 20px 8px;max-width:1100px;margin:0 auto}
+  h1{margin:0 0 4px;font-size:1.3rem;font-weight:700}
+  .sub{color:var(--muted);font-size:.92rem;margin:0}
+  .sub a{color:var(--accent);text-decoration:none}
+  main{max-width:1100px;margin:0 auto;padding:14px 20px 60px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;align-items:center}
+  select{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+         border-radius:8px;padding:8px 10px;font-size:.92rem;min-width:150px}
+  input[type=search]{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+         border-radius:8px;padding:8px 10px;font-size:.92rem;min-width:200px}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;overflow:hidden;font-size:.92rem}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  th{background:var(--panel2);color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+  tr:last-child td{border-bottom:none}
+  a.wme{display:inline-block;background:var(--accent);color:#08131f;font-weight:600;
+        padding:5px 11px;border-radius:7px;text-decoration:none;font-size:.85rem;white-space:nowrap}
+  a.wme:hover{filter:brightness(1.1)}
+  tr.visitado td{opacity:.45}
+  a.wme.hecho{background:var(--accent2)}
+  .quitar{color:var(--muted);cursor:pointer;margin-left:7px;font-size:.85rem}
+  .quitar:hover{color:var(--text)}
+  .chip{display:inline-block;background:#243049;border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
+  .chip.viejo{background:#3a1c1c;color:#ff9f9f}
+  .chip.nuevo{background:#1e3a24;color:#7fd18c}
+  .chip.solo{background:#3a2c14;color:#ffd9a0}
+  .tarjetas{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 2px}
+  .tar{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:120px}
+  .tar b{display:block;font-size:1.25rem;line-height:1.2}
+  .tar span{color:var(--muted);font-size:.8rem}
+  .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
+  .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+        border-radius:8px;padding:7px 14px;cursor:pointer;font-size:.9rem}
+  .pager button:disabled{opacity:.4;cursor:default}
+  .pager input{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;
+        padding:7px 6px;width:64px;font-size:.9rem;text-align:center}
+  .pager #pg-total{color:var(--muted);font-size:.9rem}
+  .cargando{color:var(--muted);padding:40px;text-align:center}
+  .nota{color:var(--muted);font-size:.85rem;margin-top:12px}
+  @media (max-width:640px){ th:nth-child(4),td:nth-child(4),th:nth-child(5),td:nth-child(5){display:none} }
+</style>
+</head>
+<body>
+<header>
+  <h1>🚧 URs abiertos</h1>
+  <p class="sub">Solicitudes de actualización de todo México, tomadas del editor ·
+    <a href="index.html">← Volver al panel</a> ·
+    <a href="comentarios.html">Comentarios →</a></p>
+</header>
+<main>
+  <div class="tarjetas" id="tarjetas"></div>
+  <div class="controls">
+    <select id="sel-estado"><option value="">Todos los estados</option></select>
+    <select id="sel-tipo"><option value="">Todos los tipos</option></select>
+    <select id="sel-edad">
+      <option value="">Cualquier antigüedad</option>
+      <option value="0">Reportados hoy</option>
+      <option value="7">De más de 7 días</option>
+      <option value="14">De más de 14 días</option>
+      <option value="21">De más de 21 días</option>
+      <option value="28">De más de 28 días (se cierran solos)</option>
+    </select>
+    <select id="sel-ed">
+      <option value="">Con y sin editor</option>
+      <option value="no">Nadie los ha contestado</option>
+      <option value="si">Ya los contestó alguien</option>
+    </select>
+    <select id="sel-orden">
+      <option value="">Orden: los más viejos primero</option>
+      <option value="nuevo">Orden: los más nuevos primero</option>
+      <option value="act">Orden: última actividad</option>
+    </select>
+    <input type="search" id="buscar" placeholder="Buscar id, estado o editor…">
+  </div>
+  <div id="contenido"><div class="cargando">Cargando URs…</div></div>
+  <div class="pager" id="pager" style="display:none">
+    <button id="pg-first" title="Primera página">«</button>
+    <button id="pg-prev">← Anterior</button>
+    <span id="pg-info"></span>
+    <input type="number" id="pg-num" min="1" value="1" title="Escribe la página y presiona Enter">
+    <span id="pg-total"></span>
+    <button id="pg-next">Siguiente →</button>
+    <button id="pg-last" title="Última página">»</button>
+  </div>
+  <p class="nota">Son los URs <b>abiertos</b> del país, con el mismo filtro que usas en el editor.
+    El botón abre el editor justo en el UR, así que desde aquí se contesta igual que siempre:
+    esta página no responde ni cierra nada, nada más te dice cuáles hay y cuáles llevan más tiempo.
+    Un UR sin actividad se cierra solo a los 30 días, por eso los de más de 28 salen marcados:
+    si no se contestan, se pierde el reporte. «Nadie los ha contestado» son los que ningún editor
+    ha tocado todavía. El estado sale de las coordenadas; la ciudad no viene en el dato del editor.
+    Los datos son de la última vez que se leyó el editor, no se actualizan solos.</p>
+</main>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmt=n=>n.toLocaleString('es-MX');
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const DIA=86400000;
+  let D=null, lista=[], pagina=0, porPagina=100;
+
+  let visitados=new Set();
+  try{visitados=new Set(JSON.parse(localStorage.getItem('svs_visitados_urs')||'[]'));}catch(e){}
+  function guardar(){try{localStorage.setItem('svs_visitados_urs',JSON.stringify([...visitados]));}catch(e){}}
+
+  const permalink=u=>`https://www.waze.com/es-419/editor?env=row&lat=${u[2]}&lon=${u[1]}&zoomLevel=17&mapUpdateRequest=${u[0]}`;
+  const dias=ts=>ts?Math.floor((Date.now()-ts*1000)/DIA):null;
+  function hace(ts){
+    if(!ts)return '—';
+    const m=Math.floor((Date.now()-ts*1000)/60000);
+    if(m<60)return 'hace '+m+' min';
+    if(m<1440)return 'hace '+Math.floor(m/60)+' hr';
+    const d=Math.floor(m/1440);
+    return 'hace '+d+(d===1?' día':' días');
+  }
+  const fecha=ts=>ts?new Date(ts*1000).toLocaleDateString('es-MX',{day:'numeric',month:'short'}):'—';
+
+  function tarjetas(){
+    const u=D.urs;
+    const viejos=u.filter(x=>dias(x[4])>=28).length;
+    const solos=u.filter(x=>!D.editores[x[6]]).length;
+    const hoy=u.filter(x=>dias(x[4])===0).length;
+    const act=D.generado?new Date(D.generado*1000).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'—';
+    $('tarjetas').innerHTML=[
+      ['URs abiertos',fmt(u.length),''],
+      ['Nadie los ha contestado',fmt(solos),''],
+      ['Por cerrarse (+28 días)',fmt(viejos),''],
+      ['Reportados hoy',fmt(hoy),''],
+      ['Leído del editor',act,'']
+    ].map(t=>`<div class="tar"><b>${esc(t[1])}</b><span>${esc(t[0])}</span></div>`).join('');
+  }
+
+  function llenarSelects(){
+    const cuenta={}, cuentaT={};
+    D.urs.forEach(u=>{cuenta[u[7]]=(cuenta[u[7]]||0)+1;cuentaT[u[3]]=(cuentaT[u[3]]||0)+1;});
+    const se=$('sel-estado');
+    Object.keys(cuenta).map(Number).sort((a,b)=>cuenta[b]-cuenta[a]).forEach(i=>{
+      const o=document.createElement('option');
+      o.value=i;o.textContent=`${D.estados[i]} (${fmt(cuenta[i])})`;se.appendChild(o);});
+    const st=$('sel-tipo');
+    Object.keys(cuentaT).map(Number).sort((a,b)=>cuentaT[b]-cuentaT[a]).forEach(i=>{
+      const o=document.createElement('option');
+      o.value=i;o.textContent=`${D.tipos[i]||('Tipo '+i)} (${fmt(cuentaT[i])})`;st.appendChild(o);});
+  }
+
+  function filtrar(){
+    const fe=$('sel-estado').value, ft=$('sel-tipo').value, fd=$('sel-edad').value,
+          fed=$('sel-ed').value, q=$('buscar').value.trim().toLowerCase();
+    lista=D.urs.filter(u=>{
+      if(fe!==''&&String(u[7])!==fe)return false;
+      if(ft!==''&&String(u[3])!==ft)return false;
+      if(fd!==''){const d=dias(u[4]); if(fd==='0'?d!==0:d<Number(fd))return false;}
+      if(fed==='no'&&D.editores[u[6]])return false;
+      if(fed==='si'&&!D.editores[u[6]])return false;
+      if(q){
+        const txt=(u[0]+' '+D.estados[u[7]]+' '+(D.editores[u[6]]||'')+' '+(D.tipos[u[3]]||'')).toLowerCase();
+        if(!txt.includes(q))return false;
+      }
+      return true;
+    });
+    const o=$('sel-orden').value;
+    if(o==='nuevo')lista.sort((a,b)=>b[4]-a[4]);
+    else if(o==='act')lista.sort((a,b)=>(b[5]||b[4])-(a[5]||a[4]));
+    else lista.sort((a,b)=>a[4]-b[4]);
+    pagina=0;
+    pintar();
+  }
+
+  function pintar(){
+    const total=lista.length;
+    const ini=pagina*porPagina, fin=Math.min(ini+porPagina,total);
+    let html=`<table><thead><tr><th>Tipo</th><th>Estado</th><th>Reportado</th><th>Última actividad</th><th>Editor</th><th></th></tr></thead><tbody>`;
+    if(!total){
+      html+='<tr><td colspan="6" class="cargando">No hay URs con esos filtros. 🎉</td></tr>';
+    }
+    lista.slice(ini,fin).forEach(u=>{
+      const vis=visitados.has(String(u[0]));
+      const d=dias(u[4]);
+      const ed=D.editores[u[6]]||'';
+      html+=`<tr class="${vis?'visitado':''}">
+        <td>${esc(D.tipos[u[3]]||('Tipo '+u[3]))}</td>
+        <td><span class="chip">${esc(D.estados[u[7]])}</span></td>
+        <td style="white-space:nowrap">${fecha(u[4])} <span class="chip${d>=28?' viejo':(d===0?' nuevo':'')}">${d>=28?'+'+d+' días':hace(u[4])}</span></td>
+        <td style="white-space:nowrap">${hace(u[5]||u[4])}</td>
+        <td>${ed?esc(ed):'<span class="chip solo">nadie</span>'}</td>
+        <td><a class="wme${vis?' hecho':''}" data-id="${u[0]}" target="wme" href="${permalink(u)}">${vis?'✓ Abierto':'Abrir en WME'}</a>${vis?`<span class="quitar" data-quitar="${u[0]}" title="Desmarcar">✕</span>`:''}</td></tr>`;
+    });
+    html+='</tbody></table>';
+    $('contenido').innerHTML=html;
+    const pgs=Math.max(1,Math.ceil(total/porPagina));
+    $('pager').style.display=total>porPagina?'flex':'none';
+    $('pg-info').textContent=`${fmt(ini+1)}–${fmt(fin)} de ${fmt(total)} · pág.`;
+    $('pg-num').value=pagina+1;
+    $('pg-num').max=pgs;
+    $('pg-total').textContent=`/ ${pgs}`;
+    $('pg-first').disabled=pagina===0;
+    $('pg-prev').disabled=pagina===0;
+    $('pg-next').disabled=pagina>=pgs-1;
+    $('pg-last').disabled=pagina>=pgs-1;
+  }
+
+  $('contenido').addEventListener('click',e=>{
+    const q=e.target.closest('.quitar');
+    if(q){visitados.delete(String(q.dataset.quitar));guardar();pintar();return;}
+    marcarVisto(e);
+  });
+  function marcarVisto(e){
+    const a=e.target.closest('a.wme');
+    if(a&&a.dataset.id){visitados.add(String(a.dataset.id));guardar();setTimeout(pintar,150);}
+  }
+  $('contenido').addEventListener('contextmenu',marcarVisto);
+  $('contenido').addEventListener('auxclick',marcarVisto);
+  $('pg-prev').addEventListener('click',()=>{pagina--;pintar();window.scrollTo(0,0);});
+  $('pg-next').addEventListener('click',()=>{pagina++;pintar();window.scrollTo(0,0);});
+  $('pg-first').addEventListener('click',()=>{pagina=0;pintar();window.scrollTo(0,0);});
+  $('pg-last').addEventListener('click',()=>{pagina=Math.max(0,Math.ceil(lista.length/porPagina)-1);pintar();window.scrollTo(0,0);});
+  function irAPagina(){
+    const pgs=Math.max(1,Math.ceil(lista.length/porPagina));
+    let v=parseInt($('pg-num').value,10);
+    if(isNaN(v))v=pagina+1;
+    pagina=Math.min(Math.max(v,1),pgs)-1;
+    pintar();window.scrollTo(0,0);
+  }
+  $('pg-num').addEventListener('change',irAPagina);
+  $('pg-num').addEventListener('keydown',e=>{if(e.key==='Enter')irAPagina();});
+  ['sel-estado','sel-tipo','sel-edad','sel-ed','sel-orden'].forEach(i=>$(i).addEventListener('change',filtrar));
+  $('buscar').addEventListener('input',()=>{clearTimeout(window._bt);window._bt=setTimeout(filtrar,250);});
+
+  // El dato del editor no trae estado, nada más coordenadas, así que el estado
+  // se resuelve aquí con los mismos polígonos que usa el escáner. Se guardan en
+  // el navegador para no bajarlos en cada visita.
+  const POLIS='https://raw.githubusercontent.com/velezsan/panel-velezss-waze/main/scanner/mx_estados.geojson';
+  async function poligonos(){
+    try{
+      const c=localStorage.getItem('svs_poligonos_mx');
+      if(c){const j=JSON.parse(c); if(j && j.features) return j;}
+    }catch(e){}
+    const j=await (await fetch(POLIS)).json();
+    try{localStorage.setItem('svs_poligonos_mx',JSON.stringify(j));}catch(e){}
+    return j;
+  }
+  function armaEstados(gj){
+    return gj.features.map(f=>{
+      const g=f.geometry, polis=g.type==='Polygon'?[g.coordinates]:g.coordinates;
+      const anillos=polis.filter(p=>p.length).map(p=>{
+        const r=p[0], xs=r.map(c=>c[0]), ys=r.map(c=>c[1]);
+        return [Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys),r];});
+      return [f.properties.name,anillos];});
+  }
+  function dentro(lon,lat,r){
+    let d=false;
+    for(let i=0,j=r.length-1;i<r.length;j=i++){
+      const xi=r[i][0],yi=r[i][1],xj=r[j][0],yj=r[j][1];
+      if((yi>lat)!==(yj>lat)&&lon<(xj-xi)*(lat-yi)/(yj-yi)+xi)d=!d;
+    }
+    return d;
+  }
+  function ponEstados(ests){
+    const nombres=[], idx={};
+    const dame=n=>{if(!(n in idx)){idx[n]=nombres.length;nombres.push(n);}return idx[n];};
+    D.urs.forEach(u=>{
+      const lon=u[1],lat=u[2];
+      let cual=null;
+      for(const [nom,anillos] of ests){
+        for(const [a,b,c,d,r] of anillos){
+          if(a<=lon&&lon<=c&&b<=lat&&lat<=d&&dentro(lon,lat,r)){cual=nom;break;}
+        }
+        if(cual)break;
+      }
+      if(!cual){
+        let mejor=null,md=1e9;
+        for(const [nom,anillos] of ests)for(const [a,b,c,d] of anillos){
+          const dd=((a+c)/2-lon)**2+((b+d)/2-lat)**2;
+          if(dd<md){md=dd;mejor=nom;}
+        }
+        cual=mejor||'Sin estado';
+      }
+      u[7]=dame(cual);
+    });
+    D.estados=nombres;
+  }
+
+  fetch('data/urs.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(async d=>{
+      D=d;
+      if(!D.estados){
+        try{ ponEstados(armaEstados(await poligonos())); }
+        catch(e){ D.estados=['—']; D.urs.forEach(u=>{u[7]=0;}); }
+      }
+      tarjetas();llenarSelects();filtrar();
+    })
+    .catch(()=>{$('contenido').innerHTML='<div class="cargando">Todavía no hay datos de URs. Se llenan cuando se lee el editor.</div>';});
+})();
+</script>
+</body>
+</html>
