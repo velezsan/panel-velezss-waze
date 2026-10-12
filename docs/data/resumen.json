@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-12T03:59:14+00:00",
+ "actualizado": "2026-10-12T04:34:43+00:00",
  "env": "row",
- "total": 109485,
+ "total": 109472,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -54,7 +54,7 @@
   {
    "estado": "Colima",
    "slug": "colima",
-   "total": 661,
+   "total": 646,
    "ciudades": 30
   },
   {
@@ -180,7 +180,7 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 7597,
+   "total": 7599,
    "ciudades": 711
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 25.5,
+  "porcentaje_vuelta": 25.7,
   "modo": "completo"
  },
  "aviso": "",
