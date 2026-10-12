@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-12T11:45:14+00:00",
+ "actualizado": "2026-10-12T12:30:18+00:00",
  "env": "row",
- "total": 109504,
+ "total": 109521,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -126,7 +126,7 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 7250,
+   "total": 7254,
    "ciudades": 617
   },
   {
@@ -174,7 +174,7 @@
   {
    "estado": "Tlaxcala",
    "slug": "tlaxcala",
-   "total": 1985,
+   "total": 1998,
    "ciudades": 129
   },
   {
