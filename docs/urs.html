@@ -40,6 +40,11 @@
   .chip.solo{background:#3a2c14;color:#ffd9a0}
   .quien{color:var(--accent2);cursor:pointer;text-decoration:underline dotted}
   .ciudad{color:var(--muted);font-size:.85rem}
+  .desc{color:var(--muted);font-size:.85rem;margin-top:3px;font-style:italic}
+  .vistas{display:flex;gap:8px;margin:14px 0 2px}
+  .vistas button{background:var(--panel2);color:var(--muted);border:1px solid var(--line);
+        border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.92rem}
+  .vistas button.on{background:var(--accent);color:#08131f;font-weight:600;border-color:var(--accent)}
   .tarjetas{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 2px}
   .tar{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:120px}
   .tar b{display:block;font-size:1.25rem;line-height:1.2}
@@ -64,6 +69,10 @@
     <a href="comentarios.html">Comentarios →</a></p>
 </header>
 <main>
+  <div class="vistas">
+    <button id="v-abiertos" class="on">URs abiertos</button>
+    <button id="v-champs">Reportes de los champs</button>
+  </div>
   <div class="tarjetas" id="tarjetas"></div>
   <div class="controls">
     <select id="sel-estado"><option value="">Todos los estados</option></select>
@@ -103,10 +112,14 @@
     El botón abre el editor justo en el UR, así que desde aquí se contesta igual que siempre:
     esta página no responde ni cierra nada, nada más te dice cuáles hay y cuáles llevan más tiempo.
     Un UR sin actividad se cierra solo a los 30 días, por eso los de más de 28 salen marcados.
+    La <b>descripción</b> es lo que escribió el conductor cuando le preguntaron qué salió mal;
+    muchos nunca contestan, así que los que sí traen texto son los que más rinden al abrirlos.
     «Quien reportó» sale del propio reporte: unos traen el usuario de Waze del conductor, otros
     traen un nombre automático (world_…) y muchos vienen sin nada, porque el reporte fue anónimo.
     El filtro de arriba te deja ver solo los que traen usuario, o seguir a uno en particular;
     si le das clic a un nombre en la tabla, se filtra por ese. Estado y ciudad vienen del editor.
+    La otra vista junta los reportes que levantaron <b>los local champs</b> manejando, abiertos y
+    cerrados, para ver qué están reportando ellos mismos.
     Los datos son de la última vez que se leyó el editor, no se actualizan solos.</p>
 </main>
 <script>
@@ -116,8 +129,10 @@
   const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const DIA=86400000;
   // columnas: 0 id, 1 lon, 2 lat, 3 tipo, 4 reportado, 5 actualizado,
-  //           6 iEditor, 7 iReportero, 8 iEstado, 9 iCiudad
-  let D=null, lista=[], pagina=0, porPagina=100;
+  //           6 iEditor, 7 iReportero, 8 iEstado, 9 iCiudad, 10 descripción
+  //           (en la vista de champs, 11 = 1 si sigue abierto)
+  let D=null, lista=[], pagina=0, porPagina=100, vista='abiertos';
+  const datos=()=>vista==='champs'?(D.champs||[]):D.urs;
 
   let visitados=new Set();
   try{visitados=new Set(JSON.parse(localStorage.getItem('svs_visitados_urs')||'[]'));}catch(e){}
@@ -138,23 +153,33 @@
   const fecha=ts=>ts?new Date(ts*1000).toLocaleDateString('es-MX',{day:'numeric',month:'short'}):'—';
 
   function tarjetas(){
-    const u=D.urs;
-    const viejos=u.filter(x=>dias(x[4])>=28).length;
-    const solos=u.filter(x=>!D.editores[x[6]]).length;
-    const conU=u.filter(x=>conUsuario(quien(x))).length;
+    const u=datos();
     const act=D.generado?new Date(D.generado*1000).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'—';
-    $('tarjetas').innerHTML=[
-      ['URs abiertos',fmt(u.length)],
-      ['Nadie los ha contestado',fmt(solos)],
-      ['Por cerrarse (+28 días)',fmt(viejos)],
-      ['Reportados por un usuario',fmt(conU)],
-      ['Leído del editor',act]
-    ].map(t=>`<div class="tar"><b>${esc(t[1])}</b><span>${esc(t[0])}</span></div>`).join('');
+    const conDesc=u.filter(x=>x[10]).length;
+    let tar;
+    if(vista==='champs'){
+      const abiertos=u.filter(x=>x[11]).length;
+      const quienes=new Set(u.map(x=>quien(x))).size;
+      tar=[['Reportes de los champs',fmt(u.length)],
+           ['Siguen abiertos',fmt(abiertos)],
+           ['Champs que reportaron',fmt(quienes)],
+           ['Con descripción',fmt(conDesc)],
+           ['Leído del editor',act]];
+    }else{
+      tar=[['URs abiertos',fmt(u.length)],
+           ['Nadie los ha contestado',fmt(u.filter(x=>!D.editores[x[6]]).length)],
+           ['Por cerrarse (+28 días)',fmt(u.filter(x=>dias(x[4])>=28).length)],
+           ['Con descripción',fmt(conDesc)],
+           ['Leído del editor',act]];
+    }
+    $('tarjetas').innerHTML=tar.map(t=>`<div class="tar"><b>${esc(t[1])}</b><span>${esc(t[0])}</span></div>`).join('');
   }
 
   function llenarSelects(){
+    ['sel-estado','sel-tipo','sel-quien'].forEach(id=>{
+      const s=$(id); while(s.options.length>1)s.remove(1);});
     const cE={}, cT={}, cQ={};
-    D.urs.forEach(u=>{
+    datos().forEach(u=>{
       cE[u[8]]=(cE[u[8]]||0)+1;
       cT[u[3]]=(cT[u[3]]||0)+1;
       const n=quien(u); if(conUsuario(n))cQ[n]=(cQ[n]||0)+1;
@@ -170,7 +195,7 @@
     const sq=$('sel-quien');
     const nombres=Object.keys(cQ).sort((a,b)=>cQ[b]-cQ[a]||a.localeCompare(b,'es'));
     const conU=nombres.reduce((a,n)=>a+cQ[n],0);
-    const anon=D.urs.length-conU;
+    const anon=datos().length-conU;
     [['usuario',`Solo los que traen usuario (${fmt(conU)})`],
      ['anon',`Solo los anónimos (${fmt(anon)})`]].forEach(p=>{
       const o=document.createElement('option');o.value=p[0];o.textContent=p[1];sq.appendChild(o);});
@@ -184,7 +209,7 @@
     const fe=$('sel-estado').value, ft=$('sel-tipo').value, fd=$('sel-edad').value,
           fq=$('sel-quien').value, fed=$('sel-ed').value,
           q=$('buscar').value.trim().toLowerCase();
-    lista=D.urs.filter(u=>{
+    lista=datos().filter(u=>{
       if(fe!==''&&String(u[8])!==fe)return false;
       if(ft!==''&&String(u[3])!==ft)return false;
       if(fd!==''){const d=dias(u[4]); if(fd==='0'?d!==0:d<Number(fd))return false;}
@@ -198,13 +223,14 @@
       if(fed==='si'&&!D.editores[u[6]])return false;
       if(q){
         const txt=(u[0]+' '+(D.estados[u[8]]||'')+' '+(D.ciudades[u[9]]||'')+' '
-                  +(D.editores[u[6]]||'')+' '+quien(u)+' '+(D.tipos[u[3]]||'')).toLowerCase();
+                  +(D.editores[u[6]]||'')+' '+quien(u)+' '+(D.tipos[u[3]]||'')+' '
+                  +(u[10]||'')).toLowerCase();
         if(!txt.includes(q))return false;
       }
       return true;
     });
     const o=$('sel-orden').value;
-    if(o==='nuevo')lista.sort((a,b)=>b[4]-a[4]);
+    if(o==='nuevo'||(vista==='champs'&&o===''))lista.sort((a,b)=>b[4]-a[4]);
     else if(o==='act')lista.sort((a,b)=>(b[5]||b[4])-(a[5]||a[4]));
     else lista.sort((a,b)=>a[4]-b[4]);
     pagina=0;
@@ -227,8 +253,10 @@
       const celdaQuien=conUsuario(n)
         ? `<span class="quien" data-quien="${esc(n)}" title="Ver solo los de ${esc(n)}">${esc(n)}</span>`
         : (n?'<span class="chip">sin usuario</span>':'<span class="chip">anónimo</span>');
+      const abierto=vista==='champs'?(u[11]?'<span class="chip nuevo">abierto</span>':'<span class="chip">cerrado</span>')+' ':'';
+      const desc=u[10]?`<div class="desc" title="${esc(u[10])}">«${esc(u[10].length>150?u[10].slice(0,150)+'…':u[10])}»</div>`:'';
       html+=`<tr class="${vis?'visitado':''}">
-        <td>${esc(D.tipos[u[3]]||('Tipo '+u[3]))}</td>
+        <td>${abierto}${esc(D.tipos[u[3]]||('Tipo '+u[3]))}${desc}</td>
         <td><span class="chip">${esc(D.estados[u[8]]||'—')}</span>${ciu?'<div class="ciudad">'+esc(ciu)+'</div>':''}</td>
         <td style="white-space:nowrap">${fecha(u[4])} <span class="chip${d>=28?' viejo':(d===0?' nuevo':'')}">${d>=28?'+'+d+' días':hace(u[4])}</span></td>
         <td style="white-space:nowrap">${hace(u[5]||u[4])}</td>
@@ -277,6 +305,17 @@
   $('pg-num').addEventListener('change',irAPagina);
   $('pg-num').addEventListener('keydown',e=>{if(e.key==='Enter')irAPagina();});
   ['sel-estado','sel-tipo','sel-edad','sel-quien','sel-ed','sel-orden'].forEach(i=>$(i).addEventListener('change',filtrar));
+  function cambiarVista(v){
+    if(vista===v)return;
+    vista=v;
+    $('v-abiertos').classList.toggle('on',v==='abiertos');
+    $('v-champs').classList.toggle('on',v==='champs');
+    ['sel-estado','sel-tipo','sel-edad','sel-quien','sel-ed','sel-orden'].forEach(i=>{$(i).value='';});
+    $('buscar').value='';
+    tarjetas();llenarSelects();filtrar();window.scrollTo(0,0);
+  }
+  $('v-abiertos').addEventListener('click',()=>cambiarVista('abiertos'));
+  $('v-champs').addEventListener('click',()=>cambiarVista('champs'));
   $('buscar').addEventListener('input',()=>{clearTimeout(window._bt);window._bt=setTimeout(filtrar,250);});
 
   fetch('data/urs.json',{cache:'no-store'})
@@ -286,6 +325,9 @@
       D.reporteros=D.reporteros||[''];
       D.estados=D.estados||[''];
       D.ciudades=D.ciudades||[''];
+      D.champs=D.champs||[];
+      if(!D.champs.length)$('v-champs').style.display='none';
+      else $('v-champs').textContent=`Reportes de los champs (${fmt(D.champs.length)})`;
       tarjetas();llenarSelects();filtrar();
     })
     .catch(()=>{$('contenido').innerHTML='<div class="cargando">Todavía no hay datos de URs. Se llenan cuando se lee el editor.</div>';});
