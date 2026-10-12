@@ -318,7 +318,7 @@
   $('v-champs').addEventListener('click',()=>cambiarVista('champs'));
   $('buscar').addEventListener('input',()=>{clearTimeout(window._bt);window._bt=setTimeout(filtrar,250);});
 
-  fetch('data/urs.json',{cache:'no-store'})
+  fetch('urs-datos.json',{cache:'no-store'})
     .then(r=>{if(!r.ok)throw 0;return r.json();})
     .then(d=>{
       D=d;
