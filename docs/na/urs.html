@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>URs abiertos · velezss NA</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#171e2e; --panel2:#1d2639; --line:#2a3550;
+    --text:#e8ecf4; --muted:#93a0b8; --accent:#4da3ff; --accent2:#7fd18c; --warn:#ffb454; --rojo:#ff7b7b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.45}
+  header{padding:24px 20px 8px;max-width:1150px;margin:0 auto}
+  h1{margin:0 0 4px;font-size:1.3rem;font-weight:700}
+  .sub{color:var(--muted);font-size:.92rem;margin:0}
+  .sub a{color:var(--accent);text-decoration:none}
+  main{max-width:1150px;margin:0 auto;padding:14px 20px 60px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;align-items:center}
+  select{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+         border-radius:8px;padding:8px 10px;font-size:.92rem;min-width:150px;max-width:260px}
+  input[type=search]{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+         border-radius:8px;padding:8px 10px;font-size:.92rem;min-width:200px}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;overflow:hidden;font-size:.92rem}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  th{background:var(--panel2);color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+  tr:last-child td{border-bottom:none}
+  a.wme{display:inline-block;background:var(--accent);color:#08131f;font-weight:600;
+        padding:5px 11px;border-radius:7px;text-decoration:none;font-size:.85rem;white-space:nowrap}
+  a.wme:hover{filter:brightness(1.1)}
+  tr.visitado td{opacity:.45}
+  a.wme.hecho{background:var(--accent2)}
+  .quitar{color:var(--muted);cursor:pointer;margin-left:7px;font-size:.85rem}
+  .quitar:hover{color:var(--text)}
+  .chip{display:inline-block;background:#243049;border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
+  .chip.viejo{background:#3a1c1c;color:#ff9f9f}
+  .chip.nuevo{background:#1e3a24;color:#7fd18c}
+  .chip.solo{background:#3a2c14;color:#ffd9a0}
+  .quien{color:var(--accent2);cursor:pointer;text-decoration:underline dotted}
+  .ciudad{color:var(--muted);font-size:.85rem}
+  .desc{color:var(--muted);font-size:.85rem;margin-top:3px;font-style:italic}
+  .vistas{display:flex;gap:8px;margin:14px 0 2px}
+  .vistas button{background:var(--panel2);color:var(--muted);border:1px solid var(--line);
+        border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.92rem}
+  .vistas button.on{background:var(--accent);color:#08131f;font-weight:600;border-color:var(--accent)}
+  .tarjetas{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 2px}
+  .tar{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:120px}
+  .tar b{display:block;font-size:1.25rem;line-height:1.2}
+  .tar span{color:var(--muted);font-size:.8rem}
+  .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
+  .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+        border-radius:8px;padding:7px 14px;cursor:pointer;font-size:.9rem}
+  .pager button:disabled{opacity:.4;cursor:default}
+  .pager input{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;
+        padding:7px 6px;width:64px;font-size:.9rem;text-align:center}
+  .pager #pg-total{color:var(--muted);font-size:.9rem}
+  .cargando{color:var(--muted);padding:40px;text-align:center}
+  .nota{color:var(--muted);font-size:.85rem;margin-top:12px}
+  @media (max-width:760px){ th:nth-child(4),td:nth-child(4),th:nth-child(6),td:nth-child(6){display:none} }
+</style>
+</head>
+<body>
+<header>
+  <h1>🚧 URs abiertos</h1>
+  <p class="sub">Solicitudes de actualización de la franja que vive en el servidor NA ·
+    <a href="index.html">← Volver al panel</a> ·
+    <a href="comentarios.html">Comentarios →</a></p>
+</header>
+<main>
+  <div class="vistas">
+    <button id="v-abiertos" class="on">URs abiertos</button>
+    <button id="v-champs">Reportes de los champs</button>
+  </div>
+  <div class="tarjetas" id="tarjetas"></div>
+  <div class="controls">
+    <select id="sel-estado"><option value="">Todos los estados</option></select>
+    <select id="sel-tipo"><option value="">Todos los tipos</option></select>
+    <select id="sel-edad">
+      <option value="">Cualquier antigüedad</option>
+      <option value="0">Reportados hoy</option>
+      <option value="7">De más de 7 días</option>
+      <option value="14">De más de 14 días</option>
+      <option value="21">De más de 21 días</option>
+      <option value="28">De más de 28 días (se cierran solos)</option>
+    </select>
+    <select id="sel-quien"><option value="">Quien reportó: todos</option></select>
+    <select id="sel-ed">
+      <option value="">Con y sin editor</option>
+      <option value="no">Nadie los ha contestado</option>
+      <option value="si">Ya los contestó alguien</option>
+    </select>
+    <select id="sel-orden">
+      <option value="">Orden: los más viejos primero</option>
+      <option value="nuevo">Orden: los más nuevos primero</option>
+      <option value="act">Orden: última actividad</option>
+    </select>
+    <input type="search" id="buscar" placeholder="Buscar id, ciudad, quien reportó…">
+  </div>
+  <div id="contenido"><div class="cargando">Cargando URs…</div></div>
+  <div class="pager" id="pager" style="display:none">
+    <button id="pg-first" title="Primera página">«</button>
+    <button id="pg-prev">← Anterior</button>
+    <span id="pg-info"></span>
+    <input type="number" id="pg-num" min="1" value="1" title="Escribe la página y presiona Enter">
+    <span id="pg-total"></span>
+    <button id="pg-next">Siguiente →</button>
+    <button id="pg-last" title="Última página">»</button>
+  </div>
+  <p class="nota">Son los URs <b>abiertos</b> de la franja norte que el editor atiende desde el servidor NA (env=usa): la parte de Baja California, Sonora, Chihuahua, Coahuila, Nuevo León y Tamaulipas que no vive en el servidor ROW.
+    El botón abre el editor justo en el UR, así que desde aquí se contesta igual que siempre:
+    esta página no responde ni cierra nada, nada más te dice cuáles hay y cuáles llevan más tiempo.
+    Un UR sin actividad se cierra solo a los 30 días, por eso los de más de 28 salen marcados.
+    La <b>descripción</b> es lo que escribió el conductor cuando le preguntaron qué salió mal;
+    muchos nunca contestan, así que los que sí traen texto son los que más rinden al abrirlos.
+    «Quien reportó» sale del propio reporte: unos traen el usuario de Waze del conductor, otros
+    traen un nombre automático (world_…) y muchos vienen sin nada, porque el reporte fue anónimo.
+    El filtro de arriba te deja ver solo los que traen usuario, o seguir a uno en particular;
+    si le das clic a un nombre en la tabla, se filtra por ese. Estado y ciudad vienen del editor.
+    La otra vista junta los reportes que levantaron <b>los local champs</b> manejando, abiertos y
+    cerrados, para ver qué están reportando ellos mismos.
+    Los datos son de la última vez que se leyó el editor, no se actualizan solos.</p>
+</main>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmt=n=>n.toLocaleString('es-MX');
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const DIA=86400000;
+  // columnas: 0 id, 1 lon, 2 lat, 3 tipo, 4 reportado, 5 actualizado,
+  //           6 iEditor, 7 iReportero, 8 iEstado, 9 iCiudad, 10 descripción
+  //           (en la vista de champs, 11 = 1 si sigue abierto)
+  let D=null, lista=[], pagina=0, porPagina=100, vista='abiertos';
+  const datos=()=>vista==='champs'?(D.champs||[]):D.urs;
+
+  let visitados=new Set();
+  try{visitados=new Set(JSON.parse(localStorage.getItem('svs_visitados_urs')||'[]'));}catch(e){}
+  function guardar(){try{localStorage.setItem('svs_visitados_urs',JSON.stringify([...visitados]));}catch(e){}}
+
+  const permalink=u=>`https://www.waze.com/es-419/editor?env=usa&lat=${u[2]}&lon=${u[1]}&zoomLevel=17&mapUpdateRequest=${u[0]}`;
+  const dias=ts=>ts?Math.floor((Date.now()-ts*1000)/DIA):null;
+  const quien=u=>(D.reporteros[u[7]]||'');
+  const conUsuario=n=>!!n&&!/^world_/i.test(n);
+  function hace(ts){
+    if(!ts)return '—';
+    const m=Math.floor((Date.now()-ts*1000)/60000);
+    if(m<60)return 'hace '+m+' min';
+    if(m<1440)return 'hace '+Math.floor(m/60)+' hr';
+    const d=Math.floor(m/1440);
+    return 'hace '+d+(d===1?' día':' días');
+  }
+  const fecha=ts=>ts?new Date(ts*1000).toLocaleDateString('es-MX',{day:'numeric',month:'short'}):'—';
+
+  function tarjetas(){
+    const u=datos();
+    const act=D.generado?new Date(D.generado*1000).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'—';
+    const conDesc=u.filter(x=>x[10]).length;
+    let tar;
+    if(vista==='champs'){
+      const abiertos=u.filter(x=>x[11]).length;
+      const quienes=new Set(u.map(x=>quien(x))).size;
+      tar=[['Reportes de los champs',fmt(u.length)],
+           ['Siguen abiertos',fmt(abiertos)],
+           ['Champs que reportaron',fmt(quienes)],
+           ['Con descripción',fmt(conDesc)],
+           ['Leído del editor',act]];
+    }else{
+      tar=[['URs abiertos',fmt(u.length)],
+           ['Nadie los ha contestado',fmt(u.filter(x=>!D.editores[x[6]]).length)],
+           ['Por cerrarse (+28 días)',fmt(u.filter(x=>dias(x[4])>=28).length)],
+           ['Con descripción',fmt(conDesc)],
+           ['Leído del editor',act]];
+    }
+    $('tarjetas').innerHTML=tar.map(t=>`<div class="tar"><b>${esc(t[1])}</b><span>${esc(t[0])}</span></div>`).join('');
+  }
+
+  function llenarSelects(){
+    ['sel-estado','sel-tipo','sel-quien'].forEach(id=>{
+      const s=$(id); while(s.options.length>1)s.remove(1);});
+    const cE={}, cT={}, cQ={};
+    datos().forEach(u=>{
+      cE[u[8]]=(cE[u[8]]||0)+1;
+      cT[u[3]]=(cT[u[3]]||0)+1;
+      const n=quien(u); if(conUsuario(n))cQ[n]=(cQ[n]||0)+1;
+    });
+    const se=$('sel-estado');
+    Object.keys(cE).map(Number).sort((a,b)=>cE[b]-cE[a]).forEach(i=>{
+      const o=document.createElement('option');
+      o.value=i;o.textContent=`${D.estados[i]||'sin estado'} (${fmt(cE[i])})`;se.appendChild(o);});
+    const st=$('sel-tipo');
+    Object.keys(cT).map(Number).sort((a,b)=>cT[b]-cT[a]).forEach(i=>{
+      const o=document.createElement('option');
+      o.value=i;o.textContent=`${D.tipos[i]||('Tipo '+i)} (${fmt(cT[i])})`;st.appendChild(o);});
+    const sq=$('sel-quien');
+    const nombres=Object.keys(cQ).sort((a,b)=>cQ[b]-cQ[a]||a.localeCompare(b,'es'));
+    const conU=nombres.reduce((a,n)=>a+cQ[n],0);
+    const anon=datos().length-conU;
+    [['usuario',`Solo los que traen usuario (${fmt(conU)})`],
+     ['anon',`Solo los anónimos (${fmt(anon)})`]].forEach(p=>{
+      const o=document.createElement('option');o.value=p[0];o.textContent=p[1];sq.appendChild(o);});
+    const gr=document.createElement('optgroup');gr.label='Por usuario';
+    nombres.forEach(n=>{
+      const o=document.createElement('option');o.value='u:'+n;o.textContent=`${n} (${fmt(cQ[n])})`;gr.appendChild(o);});
+    if(nombres.length)sq.appendChild(gr);
+  }
+
+  function filtrar(){
+    const fe=$('sel-estado').value, ft=$('sel-tipo').value, fd=$('sel-edad').value,
+          fq=$('sel-quien').value, fed=$('sel-ed').value,
+          q=$('buscar').value.trim().toLowerCase();
+    lista=datos().filter(u=>{
+      if(fe!==''&&String(u[8])!==fe)return false;
+      if(ft!==''&&String(u[3])!==ft)return false;
+      if(fd!==''){const d=dias(u[4]); if(fd==='0'?d!==0:d<Number(fd))return false;}
+      if(fq){
+        const n=quien(u);
+        if(fq==='usuario'&&!conUsuario(n))return false;
+        if(fq==='anon'&&conUsuario(n))return false;
+        if(fq.startsWith('u:')&&n!==fq.slice(2))return false;
+      }
+      if(fed==='no'&&D.editores[u[6]])return false;
+      if(fed==='si'&&!D.editores[u[6]])return false;
+      if(q){
+        const txt=(u[0]+' '+(D.estados[u[8]]||'')+' '+(D.ciudades[u[9]]||'')+' '
+                  +(D.editores[u[6]]||'')+' '+quien(u)+' '+(D.tipos[u[3]]||'')+' '
+                  +(u[10]||'')).toLowerCase();
+        if(!txt.includes(q))return false;
+      }
+      return true;
+    });
+    const o=$('sel-orden').value;
+    if(o==='nuevo'||(vista==='champs'&&o===''))lista.sort((a,b)=>b[4]-a[4]);
+    else if(o==='act')lista.sort((a,b)=>(b[5]||b[4])-(a[5]||a[4]));
+    else lista.sort((a,b)=>a[4]-b[4]);
+    pagina=0;
+    pintar();
+  }
+
+  function pintar(){
+    const total=lista.length;
+    const ini=pagina*porPagina, fin=Math.min(ini+porPagina,total);
+    let html=`<table><thead><tr><th>Tipo</th><th>Dónde</th><th>Reportado</th><th>Última actividad</th><th>Quién reportó</th><th>Editor</th><th></th></tr></thead><tbody>`;
+    if(!total){
+      html+='<tr><td colspan="7" class="cargando">No hay URs con esos filtros. 🎉</td></tr>';
+    }
+    lista.slice(ini,fin).forEach(u=>{
+      const vis=visitados.has(String(u[0]));
+      const d=dias(u[4]);
+      const ed=D.editores[u[6]]||'';
+      const n=quien(u);
+      const ciu=D.ciudades[u[9]]||'';
+      const celdaQuien=conUsuario(n)
+        ? `<span class="quien" data-quien="${esc(n)}" title="Ver solo los de ${esc(n)}">${esc(n)}</span>`
+        : (n?'<span class="chip">sin usuario</span>':'<span class="chip">anónimo</span>');
+      const abierto=vista==='champs'?(u[11]?'<span class="chip nuevo">abierto</span>':'<span class="chip">cerrado</span>')+' ':'';
+      const desc=u[10]?`<div class="desc" title="${esc(u[10])}">«${esc(u[10].length>150?u[10].slice(0,150)+'…':u[10])}»</div>`:'';
+      html+=`<tr class="${vis?'visitado':''}">
+        <td>${abierto}${esc(D.tipos[u[3]]||('Tipo '+u[3]))}${desc}</td>
+        <td><span class="chip">${esc(D.estados[u[8]]||'—')}</span>${ciu?'<div class="ciudad">'+esc(ciu)+'</div>':''}</td>
+        <td style="white-space:nowrap">${fecha(u[4])} <span class="chip${d>=28?' viejo':(d===0?' nuevo':'')}">${d>=28?'+'+d+' días':hace(u[4])}</span></td>
+        <td style="white-space:nowrap">${hace(u[5]||u[4])}</td>
+        <td>${celdaQuien}</td>
+        <td>${ed?esc(ed):'<span class="chip solo">nadie</span>'}</td>
+        <td><a class="wme${vis?' hecho':''}" data-id="${u[0]}" target="wme" href="${permalink(u)}">${vis?'✓ Abierto':'Abrir en WME'}</a>${vis?`<span class="quitar" data-quitar="${u[0]}" title="Desmarcar">✕</span>`:''}</td></tr>`;
+    });
+    html+='</tbody></table>';
+    $('contenido').innerHTML=html;
+    const pgs=Math.max(1,Math.ceil(total/porPagina));
+    $('pager').style.display=total>porPagina?'flex':'none';
+    $('pg-info').textContent=`${fmt(ini+1)}–${fmt(fin)} de ${fmt(total)} · pág.`;
+    $('pg-num').value=pagina+1;
+    $('pg-num').max=pgs;
+    $('pg-total').textContent=`/ ${pgs}`;
+    $('pg-first').disabled=pagina===0;
+    $('pg-prev').disabled=pagina===0;
+    $('pg-next').disabled=pagina>=pgs-1;
+    $('pg-last').disabled=pagina>=pgs-1;
+  }
+
+  $('contenido').addEventListener('click',e=>{
+    const q=e.target.closest('.quitar');
+    if(q){visitados.delete(String(q.dataset.quitar));guardar();pintar();return;}
+    const w=e.target.closest('.quien');
+    if(w){$('sel-quien').value='u:'+w.dataset.quien;filtrar();window.scrollTo(0,0);return;}
+    marcarVisto(e);
+  });
+  function marcarVisto(e){
+    const a=e.target.closest('a.wme');
+    if(a&&a.dataset.id){visitados.add(String(a.dataset.id));guardar();setTimeout(pintar,150);}
+  }
+  $('contenido').addEventListener('contextmenu',marcarVisto);
+  $('contenido').addEventListener('auxclick',marcarVisto);
+  $('pg-prev').addEventListener('click',()=>{pagina--;pintar();window.scrollTo(0,0);});
+  $('pg-next').addEventListener('click',()=>{pagina++;pintar();window.scrollTo(0,0);});
+  $('pg-first').addEventListener('click',()=>{pagina=0;pintar();window.scrollTo(0,0);});
+  $('pg-last').addEventListener('click',()=>{pagina=Math.max(0,Math.ceil(lista.length/porPagina)-1);pintar();window.scrollTo(0,0);});
+  function irAPagina(){
+    const pgs=Math.max(1,Math.ceil(lista.length/porPagina));
+    let v=parseInt($('pg-num').value,10);
+    if(isNaN(v))v=pagina+1;
+    pagina=Math.min(Math.max(v,1),pgs)-1;
+    pintar();window.scrollTo(0,0);
+  }
+  $('pg-num').addEventListener('change',irAPagina);
+  $('pg-num').addEventListener('keydown',e=>{if(e.key==='Enter')irAPagina();});
+  ['sel-estado','sel-tipo','sel-edad','sel-quien','sel-ed','sel-orden'].forEach(i=>$(i).addEventListener('change',filtrar));
+  function cambiarVista(v){
+    if(vista===v)return;
+    vista=v;
+    $('v-abiertos').classList.toggle('on',v==='abiertos');
+    $('v-champs').classList.toggle('on',v==='champs');
+    ['sel-estado','sel-tipo','sel-edad','sel-quien','sel-ed','sel-orden'].forEach(i=>{$(i).value='';});
+    $('buscar').value='';
+    tarjetas();llenarSelects();filtrar();window.scrollTo(0,0);
+  }
+  $('v-abiertos').addEventListener('click',()=>cambiarVista('abiertos'));
+  $('v-champs').addEventListener('click',()=>cambiarVista('champs'));
+  $('buscar').addEventListener('input',()=>{clearTimeout(window._bt);window._bt=setTimeout(filtrar,250);});
+
+  fetch('urs-datos.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{
+      D=d;
+      D.reporteros=D.reporteros||[''];
+      D.estados=D.estados||[''];
+      D.ciudades=D.ciudades||[''];
+      D.champs=D.champs||[];
+      if(!D.champs.length)$('v-champs').style.display='none';
+      else $('v-champs').textContent=`Reportes de los champs (${fmt(D.champs.length)})`;
+      tarjetas();llenarSelects();filtrar();
+    })
+    .catch(()=>{$('contenido').innerHTML='<div class="cargando">Todavía no hay datos de URs. Se llenan cuando se lee el editor.</div>';});
+})();
+</script>
+</body>
+</html>
