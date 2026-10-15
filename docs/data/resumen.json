@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-15T10:43:47+00:00",
+ "actualizado": "2026-10-15T11:24:55+00:00",
  "env": "row",
  "total": 109587,
  "estados": [
@@ -66,7 +66,7 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 10275,
+   "total": 10274,
    "ciudades": 497
   },
   {
@@ -132,7 +132,7 @@
   {
    "estado": "Querétaro",
    "slug": "queretaro",
-   "total": 2292,
+   "total": 2293,
    "ciudades": 148
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 31.6,
+  "porcentaje_vuelta": 31.7,
   "modo": "completo"
  },
  "aviso": "",
