@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-17T07:13:53+00:00",
+ "actualizado": "2026-10-17T08:03:52+00:00",
  "env": "row",
- "total": 107956,
+ "total": 107957,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -138,7 +138,7 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 1488,
+   "total": 1489,
    "ciudades": 42
   },
   {
