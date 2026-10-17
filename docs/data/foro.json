@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-10-16T05:23:08+00:00",
+ "actualizado": "2026-10-17T02:52:31+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 97,
- "peticiones": 105,
+ "temas_revisados": 93,
+ "peticiones": 101,
  "errores": 0,
  "champs": {
   "camachista": {
@@ -29,7 +29,7 @@
   "arielorellana": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 30
+    "respuestas": 28
    },
    "otras": {
     "temas": 0,
@@ -79,7 +79,7 @@
   "carloslaso": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 32
+    "respuestas": 27
    },
    "otras": {
     "temas": 0,
@@ -108,12 +108,12 @@
   }
  },
  "otros_frecuentes": {
-  "velezss": 37,
+  "velezss": 34,
   "LuisCav29": 26,
   "JorgeLAB": 7,
   "world_yeh8sazm": 5,
-  "system": 5,
   "jcog69": 4,
+  "system": 4,
   "world_ifjpgwib": 3,
   "ideastisp": 3,
   "Fronyshout": 3,
