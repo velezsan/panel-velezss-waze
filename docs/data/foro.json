@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-10-17T02:52:31+00:00",
+ "actualizado": "2026-10-18T00:23:23+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 93,
- "peticiones": 101,
+ "temas_revisados": 83,
+ "peticiones": 90,
  "errores": 0,
  "champs": {
   "camachista": {
@@ -29,7 +29,7 @@
   "arielorellana": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 28
+    "respuestas": 27
    },
    "otras": {
     "temas": 0,
@@ -39,7 +39,7 @@
   "gwm_": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 28
+    "respuestas": 21
    },
    "otras": {
     "temas": 0,
@@ -73,23 +73,23 @@
    },
    "otras": {
     "temas": 0,
-    "respuestas": 6
+    "respuestas": 5
    }
   },
   "carloslaso": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 27
+    "respuestas": 20
    },
    "otras": {
     "temas": 0,
-    "respuestas": 11
+    "respuestas": 10
    }
   },
   "davidabarca": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 1
+    "respuestas": 0
    },
    "otras": {
     "temas": 0,
@@ -108,20 +108,20 @@
   }
  },
  "otros_frecuentes": {
-  "velezss": 34,
-  "LuisCav29": 26,
+  "velezss": 32,
+  "LuisCav29": 14,
   "JorgeLAB": 7,
   "world_yeh8sazm": 5,
   "jcog69": 4,
   "system": 4,
   "world_ifjpgwib": 3,
-  "ideastisp": 3,
   "Fronyshout": 3,
   "world_gcr4fuhs": 2,
   "CasaTinta": 2,
   "world_79yp1s4i": 2,
   "ArturoCastroPeaceful9": 2,
   "Alex_Miranda": 2,
-  "netogrimald": 2
+  "netogrimald": 2,
+  "CovidioMilaneso": 2
  }
 }
