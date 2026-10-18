@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-18T05:24:34+00:00",
+ "actualizado": "2026-10-18T06:06:10+00:00",
  "env": "row",
- "total": 107720,
+ "total": 107717,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -168,7 +168,7 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 1209,
+   "total": 1206,
    "ciudades": 98
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 42.8,
+  "porcentaje_vuelta": 43.2,
   "modo": "completo"
  },
  "aviso": "",
