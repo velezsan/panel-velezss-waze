@@ -118,3 +118,20 @@ verificar. El commit se confirma en
 commit local, sin push, y un resumen con los números del día: abiertos, cuántos no ha
 contestado nadie, cuántos están por cerrarse solos a los 30 días, cuántos traen descripción
 y cuántos reportaron los champs.
+
+## 7. Los reportes de los champs se acumulan
+
+Waze solo deja ver unos treinta días hacia atrás, así que un reporte viejo desaparece de la
+lectura aunque haya existido. Para que no se pierdan, antes de subir el archivo se mezcla lo
+nuevo con lo que ya estaba publicado: se bajan las versiones anteriores de
+`docs/urs-datos.json` (y su gemelo de NA) desde `raw.githubusercontent.com` usando los SHA
+de los commits que tocaron ese archivo —la lista sale de
+`https://api.github.com/repos/velezsan/panel-velezss-waze/commits?path=docs/urs-datos.json`—
+y se agregan los reportes de champs que ya no vienen en la lectura de hoy.
+
+Al mezclar hay que volver a indexar: cada fila guarda posiciones dentro de `editores`,
+`reporteros`, `estados` y `ciudades`, y esos arreglos cambian de una corrida a otra, así que
+el nombre se resuelve con los arreglos del archivo viejo y se vuelve a dar de alta en los del
+nuevo. A un reporte recuperado se le pone la bandera de abierto en 0, porque si ya no aparece
+en la lectura es que está cerrado. El archivo lleva `champsAcumulados: true` para dejar claro
+que esa lista no es solo la ventana de hoy.
