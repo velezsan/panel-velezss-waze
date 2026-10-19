@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-10-18T21:51:03+00:00",
+ "actualizado": "2026-10-19T19:19:54+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 70,
- "peticiones": 77,
+ "temas_revisados": 69,
+ "peticiones": 76,
  "errores": 0,
  "champs": {
   "davidabarca": {
@@ -39,7 +39,7 @@
   "arielorellana": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 12
+    "respuestas": 9
    },
    "otras": {
     "temas": 0,
@@ -108,20 +108,20 @@
   }
  },
  "otros_frecuentes": {
-  "velezss": 29,
-  "LuisCav29": 11,
+  "velezss": 28,
+  "LuisCav29": 10,
   "JorgeLAB": 7,
   "world_yeh8sazm": 5,
   "jcog69": 4,
   "system": 4,
   "world_ifjpgwib": 3,
+  "world_9jx5hsnm": 2,
   "world_gcr4fuhs": 2,
   "CasaTinta": 2,
   "world_79yp1s4i": 2,
   "ArturoCastroPeaceful9": 2,
   "Alex_Miranda": 2,
   "netogrimald": 2,
-  "CovidioMilaneso": 2,
-  "world_0nyf3ism": 2
+  "CovidioMilaneso": 2
  }
 }
