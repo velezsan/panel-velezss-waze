@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-20T05:19:25+00:00",
+ "actualizado": "2026-10-20T06:00:52+00:00",
  "env": "row",
- "total": 107727,
+ "total": 107718,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -114,8 +114,8 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 5304,
-   "ciudades": 177
+   "total": 5295,
+   "ciudades": 178
   },
   {
    "estado": "Oaxaca",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 58.5,
+  "porcentaje_vuelta": 58.8,
   "modo": "completo"
  },
  "aviso": "",
