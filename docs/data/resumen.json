@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-21T02:22:10+00:00",
+ "actualizado": "2026-10-21T03:04:15+00:00",
  "env": "row",
- "total": 107705,
+ "total": 107704,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -114,7 +114,7 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 5285,
+   "total": 5284,
    "ciudades": 179
   },
   {
