@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-10-20T16:54:33+00:00",
+ "actualizado": "2026-10-21T14:31:14+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 64,
- "peticiones": 71,
+ "temas_revisados": 65,
+ "peticiones": 72,
  "errores": 0,
  "champs": {
   "gwm_": {
@@ -73,7 +73,7 @@
    },
    "otras": {
     "temas": 0,
-    "respuestas": 3
+    "respuestas": 2
    }
   },
   "editorbcmx": {
@@ -89,11 +89,11 @@
   "carloslaso": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 20
+    "respuestas": 18
    },
    "otras": {
     "temas": 0,
-    "respuestas": 10
+    "respuestas": 9
    }
   },
   "arturoae": {
@@ -108,13 +108,13 @@
   }
  },
  "otros_frecuentes": {
-  "velezss": 28,
-  "LuisCav29": 10,
+  "velezss": 26,
+  "LuisCav29": 9,
   "JorgeLAB": 7,
   "world_yeh8sazm": 5,
-  "jcog69": 4,
   "world_9jx5hsnm": 3,
   "world_ifjpgwib": 3,
+  "jcog69": 3,
   "world_gcr4fuhs": 2,
   "CasaTinta": 2,
   "world_79yp1s4i": 2,
