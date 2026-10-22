@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-22T02:27:09+00:00",
+ "actualizado": "2026-10-22T02:30:28+00:00",
  "env": "usa",
  "total": 75,
  "estados": [
@@ -29,11 +29,11 @@
   }
  ],
  "progreso": {
-  "ciclo": 170,
+  "ciclo": 171,
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 99.1,
+  "porcentaje_vuelta": 60.9,
   "modo": "completo"
  },
  "aviso": "",
