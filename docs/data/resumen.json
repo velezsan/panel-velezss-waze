@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-22T11:22:21+00:00",
+ "actualizado": "2026-10-22T11:59:12+00:00",
  "env": "row",
- "total": 107711,
+ "total": 107709,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -36,8 +36,8 @@
   {
    "estado": "Chihuahua",
    "slug": "chihuahua",
-   "total": 1808,
-   "ciudades": 117
+   "total": 1806,
+   "ciudades": 116
   },
   {
    "estado": "Ciudad de México",
