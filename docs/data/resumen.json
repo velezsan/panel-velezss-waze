@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-23T13:07:00+00:00",
+ "actualizado": "2026-10-23T13:53:53+00:00",
  "env": "row",
- "total": 107419,
+ "total": 107424,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -12,7 +12,7 @@
   {
    "estado": "Baja California",
    "slug": "baja-california",
-   "total": 698,
+   "total": 703,
    "ciudades": 35
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 94.1,
+  "porcentaje_vuelta": 94.8,
   "modo": "completo"
  },
  "aviso": "",
