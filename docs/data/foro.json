@@ -1,11 +1,21 @@
 {
- "actualizado": "2026-10-25T04:42:01+00:00",
+ "actualizado": "2026-10-26T02:15:15+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
  "temas_revisados": 59,
  "peticiones": 65,
  "errores": 0,
  "champs": {
+  "davidabarca": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 0
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 9
+   }
+  },
   "hector_hf": {
    "desbloqueos": {
     "temas": 0,
@@ -36,16 +46,6 @@
     "respuestas": 1
    }
   },
-  "davidabarca": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 0
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 8
-   }
-  },
   "camachista": {
    "desbloqueos": {
     "temas": 0,
@@ -69,7 +69,7 @@
   "arielorellana": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 8
+    "respuestas": 7
    },
    "otras": {
     "temas": 0,
@@ -108,8 +108,8 @@
   }
  },
  "otros_frecuentes": {
-  "velezss": 23,
-  "JorgeLAB": 8,
+  "velezss": 21,
+  "JorgeLAB": 9,
   "LuisCav29": 8,
   "world_yeh8sazm": 5,
   "world_9jx5hsnm": 3,
@@ -120,8 +120,8 @@
   "ArturoCastroPeaceful9": 2,
   "jcog69": 2,
   "Alex_Miranda": 2,
-  "netogrimald": 2,
-  "CovidioMilaneso": 2,
-  "world_0nyf3ism": 2
+  "world_0nyf3ism": 2,
+  "Fronyshout": 2,
+  "world_210kdrsh": 1
  }
 }
