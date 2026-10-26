@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-10-26T02:15:15+00:00",
+ "actualizado": "2026-10-26T23:51:01+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 59,
- "peticiones": 65,
+ "temas_revisados": 57,
+ "peticiones": 63,
  "errores": 0,
  "champs": {
   "davidabarca": {
@@ -29,7 +29,7 @@
   "gwm_": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 18
+    "respuestas": 16
    },
    "otras": {
     "temas": 0,
@@ -49,7 +49,7 @@
   "camachista": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 4
+    "respuestas": 3
    },
    "otras": {
     "temas": 0,
@@ -99,7 +99,7 @@
   "arturoae": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 1
+    "respuestas": 0
    },
    "otras": {
     "temas": 0,
@@ -112,16 +112,16 @@
   "JorgeLAB": 9,
   "LuisCav29": 8,
   "world_yeh8sazm": 5,
+  "DINSA_CENTRO": 4,
   "world_9jx5hsnm": 3,
   "world_ifjpgwib": 3,
+  "JadPort": 2,
   "world_gcr4fuhs": 2,
   "CasaTinta": 2,
   "world_79yp1s4i": 2,
   "ArturoCastroPeaceful9": 2,
   "jcog69": 2,
   "Alex_Miranda": 2,
-  "world_0nyf3ism": 2,
-  "Fronyshout": 2,
-  "world_210kdrsh": 1
+  "world_0nyf3ism": 2
  }
 }
