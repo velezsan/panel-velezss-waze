@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-29T19:47:43+00:00",
+ "actualizado": "2026-10-29T20:23:59+00:00",
  "env": "row",
- "total": 107585,
+ "total": 107586,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -180,7 +180,7 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 7462,
+   "total": 7463,
    "ciudades": 709
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 26.8,
+  "porcentaje_vuelta": 27.1,
   "modo": "completo"
  },
  "aviso": "",
