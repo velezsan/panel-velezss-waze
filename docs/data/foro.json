@@ -1,11 +1,21 @@
 {
- "actualizado": "2026-10-29T16:47:02+00:00",
+ "actualizado": "2026-10-30T14:28:54+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
  "temas_revisados": 46,
  "peticiones": 50,
  "errores": 0,
  "champs": {
+  "gwm_": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 14
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 4
+   }
+  },
   "davidabarca": {
    "desbloqueos": {
     "temas": 0,
@@ -13,7 +23,7 @@
    },
    "otras": {
     "temas": 0,
-    "respuestas": 8
+    "respuestas": 5
    }
   },
   "hector_hf": {
@@ -24,16 +34,6 @@
    "otras": {
     "temas": 0,
     "respuestas": 3
-   }
-  },
-  "gwm_": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 14
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 7
    }
   },
   "eumirgarciac2": {
@@ -63,7 +63,7 @@
    },
    "otras": {
     "temas": 0,
-    "respuestas": 2
+    "respuestas": 1
    }
   },
   "arielorellana": {
@@ -83,37 +83,27 @@
    },
    "otras": {
     "temas": 0,
-    "respuestas": 1
+    "respuestas": 0
    }
   },
   "carloslaso": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 12
+    "respuestas": 10
    },
    "otras": {
     "temas": 0,
-    "respuestas": 9
-   }
-  },
-  "arturoae": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 0
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 1
+    "respuestas": 6
    }
   }
  },
  "otros_frecuentes": {
-  "velezss": 18,
+  "velezss": 10,
   "JorgeLAB": 8,
   "LuisCav29": 8,
   "DINSA_CENTRO": 5,
   "world_yeh8sazm": 5,
-  "world_9jx5hsnm": 3,
+  "world_9jx5hsnm": 4,
   "world_ifjpgwib": 3,
   "JadPort": 2,
   "world_gcr4fuhs": 2,
@@ -122,6 +112,6 @@
   "ArturoCastroPeaceful9": 2,
   "jcog69": 2,
   "Alex_Miranda": 2,
-  "world_210kdrsh": 1
+  "world_e8qai1pb": 1
  }
 }
