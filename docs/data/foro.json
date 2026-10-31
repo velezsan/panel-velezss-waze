@@ -1,11 +1,21 @@
 {
- "actualizado": "2026-10-30T14:28:54+00:00",
+ "actualizado": "2026-10-31T12:07:52+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 46,
- "peticiones": 50,
+ "temas_revisados": 47,
+ "peticiones": 51,
  "errores": 0,
  "champs": {
+  "hector_hf": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 2
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 3
+   }
+  },
   "gwm_": {
    "desbloqueos": {
     "temas": 0,
@@ -26,16 +36,6 @@
     "respuestas": 5
    }
   },
-  "hector_hf": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 1
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 3
-   }
-  },
   "eumirgarciac2": {
    "desbloqueos": {
     "temas": 0,
@@ -53,7 +53,7 @@
    },
    "otras": {
     "temas": 0,
-    "respuestas": 6
+    "respuestas": 5
    }
   },
   "maalrivba": {
@@ -89,17 +89,17 @@
   "carloslaso": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 10
+    "respuestas": 9
    },
    "otras": {
     "temas": 0,
-    "respuestas": 6
+    "respuestas": 3
    }
   }
  },
  "otros_frecuentes": {
-  "velezss": 10,
-  "JorgeLAB": 8,
+  "JorgeLAB": 9,
+  "velezss": 9,
   "LuisCav29": 8,
   "DINSA_CENTRO": 5,
   "world_yeh8sazm": 5,
@@ -112,6 +112,6 @@
   "ArturoCastroPeaceful9": 2,
   "jcog69": 2,
   "Alex_Miranda": 2,
-  "world_e8qai1pb": 1
+  "DanielAragnR": 1
  }
 }
