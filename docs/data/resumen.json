@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-11-01T00:32:32+00:00",
+ "actualizado": "2026-11-01T01:13:59+00:00",
  "env": "row",
  "total": 107267,
  "estados": [
@@ -78,7 +78,7 @@
   {
    "estado": "Hidalgo",
    "slug": "hidalgo",
-   "total": 4561,
+   "total": 4560,
    "ciudades": 275
   },
   {
@@ -126,8 +126,8 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 7211,
-   "ciudades": 617
+   "total": 7212,
+   "ciudades": 618
   },
   {
    "estado": "Querétaro",
