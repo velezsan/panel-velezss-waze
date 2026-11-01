@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-10-31T23:48:58+00:00",
+ "actualizado": "2026-11-01T00:32:32+00:00",
  "env": "row",
- "total": 107231,
+ "total": 107267,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -78,7 +78,7 @@
   {
    "estado": "Hidalgo",
    "slug": "hidalgo",
-   "total": 4525,
+   "total": 4561,
    "ciudades": 275
   },
   {
