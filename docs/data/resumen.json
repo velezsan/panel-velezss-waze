@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-02T00:20:35+00:00",
+ "actualizado": "2026-11-02T01:16:20+00:00",
  "env": "row",
- "total": 107274,
+ "total": 107276,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -84,7 +84,7 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 10072,
+   "total": 10073,
    "ciudades": 445
   },
   {
@@ -180,7 +180,7 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 7455,
+   "total": 7456,
    "ciudades": 709
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 33.0,
+  "porcentaje_vuelta": 33.3,
   "modo": "completo"
  },
  "aviso": "",
