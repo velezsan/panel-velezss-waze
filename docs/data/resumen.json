@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-04T02:29:47+00:00",
+ "actualizado": "2026-11-04T03:10:46+00:00",
  "env": "row",
- "total": 107881,
+ "total": 107882,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -144,7 +144,7 @@
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 3410,
+   "total": 3411,
    "ciudades": 279
   },
   {
