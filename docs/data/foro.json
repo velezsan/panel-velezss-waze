@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-11-03T05:21:50+00:00",
+ "actualizado": "2026-11-04T03:14:02+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 42,
- "peticiones": 45,
+ "temas_revisados": 41,
+ "peticiones": 44,
  "errores": 0,
  "champs": {
   "davidabarca": {
@@ -99,7 +99,7 @@
   "carloslaso": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 3
+    "respuestas": 2
    },
    "otras": {
     "temas": 0,
@@ -112,7 +112,7 @@
   "DINSA_CENTRO": 6,
   "world_yeh8sazm": 5,
   "world_9jx5hsnm": 4,
-  "LuisCav29": 4,
+  "LuisCav29": 3,
   "world_ifjpgwib": 3,
   "velezss": 3,
   "akron25": 2,
@@ -122,6 +122,6 @@
   "world_79yp1s4i": 2,
   "ArturoCastroPeaceful9": 2,
   "jcog69": 2,
-  "Alex_Miranda": 2
+  "world_e8qai1pb": 1
  }
 }
