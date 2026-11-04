@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-04T13:23:59+00:00",
+ "actualizado": "2026-11-04T14:03:42+00:00",
  "env": "row",
- "total": 107866,
+ "total": 107862,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -18,7 +18,7 @@
   {
    "estado": "Baja California Sur",
    "slug": "baja-california-sur",
-   "total": 1093,
+   "total": 1089,
    "ciudades": 47
   },
   {
