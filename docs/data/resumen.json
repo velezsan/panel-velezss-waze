@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-05T21:37:16+00:00",
+ "actualizado": "2026-11-05T22:18:29+00:00",
  "env": "row",
- "total": 107690,
+ "total": 107689,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -150,7 +150,7 @@
   {
    "estado": "Sinaloa",
    "slug": "sinaloa",
-   "total": 1859,
+   "total": 1858,
    "ciudades": 138
   },
   {
