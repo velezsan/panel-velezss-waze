@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-05T11:22:34+00:00",
+ "actualizado": "2026-11-05T12:01:48+00:00",
  "env": "row",
- "total": 107740,
+ "total": 107709,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -18,7 +18,7 @@
   {
    "estado": "Baja California Sur",
    "slug": "baja-california-sur",
-   "total": 967,
+   "total": 953,
    "ciudades": 41
   },
   {
@@ -192,7 +192,7 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 2927,
+   "total": 2910,
    "ciudades": 264
   }
  ],
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 52.3,
+  "porcentaje_vuelta": 52.6,
   "modo": "completo"
  },
  "aviso": "",
