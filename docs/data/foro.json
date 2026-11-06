@@ -1,11 +1,31 @@
 {
- "actualizado": "2026-11-05T23:03:43+00:00",
+ "actualizado": "2026-11-06T20:55:22+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 43,
- "peticiones": 46,
+ "temas_revisados": 46,
+ "peticiones": 49,
  "errores": 0,
  "champs": {
+  "gwm_": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 26
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 4
+   }
+  },
+  "camachista": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 4
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 5
+   }
+  },
   "davidabarca": {
    "desbloqueos": {
     "temas": 0,
@@ -19,7 +39,7 @@
   "eumirgarciac2": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 4
+    "respuestas": 3
    },
    "otras": {
     "temas": 0,
@@ -44,26 +64,6 @@
    "otras": {
     "temas": 0,
     "respuestas": 3
-   }
-  },
-  "gwm_": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 14
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 4
-   }
-  },
-  "camachista": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 2
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 5
    }
   },
   "maalrivba": {
@@ -109,9 +109,10 @@
  },
  "otros_frecuentes": {
   "JorgeLAB": 9,
-  "LuisCav29": 6,
+  "LuisCav29": 7,
   "DINSA_CENTRO": 6,
   "world_yeh8sazm": 5,
+  "xl45": 4,
   "world_9jx5hsnm": 4,
   "world_ifjpgwib": 3,
   "world_ey9tmsgb": 2,
@@ -121,7 +122,6 @@
   "CasaTinta": 2,
   "world_79yp1s4i": 2,
   "ArturoCastroPeaceful9": 2,
-  "jcog69": 2,
   "world_e8qai1pb": 1
  }
 }
