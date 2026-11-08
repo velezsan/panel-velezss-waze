@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-11-07T18:36:21+00:00",
+ "actualizado": "2026-11-08T16:25:51+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 46,
- "peticiones": 49,
+ "temas_revisados": 45,
+ "peticiones": 48,
  "errores": 0,
  "champs": {
   "gwm_": {
@@ -23,7 +23,7 @@
    },
    "otras": {
     "temas": 0,
-    "respuestas": 5
+    "respuestas": 4
    }
   },
   "davidabarca": {
@@ -43,7 +43,7 @@
    },
    "otras": {
     "temas": 0,
-    "respuestas": 1
+    "respuestas": 0
    }
   },
   "arturoae": {
