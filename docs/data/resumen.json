@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-08T03:19:29+00:00",
+ "actualizado": "2026-11-08T04:01:37+00:00",
  "env": "row",
- "total": 107511,
+ "total": 107500,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -18,7 +18,7 @@
   {
    "estado": "Baja California Sur",
    "slug": "baja-california-sur",
-   "total": 835,
+   "total": 823,
    "ciudades": 38
   },
   {
@@ -36,7 +36,7 @@
   {
    "estado": "Chihuahua",
    "slug": "chihuahua",
-   "total": 1546,
+   "total": 1547,
    "ciudades": 115
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 71.6,
+  "porcentaje_vuelta": 72.2,
   "modo": "completo"
  },
  "aviso": "",
