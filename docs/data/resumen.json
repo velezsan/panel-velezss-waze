@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-08T01:49:23+00:00",
+ "actualizado": "2026-11-08T01:53:07+00:00",
  "env": "row",
- "total": 107523,
+ "total": 107521,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -156,7 +156,7 @@
   {
    "estado": "Sonora",
    "slug": "sonora",
-   "total": 380,
+   "total": 378,
    "ciudades": 32
   },
   {
