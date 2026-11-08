@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-08T05:28:42+00:00",
+ "actualizado": "2026-11-08T06:25:10+00:00",
  "env": "row",
- "total": 107472,
+ "total": 107417,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -18,7 +18,7 @@
   {
    "estado": "Baja California Sur",
    "slug": "baja-california-sur",
-   "total": 823,
+   "total": 765,
    "ciudades": 38
   },
   {
@@ -48,7 +48,7 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 3420,
+   "total": 3423,
    "ciudades": 110
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 73.3,
+  "porcentaje_vuelta": 73.6,
   "modo": "completo"
  },
  "aviso": "",
