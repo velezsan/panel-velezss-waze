@@ -1,15 +1,15 @@
 {
- "actualizado": "2026-11-08T16:25:51+00:00",
+ "actualizado": "2026-11-09T14:09:45+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 45,
- "peticiones": 48,
+ "temas_revisados": 46,
+ "peticiones": 49,
  "errores": 0,
  "champs": {
   "gwm_": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 26
+    "respuestas": 31
    },
    "otras": {
     "temas": 0,
@@ -103,7 +103,7 @@
    },
    "otras": {
     "temas": 0,
-    "respuestas": 1
+    "respuestas": 0
    }
   }
  },
@@ -111,8 +111,8 @@
   "JorgeLAB": 9,
   "LuisCav29": 7,
   "DINSA_CENTRO": 6,
+  "xl45": 5,
   "world_yeh8sazm": 5,
-  "xl45": 4,
   "world_9jx5hsnm": 4,
   "world_ifjpgwib": 3,
   "world_ey9tmsgb": 2,
