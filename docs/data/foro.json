@@ -1,21 +1,11 @@
 {
- "actualizado": "2026-11-10T16:21:32+00:00",
+ "actualizado": "2026-11-11T14:12:06+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 62,
- "peticiones": 66,
+ "temas_revisados": 64,
+ "peticiones": 68,
  "errores": 0,
  "champs": {
-  "camachista": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 5
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 4
-   }
-  },
   "eumirgarciac2": {
    "desbloqueos": {
     "temas": 0,
@@ -24,6 +14,16 @@
    "otras": {
     "temas": 0,
     "respuestas": 0
+   }
+  },
+  "camachista": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 5
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 4
    }
   },
   "gwm_": {
@@ -108,11 +108,11 @@
   }
  },
  "otros_frecuentes": {
-  "xl45": 20,
+  "xl45": 22,
   "JorgeLAB": 10,
-  "LuisCav29": 6,
+  "world_yeh8sazm": 6,
   "DINSA_CENTRO": 6,
-  "world_yeh8sazm": 5,
+  "LuisCav29": 5,
   "world_9jx5hsnm": 4,
   "world_ifjpgwib": 3,
   "world_ey9tmsgb": 2,
@@ -122,6 +122,6 @@
   "CasaTinta": 2,
   "world_79yp1s4i": 2,
   "ArturoCastroPeaceful9": 2,
-  "HectorcSpeedy": 1
+  "world_r6y4yry5": 1
  }
 }
