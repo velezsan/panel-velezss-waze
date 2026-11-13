@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-11-12T12:06:12+00:00",
+ "actualizado": "2026-11-13T13:19:03+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 66,
- "peticiones": 70,
+ "temas_revisados": 68,
+ "peticiones": 72,
  "errores": 0,
  "champs": {
   "arturoae": {
@@ -108,7 +108,7 @@
   }
  },
  "otros_frecuentes": {
-  "xl45": 26,
+  "xl45": 27,
   "JorgeLAB": 10,
   "world_yeh8sazm": 8,
   "DINSA_CENTRO": 6,
