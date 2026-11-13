@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-13T11:08:17+00:00",
+ "actualizado": "2026-11-13T11:49:43+00:00",
  "env": "row",
- "total": 107437,
+ "total": 107431,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -162,7 +162,7 @@
   {
    "estado": "Tabasco",
    "slug": "tabasco",
-   "total": 1460,
+   "total": 1454,
    "ciudades": 61
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 20.6,
+  "porcentaje_vuelta": 20.8,
   "modo": "completo"
  },
  "aviso": "",
