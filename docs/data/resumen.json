@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-13T17:46:35+00:00",
+ "actualizado": "2026-11-13T18:28:25+00:00",
  "env": "row",
- "total": 107422,
+ "total": 107423,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -126,7 +126,7 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 7208,
+   "total": 7209,
    "ciudades": 617
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 21.5,
+  "porcentaje_vuelta": 21.6,
   "modo": "completo"
  },
  "aviso": "",
