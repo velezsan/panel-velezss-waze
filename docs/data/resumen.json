@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-14T06:43:29+00:00",
+ "actualizado": "2026-11-14T07:27:00+00:00",
  "env": "row",
- "total": 107573,
+ "total": 107580,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -96,8 +96,8 @@
   {
    "estado": "Morelos",
    "slug": "morelos",
-   "total": 2475,
-   "ciudades": 132
+   "total": 2482,
+   "ciudades": 133
   },
   {
    "estado": "México",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 23.1,
+  "porcentaje_vuelta": 23.2,
   "modo": "completo"
  },
  "aviso": "",
