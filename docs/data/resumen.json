@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-11-14T03:18:31+00:00",
+ "actualizado": "2026-11-14T03:53:14+00:00",
  "env": "row",
  "total": 107573,
  "estados": [
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 22.5,
+  "porcentaje_vuelta": 22.8,
   "modo": "completo"
  },
  "aviso": "",
