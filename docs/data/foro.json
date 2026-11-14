@@ -1,15 +1,25 @@
 {
- "actualizado": "2026-11-13T13:19:03+00:00",
+ "actualizado": "2026-11-14T11:08:02+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 68,
- "peticiones": 72,
+ "temas_revisados": 70,
+ "peticiones": 74,
  "errores": 0,
  "champs": {
+  "gwm_": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 36
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 5
+   }
+  },
   "arturoae": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 1
+    "respuestas": 2
    },
    "otras": {
     "temas": 0,
@@ -19,27 +29,27 @@
   "eumirgarciac2": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 13
+    "respuestas": 15
    },
    "otras": {
     "temas": 0,
     "respuestas": 0
    }
   },
-  "camachista": {
+  "maalrivba": {
    "desbloqueos": {
     "temas": 0,
     "respuestas": 5
    },
    "otras": {
     "temas": 0,
-    "respuestas": 4
+    "respuestas": 1
    }
   },
-  "gwm_": {
+  "camachista": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 29
+    "respuestas": 5
    },
    "otras": {
     "temas": 0,
@@ -64,16 +74,6 @@
    "otras": {
     "temas": 0,
     "respuestas": 3
-   }
-  },
-  "maalrivba": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 1
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 1
    }
   },
   "arielorellana": {
@@ -108,13 +108,13 @@
   }
  },
  "otros_frecuentes": {
-  "xl45": 27,
+  "xl45": 31,
   "JorgeLAB": 10,
   "world_yeh8sazm": 8,
   "DINSA_CENTRO": 6,
   "LuisCav29": 5,
+  "world_r6y4yry5": 4,
   "world_9jx5hsnm": 4,
-  "world_r6y4yry5": 3,
   "world_ifjpgwib": 3,
   "world_ey9tmsgb": 2,
   "akron25": 2,
