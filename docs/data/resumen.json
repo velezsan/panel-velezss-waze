@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-14T17:46:23+00:00",
+ "actualizado": "2026-11-14T18:22:07+00:00",
  "env": "row",
- "total": 107605,
+ "total": 107593,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -96,7 +96,7 @@
   {
    "estado": "Morelos",
    "slug": "morelos",
-   "total": 2490,
+   "total": 2478,
    "ciudades": 133
   },
   {
