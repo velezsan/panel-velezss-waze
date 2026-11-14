@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-14T11:56:06+00:00",
+ "actualizado": "2026-11-14T12:37:58+00:00",
  "env": "row",
- "total": 107560,
+ "total": 107576,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -90,8 +90,8 @@
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 4312,
-   "ciudades": 329
+   "total": 4328,
+   "ciudades": 330
   },
   {
    "estado": "Morelos",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 23.6,
+  "porcentaje_vuelta": 23.8,
   "modo": "completo"
  },
  "aviso": "",
