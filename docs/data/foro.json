@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-11-14T11:08:02+00:00",
+ "actualizado": "2026-11-15T08:55:58+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 70,
- "peticiones": 74,
+ "temas_revisados": 69,
+ "peticiones": 73,
  "errores": 0,
  "champs": {
   "gwm_": {
@@ -29,7 +29,7 @@
   "eumirgarciac2": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 15
+    "respuestas": 14
    },
    "otras": {
     "temas": 0,
@@ -109,7 +109,7 @@
  },
  "otros_frecuentes": {
   "xl45": 31,
-  "JorgeLAB": 10,
+  "JorgeLAB": 8,
   "world_yeh8sazm": 8,
   "DINSA_CENTRO": 6,
   "LuisCav29": 5,
