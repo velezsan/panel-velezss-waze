@@ -1,6 +1,6 @@
 {
  "ok": true,
- "fecha": "2026-11-17T22:36:28.853047+00:00",
+ "fecha": "2026-11-18T07:45:51.946294+00:00",
  "modo": "completo",
  "celdas": 0,
  "peticiones": 0,
@@ -9,5 +9,5 @@
  "total_acumulado": 108013,
  "peticiones_inegi": 0,
  "errores_inegi": 0,
- "minutos": 0.9
+ "minutos": 0.7
 }
