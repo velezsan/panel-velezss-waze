@@ -735,6 +735,7 @@ CHAMPS_MX = {
 }
 VENTANA_CHAMPS_DIAS = 60
 _champs_celda = {}  # userName -> ids de segmentos editados (se vacía por celda)
+_champs_places_celda = {}  # userName -> ids de places editados (se vacía por celda)
 
 # candado mínimo esperado por tipo de vía (etapa 1: sin PS)
 REQ_CANDADO = {3: 5, 6: 4, 4: 4, 7: 3}  # FW, MH, Ramp, mH
@@ -903,6 +904,16 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             un = usuarios.get(seg.get("updatedBy"), "")
             if un and un.lower() in CHAMPS_MX:
                 _champs_celda.setdefault(un, set()).add(seg.get("id"))
+
+    # lo mismo con los places: vienen en la misma respuesta
+    try:
+        for ven in _objetos(data, "venues"):
+            if (ven.get("updatedOn") or 0) >= corte:
+                un_pl = usuarios.get(ven.get("updatedBy"), "")
+                if un_pl and un_pl.lower() in CHAMPS_MX:
+                    _champs_places_celda.setdefault(un_pl, set()).add(ven.get("id"))
+    except Exception:
+        pass
 
     # candados bajos en vías importantes (FW, MH, Ramp, mH)
     for seg in segs:
@@ -1422,6 +1433,7 @@ def main():
                 _v["celda"] = str(_f * cols + _c)
     celdas_info = estado.get("celdas", {})  # idx -> {"n": segs, "c": ciclo}
     champs_info = estado.get("champs", {})  # idx -> {userName: segs editados}
+    champs_places_info = estado.get("champs_places", {})  # idx -> {userName: places editados}
     candados_info = estado.get("candados", {})  # idx -> [registros de candado bajo]
     pases_info = estado.get("pases", {})  # idx -> [segmentos con pases de peaje]
     comentarios_info = estado.get("comentarios", {})  # idx -> [notas de mapa]
@@ -1435,6 +1447,7 @@ def main():
         log("Cambió la zona o el tamaño de celda: reiniciando el recorrido")
         celdas_info, cursor, ciclo = {}, 0, 1
         champs_info = {}
+        champs_places_info = {}
         candados_info = {}
         pases_info = {}
         comentarios_info = {}
@@ -1628,7 +1641,8 @@ def main():
         }
         resumen = guardar_almacen(almacen, {"env": env, "progreso": progreso})
         estado.update({"cursor": cursor, "ciclo": ciclo, "celdas": celdas_info,
-                       "champs": champs_info, "candados": candados_info,
+                       "champs": champs_info, "champs_places": champs_places_info,
+                       "candados": candados_info,
                        "pases": pases_info, "comentarios": comentarios_info,
                        "ortografia": ortografia_info,
                        "velocidades": velocidades_info,
@@ -1648,12 +1662,18 @@ def main():
         for _m in champs_info.values():
             for _k, _v in _m.items():
                 tot_champs[_k] = tot_champs.get(_k, 0) + _v
+        tot_places = {}
+        for _m in champs_places_info.values():
+            for _k, _v in _m.items():
+                tot_places[_k] = tot_places.get(_k, 0) + _v
         save_json(os.path.join(DATA_DIR, "champs.json"), {
             "actualizado": datetime.now(timezone.utc).isoformat(),
             "ventana_dias": VENTANA_CHAMPS_DIAS,
             "celdas_con_ediciones": len(champs_info),
             "porcentaje_pais": progreso.get("porcentaje"),
             "totales": tot_champs,
+            "places": tot_places,
+            "celdas_con_places": len(champs_places_info),
         }, compact=True)
         # panel de candados bajos: reagrupar por estado
         cand_por_estado = {}
@@ -2003,6 +2023,7 @@ def main():
                     except Exception:
                         usa_n = None
                 _champs_celda.clear()
+                _champs_places_celda.clear()
                 _candados_celda.clear()
                 _pases_celda.clear()
                 _velocidades_celda.clear()
@@ -2030,6 +2051,7 @@ def main():
                     h = []
                     segs_en_celda = 0
                     _champs_celda.clear()
+                    _champs_places_celda.clear()
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _velocidades_celda.clear()
@@ -2042,6 +2064,7 @@ def main():
                     h = []
                     segs_en_celda = 0
                     _champs_celda.clear()  # celda del servidor NA: no cuenta
+                    _champs_places_celda.clear()
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _velocidades_celda.clear()
@@ -2054,6 +2077,10 @@ def main():
                     champs_info[str(idx)] = {k: len(v) for k, v in _champs_celda.items()}
                 else:
                     champs_info.pop(str(idx), None)
+                if _champs_places_celda:
+                    champs_places_info[str(idx)] = {k: len(v) for k, v in _champs_places_celda.items()}
+                else:
+                    champs_places_info.pop(str(idx), None)
                 if _candados_celda:
                     _hoy_c = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
                     _prev_c = {p.get("id"): p.get("v", "")
@@ -2178,6 +2205,7 @@ def main():
                     except Exception:
                         usa_n = None
                 _champs_celda.clear()
+                _champs_places_celda.clear()
                 _candados_celda.clear()
                 _pases_celda.clear()
                 _velocidades_celda.clear()
@@ -2216,6 +2244,7 @@ def main():
                     h = []
                     segs_en_celda = 0
                     _champs_celda.clear()
+                    _champs_places_celda.clear()
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _velocidades_celda.clear()
@@ -2230,6 +2259,7 @@ def main():
                     h = []
                     segs_en_celda = 0  # tratarla como vacía: re-checar solo de vez en cuando
                     _champs_celda.clear()  # celda del servidor NA: no cuenta
+                    _champs_places_celda.clear()
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _velocidades_celda.clear()
@@ -2242,6 +2272,10 @@ def main():
                     champs_info[str(idx)] = {k: len(v) for k, v in _champs_celda.items()}
                 else:
                     champs_info.pop(str(idx), None)
+                if _champs_places_celda:
+                    champs_places_info[str(idx)] = {k: len(v) for k, v in _champs_places_celda.items()}
+                else:
+                    champs_places_info.pop(str(idx), None)
                 if _candados_celda:
                     _hoy_c = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
                     _prev_c = {p.get("id"): p.get("v", "")
