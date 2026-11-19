@@ -1,7 +1,7 @@
 name: Diagnostico 403
 
 # Prueba temporal: desde que maquinas de GitHub responde Waze y desde cuales no.
-# Hace una docena de peticiones chicas y termina. Se puede borrar cuando ya no sirva.
+# Hace unas cuantas peticiones chicas y termina. Se puede borrar cuando ya no sirva.
 
 on:
   workflow_dispatch:
@@ -17,7 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-22.04, ubuntu-24.04, ubuntu-24.04-arm, macos-latest, windows-latest]
+        intento: [1, 2, 3]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
@@ -26,51 +27,38 @@ jobs:
           python-version: '3.12'
       - name: Probar
         shell: bash
+        env:
+          MAQUINA: ${{ matrix.os }}
         run: |
           python -m pip install --quiet requests
           python - <<'EOF'
           import os
           import requests
-          UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
-          H = {"User-Agent": UA,
+          H = {"User-Agent": "panel-velezss-waze (github.com/velezsan/panel-velezss-waze)",
                "Accept": "application/json, text/javascript, */*; q=0.01",
                "Accept-Language": "es-MX,es;q=0.9,en;q=0.8",
-               "Referer": "https://www.waze.com/editor",
-               "X-Requested-With": "XMLHttpRequest"}
-          H2 = dict(H)
-          H2["User-Agent"] = "panel-velezss-waze (github.com/velezsan/panel-velezss-waze)"
+               "Referer": "https://www.waze.com/editor"}
           P = {"bbox": "-99.14,19.42,-99.13,19.43", "language": "es-419",
                "sandbox": "true", "roadTypes": "1"}
           ROW = "https://www.waze.com/row-Descartes/app/Features"
           USA = "https://www.waze.com/Descartes/app/Features"
           OUT = []
 
-          def corto(t):
-              return "".join(c for c in t[:40] if c.isalnum() or c == " ")
-
-          def probar(nombre, url, params=None, headers=None, sesion=None):
+          def probar(nombre, url, params=None):
               try:
-                  r = (sesion or requests).get(url, params=params, headers=headers, timeout=40)
-                  OUT.append(f"{nombre}={r.status_code}/{len(r.content)}b/{corto(r.text)}")
+                  r = requests.get(url, params=params, headers=H, timeout=40)
+                  OUT.append(f"{nombre}={r.status_code}")
               except Exception as e:
                   OUT.append(f"{nombre}=EXC {type(e).__name__}")
 
           try:
               j = requests.get("https://ipinfo.io/json", timeout=20).json()
-              OUT.append(f"egreso={j.get('org')} {j.get('country')} {j.get('region')}")
+              ip = (j.get("ip") or "").split(".")
+              OUT.append(f"egreso={'.'.join(ip[:2])}.x.x {j.get('region')}")
           except Exception as e:
               OUT.append(f"egreso=EXC {type(e).__name__}")
 
-          probar("portada", "https://www.waze.com/", headers=H)
-          probar("livemap", "https://www.waze.com/live-map/", headers=H)
-          probar("editor", "https://www.waze.com/editor", {"env": "row"}, H)
-          probar("features_row", ROW, P, H)
-          probar("features_usa", USA, dict(P, bbox="-117.03,32.52,-117.02,32.53"), H)
-          probar("features_row_ua_honesto", ROW, P, H2)
-          s = requests.Session()
-          s.headers.update(H)
-          probar("sesion_editor", "https://www.waze.com/editor", {"env": "row"}, None, s)
-          probar("sesion_features", ROW, P, None, s)
-          print("::notice title=RESULTADO " + os.environ.get("RUNNER_OS", "?") + "::" + " ; ".join(OUT))
+          probar("row", ROW, P)
+          probar("usa", USA, dict(P, bbox="-117.03,32.52,-117.02,32.53"))
+          print("::notice title=RESULTADO " + os.environ.get("MAQUINA", "?") + "::" + " ; ".join(OUT))
           EOF
