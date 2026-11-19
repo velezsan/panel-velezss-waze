@@ -135,3 +135,17 @@ el nombre se resuelve con los arreglos del archivo viejo y se vuelve a dar de al
 nuevo. A un reporte recuperado se le pone la bandera de abierto en 0, porque si ya no aparece
 en la lectura es que está cerrado. El archivo lleva `champsAcumulados: true` para dejar claro
 que esa lista no es solo la ventana de hoy.
+
+## 8. Los URs que cierran los champs
+
+En la misma lectura vienen los URs cerrados, y cada uno trae a su último editor. Con eso se cuenta cuántos cerró cada Local Champ, que es la columna nueva de la página de champs.
+
+Waze solo devuelve los cerrados de los últimos 30 días, así que el conteo se acumula igual que los reportes: antes de subir, se leen del archivo publicado los ids que ya estaban contados y se les unen los de hoy. Así la cuenta crece corrida tras corrida en vez de reiniciarse cada mes.
+
+En el JSON van tres campos:
+
+- `cerradosChamps`: por cada champ, la lista de ids de URs cerrados que ya se le contaron (la unión de todas las corridas).
+- `cerradosPorChamp`: el número, que es el largo de esa lista. Es lo que lee la página.
+- `cerradosDesde`: la fecha de la primera corrida que empezó a contar, para que la página pueda decir desde cuándo.
+
+Dos advertencias que conviene repetir cuando se presente el dato: es el **último editor** del UR, no necesariamente quien lo cerró (si alguien comenta después, el crédito se le va a ese), y de los cerrados viejos nunca vamos a saber nada, porque ya no vienen en la lectura.
