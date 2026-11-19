@@ -110,5 +110,49 @@
     });
 })();
 </script>
+<script>
+// columnas extra: places editados (escaner) y URs cerrados (cosecha de URs)
+(async () => {
+  const fmt = n => (n === undefined || n === null) ? "\u2014" : Number(n).toLocaleString("es-MX");
+  const baja = async u => { try { const r = await fetch(u + "?v=" + Date.now(), {cache:"no-store"}); return r.ok ? await r.json() : null; } catch (e) { return null; } };
+  const [cj, uj] = await Promise.all([baja("../data-na/champs.json"), baja("urs-datos.json")]);
+  const mapa = o => { const m = {}; for (const k in (o || {})) m[k.toLowerCase()] = o[k]; return m; };
+  const places = mapa(cj && cj.places);
+  const cerrados = mapa(uj && uj.cerradosPorChamp);
+  let intentos = 0;
+  const reloj = setInterval(() => {
+    const filas = document.querySelectorAll("tbody tr");
+    if (!filas.length) { if (++intentos > 40) clearInterval(reloj); return; }
+    clearInterval(reloj);
+    const cab = document.querySelector("thead tr");
+    if (!cab || cab.children.length < 3 || cab.dataset.extra) return;
+    cab.dataset.extra = "1";
+    const modelo = cab.children[2];
+    let refTh = modelo;
+    ["Places editados", "URs cerrados (30 d)"].forEach(txt => {
+      const th = document.createElement("th");
+      th.className = modelo.className;
+      th.textContent = txt;
+      refTh.parentNode.insertBefore(th, refTh.nextSibling);
+      refTh = th;
+    });
+    filas.forEach(tr => {
+      const celdaSeg = tr.children[2];
+      if (!celdaSeg) return;
+      const nombre = (tr.children[1].textContent || "").trim().split(/\s+/)[0].toLowerCase();
+      let ref = celdaSeg;
+      [places[nombre], cerrados[nombre]].forEach(v => {
+        const td = document.createElement("td");
+        td.className = celdaSeg.className;
+        td.textContent = fmt(v);
+        ref.parentNode.insertBefore(td, ref.nextSibling);
+        ref = td;
+      });
+    });
+    const nota = document.getElementById("nota");
+    if (nota) nota.append(" Los places editados salen del mismo recorrido del escáner, con la misma ventana y el mismo criterio que los segmentos: cuentan los places cuya última edición es del champ. Los URs cerrados salen de la cosecha de URs, que solo alcanza a ver los últimos 30 días, y se cuentan por el último editor del UR.");
+  }, 300);
+})();
+</script>
 </body>
 </html>
