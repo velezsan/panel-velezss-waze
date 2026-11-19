@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-19T19:24:52+00:00",
+ "actualizado": "2026-11-19T20:06:24+00:00",
  "env": "row",
- "total": 107988,
+ "total": 107996,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -90,7 +90,7 @@
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 4345,
+   "total": 4353,
    "ciudades": 330
   },
   {
