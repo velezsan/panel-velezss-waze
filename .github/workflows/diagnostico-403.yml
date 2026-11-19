@@ -1,7 +1,7 @@
 name: Diagnostico 403
 
-# Prueba temporal: desde que maquinas de GitHub responde Waze y desde cuales no.
-# Hace unas cuantas peticiones chicas y termina. Se puede borrar cuando ya no sirva.
+# Prueba temporal: que cabecera hace que Waze rechace al escaner en las maquinas Linux.
+# Cada variante corre en una maquina aparte para que no se contaminen entre si.
 
 on:
   workflow_dispatch:
@@ -17,9 +17,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, ubuntu-24.04, ubuntu-24.04-arm, macos-latest, windows-latest]
+        variante: [honesto, chrome, honesto_xrw, chrome_xrw]
         intento: [1, 2, 3]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/setup-python@v5
@@ -28,25 +28,33 @@ jobs:
       - name: Probar
         shell: bash
         env:
-          MAQUINA: ${{ matrix.os }}
+          VARIANTE: ${{ matrix.variante }}
         run: |
           python -m pip install --quiet requests
           python - <<'EOF'
           import os
           import requests
-          H = {"User-Agent": "panel-velezss-waze (github.com/velezsan/panel-velezss-waze)",
-               "Accept": "application/json, text/javascript, */*; q=0.01",
-               "Accept-Language": "es-MX,es;q=0.9,en;q=0.8",
-               "Referer": "https://www.waze.com/editor"}
+          V = os.environ.get("VARIANTE", "honesto")
+          CHROME = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                    "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
+          HONESTO = "panel-velezss-waze (github.com/velezsan/panel-velezss-waze)"
+          BASE = {"Accept": "application/json, text/javascript, */*; q=0.01",
+                  "Accept-Language": "es-MX,es;q=0.9,en;q=0.8",
+                  "Referer": "https://www.waze.com/editor"}
+          H = dict(BASE)
+          H["User-Agent"] = CHROME if V.startswith("chrome") else HONESTO
+          if V.endswith("_xrw"):
+              H["X-Requested-With"] = "XMLHttpRequest"
+          LIMPIO = dict(BASE)
+          LIMPIO["User-Agent"] = HONESTO
           P = {"bbox": "-99.14,19.42,-99.13,19.43", "language": "es-419",
                "sandbox": "true", "roadTypes": "1"}
           ROW = "https://www.waze.com/row-Descartes/app/Features"
-          USA = "https://www.waze.com/Descartes/app/Features"
           OUT = []
 
-          def probar(nombre, url, params=None):
+          def probar(nombre, headers):
               try:
-                  r = requests.get(url, params=params, headers=H, timeout=40)
+                  r = requests.get(ROW, params=P, headers=headers, timeout=40)
                   OUT.append(f"{nombre}={r.status_code}")
               except Exception as e:
                   OUT.append(f"{nombre}=EXC {type(e).__name__}")
@@ -58,7 +66,8 @@ jobs:
           except Exception as e:
               OUT.append(f"egreso=EXC {type(e).__name__}")
 
-          probar("row", ROW, P)
-          probar("usa", USA, dict(P, bbox="-117.03,32.52,-117.02,32.53"))
-          print("::notice title=RESULTADO " + os.environ.get("MAQUINA", "?") + "::" + " ; ".join(OUT))
+          probar("primera", H)
+          probar("segunda", H)
+          probar("despues_limpia", LIMPIO)
+          print("::notice title=RESULTADO " + V + "::" + " ; ".join(OUT))
           EOF
