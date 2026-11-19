@@ -1,12 +1,13 @@
-name: Diagnostico 403
+name: Diagnostico de conexion con Waze
 
-# Prueba temporal: comparar la maquina "ubuntu-latest" contra versiones fijas de Ubuntu.
+# Herramienta manual (no corre sola): compara desde que maquinas de GitHub responde
+# la API de Waze. Sirvio para descubrir que con "ubuntu-latest" (Ubuntu 26.04,
+# OpenSSL 3.5) Waze contesta 403, mientras que con ubuntu-24.04 y 22.04 contesta bien.
+# Si algun dia el escaner vuelve a recibir 403, correr esto desde la pestana Actions
+# y leer los avisos "RESULTADO" del run.
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - '.github/workflows/diagnostico-403.yml'
 
 permissions:
   contents: read
@@ -17,7 +18,6 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, ubuntu-24.04, ubuntu-22.04]
-        intento: [1, 2, 3]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
@@ -31,33 +31,25 @@ jobs:
         run: |
           python -m pip install --quiet requests
           python - <<'EOF'
-          import os, ssl, platform, sys
-          import requests, urllib3
+          import os, ssl, platform
+          import requests
           H = {"User-Agent": "panel-velezss-waze (github.com/velezsan/panel-velezss-waze)",
                "Accept": "application/json, text/javascript, */*; q=0.01",
-               "Accept-Language": "es-MX,es;q=0.9,en;q=0.8",
                "Referer": "https://www.waze.com/editor"}
           P = {"bbox": "-99.14,19.42,-99.13,19.43", "language": "es-419",
                "sandbox": "true", "roadTypes": "1"}
-          ROW = "https://www.waze.com/row-Descartes/app/Features"
           OUT = []
           try:
-              rel = platform.freedesktop_os_release().get("PRETTY_NAME", "?")
+              OUT.append("so=" + platform.freedesktop_os_release().get("PRETTY_NAME", "?"))
           except Exception:
-              rel = "?"
-          OUT.append("so=" + rel)
+              OUT.append("so=?")
           OUT.append("openssl=" + ssl.OPENSSL_VERSION)
-          OUT.append("py=" + sys.version.split()[0] + " req=" + requests.__version__ + " ul3=" + urllib3.__version__)
-          try:
-              j = requests.get("https://ipinfo.io/json", timeout=20).json()
-              ip = (j.get("ip") or "").split(".")
-              OUT.append(f"egreso={'.'.join(ip[:2])}.x.x {j.get('region')}")
-          except Exception as e:
-              OUT.append(f"egreso=EXC {type(e).__name__}")
-          try:
-              r = requests.get(ROW, params=P, headers=H, timeout=40)
-              OUT.append(f"row={r.status_code} http={r.raw.version}")
-          except Exception as e:
-              OUT.append(f"row=EXC {type(e).__name__}")
+          for nombre, url in (("row", "https://www.waze.com/row-Descartes/app/Features"),
+                              ("usa", "https://www.waze.com/Descartes/app/Features")):
+              try:
+                  r = requests.get(url, params=P, headers=H, timeout=40)
+                  OUT.append(f"{nombre}={r.status_code}")
+              except Exception as e:
+                  OUT.append(f"{nombre}=EXC {type(e).__name__}")
           print("::notice title=RESULTADO " + os.environ.get("MAQUINA", "?") + "::" + " ; ".join(OUT))
           EOF

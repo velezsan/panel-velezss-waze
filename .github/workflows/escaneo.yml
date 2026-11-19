@@ -31,7 +31,7 @@ concurrency:
 
 jobs:
   escanear:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # fijo en 24.04: con ubuntu-latest (Ubuntu 26.04, OpenSSL 3.5) Waze responde 403 desde el 17-nov-2026
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
