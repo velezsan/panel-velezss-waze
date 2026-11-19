@@ -20,6 +20,7 @@ import subprocess
 import sys
 import time
 import unicodedata
+import zlib
 from collections import deque
 from datetime import datetime, timezone
 
@@ -273,6 +274,24 @@ def puntos_consulta(coords):
     return unicos
 
 
+# --- memoria del INEGI entre corridas (solo si el workflow define INEGI_MEMORIA)
+# El INEGI contesta lo mismo mientras el segmento no cambie de forma, así que lo
+# ya consultado se guarda fuera del repo (caché de Actions) y no se vuelve a pedir.
+MEMORIA_INEGI_DIAS = 150         # un nombre al 100% se da por bueno este tiempo...
+MEMORIA_INEGI_HOLGURA = 60       # ...más 0-59 días según el segmento (no vencen todos juntos)
+MEMORIA_INEGI_DIAS_NADA = 45     # un "no dio nombre" se vuelve a preguntar antes
+MEMORIA_INEGI_HOLGURA_NADA = 30
+
+# Freno para Waze: segundos mínimos entre una petición de celda y la siguiente.
+# Sin el INEGI de por medio el escáner pediría celdas mucho más rápido; con esto
+# el ritmo lo decide el workflow (0 o sin definir = sin freno, como siempre).
+try:
+    RITMO_MIN_WAZE = float(os.environ.get("ESCANER_SEG_ENTRE_PETICIONES", "0") or 0)
+except ValueError:
+    RITMO_MIN_WAZE = 0.0
+_ultima_peticion_waze = [0.0]
+
+
 class ConsultorINEGI:
     """Consulta el WMS del INEGI con caché por coordenada y pausa entre llamadas."""
 
@@ -283,6 +302,118 @@ class ConsultorINEGI:
         self.pausa = pausa
         self.peticiones = 0
         self.errores = 0
+        # memoria entre corridas (apagada mientras memoria_path sea None)
+        self.memoria = {}        # id -> [firma, día, nombre] o [firma, día] si no dio nombre
+        self.memoria_path = None
+        self.previas_pos = {}    # id -> (lat, lon) del almacén, para sembrar la memoria
+        self.de_memoria = 0      # segmentos resueltos sin preguntar
+        self.sembrados = 0       # de esos, los que se dieron por buenos desde el almacén
+
+    # --- memoria entre corridas ---------------------------------------------
+
+    @staticmethod
+    def _dia():
+        return int(time.time() // 86400)
+
+    @staticmethod
+    def _firma(coords):
+        """Huella de la forma del segmento: si alguien lo mueve, cambia."""
+        try:
+            txt = ";".join(f"{p[0]:.6f},{p[1]:.6f}" for p in coords)
+        except (TypeError, IndexError, ValueError):
+            return None
+        return zlib.crc32(txt.encode("ascii")) if txt else None
+
+    @staticmethod
+    def _desfase(seg_id, modulo, sal=""):
+        return zlib.crc32((sal + str(seg_id)).encode("ascii")) % modulo
+
+    def _vigencia(self, seg_id, con_nombre):
+        if con_nombre:
+            return MEMORIA_INEGI_DIAS + self._desfase(seg_id, MEMORIA_INEGI_HOLGURA)
+        return MEMORIA_INEGI_DIAS_NADA + self._desfase(seg_id, MEMORIA_INEGI_HOLGURA_NADA)
+
+    def cargar_memoria(self, path):
+        """Activa la memoria y lee lo guardado. Devuelve cuántos segmentos recuerda."""
+        self.memoria_path = path
+        try:
+            with open(path, encoding="utf-8") as f:
+                datos = json.load(f)
+            segs = datos.get("segs", {}) if isinstance(datos, dict) else {}
+        except (OSError, ValueError):
+            segs = {}
+        hoy = self._dia()
+        tope = MEMORIA_INEGI_DIAS + MEMORIA_INEGI_HOLGURA
+        # lo muy viejo se tira: de todos modos se volvería a consultar
+        self.memoria = {k: v for k, v in segs.items()
+                        if isinstance(v, list) and len(v) >= 2 and hoy - v[1] <= tope}
+        return len(self.memoria)
+
+    def guardar_memoria(self):
+        if not self.memoria_path:
+            return
+        try:
+            os.makedirs(os.path.dirname(self.memoria_path) or ".", exist_ok=True)
+            tmp = self.memoria_path + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump({"v": 1, "segs": self.memoria}, f, ensure_ascii=False,
+                          separators=(",", ":"))
+            os.replace(tmp, self.memoria_path)
+        except OSError as e:
+            log(f"No se pudo guardar la memoria del INEGI: {e}")
+
+    def recordar(self, seg_id, coords):
+        """(True, nombre) si ya se consultó ese segmento con esa misma forma.
+
+        nombre vacío significa que el INEGI no dio nada aplicable."""
+        if not self.memoria_path:
+            return False, ""
+        v = self.memoria.get(str(seg_id))
+        if not v:
+            return False, ""
+        f = self._firma(coords)
+        if f is None or v[0] != f:
+            return False, ""
+        nombre = v[2] if len(v) > 2 else ""
+        if self._dia() - v[1] > self._vigencia(seg_id, bool(nombre)):
+            return False, ""
+        self.de_memoria += 1
+        return True, nombre
+
+    def anotar(self, seg_id, coords, nombre):
+        """Guarda lo que acaba de contestar el INEGI (nombre vacío = nada aplicable)."""
+        if not self.memoria_path:
+            return
+        f = self._firma(coords)
+        if f is None:
+            return
+        v = [f, self._dia()]
+        if nombre:
+            v.append(nombre)
+        self.memoria[str(seg_id)] = v
+
+    def sembrar(self, h, coords, previas):
+        """Arranque de la memoria: si en la vuelta pasada el INEGI ya dio nombre al
+        100% y el segmento sigue en el mismo punto, se da por bueno sin preguntar.
+
+        Se anota con vencimiento escalonado (5 a 64 días) para que todos se vuelvan
+        a verificar contra el INEGI poco a poco. Devuelve el nombre o ""."""
+        if not self.memoria_path or not previas:
+            return ""
+        k = str(h.get("id"))
+        nombre = previas.get(k)
+        if not nombre or k in self.memoria:
+            return ""
+        if self.previas_pos.get(k) != (h.get("lat"), h.get("lon")):
+            return ""
+        f = self._firma(coords)
+        if f is None:
+            return ""
+        dia = self._dia() - self._vigencia(k, True) + 5 + self._desfase(k, 60, "s")
+        self.memoria[k] = [f, dia, nombre]
+        self.de_memoria += 1
+        self.sembrados += 1
+        return nombre
 
     def nombres_en(self, lon, lat):
         key = (round(lon, 6), round(lat, 6))
@@ -609,6 +740,11 @@ def pedir_celda(sesion, env, bbox, pausa, tipos=None):
         params["venues"] = "true"
         params["venueFilter"] = "1,1,1,1"
         params["venueLevel"] = "8"
+    if RITMO_MIN_WAZE > 0:
+        _falta = RITMO_MIN_WAZE - (time.time() - _ultima_peticion_waze[0])
+        if _falta > 0:
+            time.sleep(_falta)
+    _ultima_peticion_waze[0] = time.time()
     time.sleep(pausa)
     r = sesion.get(ENDPOINTS[env], params=params, timeout=60)
     texto = r.text[:2000]
@@ -1200,9 +1336,27 @@ def enriquecer_con_inegi(hallazgos, inegi, limite, previas=None):
     """
     for h in hallazgos:
         coords = h.pop("_coords", [])
-        if inegi is None or time.time() >= limite:
+        if inegi is None:
+            continue
+        conocido, nombre_mem = inegi.recordar(h["id"], coords)
+        if not conocido:
+            nombre_mem = inegi.sembrar(h, coords, previas)
+            conocido = bool(nombre_mem)
+        if conocido:
+            # el INEGI ya contestó por este segmento y no ha cambiado de forma
+            if nombre_mem:
+                h["sug"] = nombre_mem
+                h["conf"] = 100
+            continue
+        if time.time() >= limite:
             continue
         nombre, conf, empatado, fallo = inegi.sugerir(coords)
+        if not fallo:
+            aplica = bool(nombre) and conf >= 100 and not empatado
+            # un "no" que contradice a la vuelta pasada no se guarda: puede ser un
+            # vacío pasajero del INEGI, y así se vuelve a preguntar en la siguiente
+            if aplica or not (previas and str(h["id"]) in previas):
+                inegi.anotar(h["id"], coords, nombre if aplica else "")
         # como GAIA: solo valen los resultados al 100% y sin empate
         if not fallo and nombre and conf >= 100 and not empatado:
             h["sug"] = nombre
@@ -1375,6 +1529,9 @@ def main():
     franja_na = cfg.get("franja_na_grados", 0.6)  # ancho de la franja del Panel NA
     usar_inegi = cfg.get("sugerencias_inegi", True)
     inegi = ConsultorINEGI(cfg.get("pausa_inegi_segundos", 0.15)) if usar_inegi else None
+    _mem_inegi = os.environ.get("INEGI_MEMORIA", "").strip()
+    if inegi is not None and _mem_inegi and not panel_na:
+        log(f"memoria del INEGI: {inegi.cargar_memoria(_mem_inegi)} segmentos recordados")
 
     inicio = time.time()
     limite = inicio + args.minutos * 60
@@ -1417,6 +1574,10 @@ def main():
         for _k, _v in _m.items():
             if _v.get("sug"):
                 sugs_previas[_k] = _v["sug"]
+    if inegi is not None and inegi.memoria_path:
+        inegi.previas_pos = {_k: (_v.get("lat"), _v.get("lon"))
+                             for _m in almacen.values() for _k, _v in _m.items()
+                             if _v.get("sug")}
 
     # --- malla
     lon1, lat1, lon2, lat2 = bbox_mx
@@ -2143,6 +2304,8 @@ def main():
                         f"{hallados_run} sin nombre")
                 if pub_cada and time.time() - ultima_pub >= pub_cada * 60 and escaneadas:
                     aplicar_pendientes()
+                    if inegi is not None:
+                        inegi.guardar_memoria()
                     publicar_git(f"Publicación parcial {datetime.now(timezone.utc).strftime('%H:%M UTC')}")
                     ultima_pub = time.time()
         else:
@@ -2338,6 +2501,8 @@ def main():
                         f"{hallados_run} sin nombre | cursor {cursor}/{total_celdas}")
                 if pub_cada and time.time() - ultima_pub >= pub_cada * 60 and escaneadas:
                     aplicar_pendientes()
+                    if inegi is not None:
+                        inegi.guardar_memoria()
                     publicar_git(f"Publicación parcial {datetime.now(timezone.utc).strftime('%H:%M UTC')}")
                     ultima_pub = time.time()
     except AuthError as e:
@@ -2349,6 +2514,8 @@ def main():
 
     # --- volcado final al almacén y archivos del panel
     resumen = aplicar_pendientes()
+    if inegi is not None:
+        inegi.guardar_memoria()
     save_json(LASTRUN_PATH, {
         "ok": True, "fecha": datetime.now(timezone.utc).isoformat(),
         "modo": args.modo, "celdas": celdas_aplicadas,
@@ -2356,6 +2523,9 @@ def main():
         "sin_nombre_en_corrida": hallados_run, "total_acumulado": resumen["total"],
         "peticiones_inegi": inegi.peticiones if inegi else 0,
         "errores_inegi": inegi.errores if inegi else 0,
+        "inegi_de_memoria": inegi.de_memoria if inegi else 0,
+        "inegi_sembrados": inegi.sembrados if inegi else 0,
+        "inegi_memoria_total": len(inegi.memoria) if inegi else 0,
         "minutos": round((time.time() - inicio) / 60, 1),
     })
     log(f"Listo: {celdas_aplicadas} celdas, {contador['req']} peticiones, "
