@@ -89,6 +89,10 @@ ACCENT_FIXES = {
 }
 
 ALLOWED = {
+    # siglas revisadas 2026-11-19
+    "CEIAC", "AZTK", "CIDAT", "CLCE", "LORSA", "CIBAR", "ZOKKO", "PISAF", "SSEM", "GABEN",
+    "DECUM", "TAPTA", "UINET", "TROX", "AEVUM", "KVP", "KSB", "IACSA", "CLM", "RCS", "EMG",
+    "VLM", "GTX", "TTR", "THN", "MIKOH", "BREC", "IVORA",
     "IMSS", "UMF", "HGZ", "HGR", "UMAE", "ISSSTE", "INSABI", "SS", "COFEPRIS", "DIF", "NSS",
     "CURP", "CRIT", "INAPAM", "CONADIC", "SAT", "SHCP", "RFC", "ISR", "IVA", "IEPS", "ISAN",
     "UMA", "SMV", "CLABE", "CNBV", "CONDUSEF", "CONSAR", "AFORE", "SIEFORE", "BMV", "BIVA",
@@ -794,6 +798,13 @@ CONDITIONAL_ARTICLES = {"el", "la", "los", "las"}
 PREPOSITIONS = {"de", "del", "a", "en", "por", "con", "para", "al"}
 # Marcas que se dejan tal cual, y solo en estas formas exactas (distingue mayúsculas)
 KEEP_AS_IS = [
+    # siglas revisadas 2026-11-19
+    "MAPS", "DOT", "EXE", "AYO", "DEV", "BON", "KU", "USAR", "HULA", "GN.", "MicroComputación",
+    "Bloom&Co", "*Delta*", "BubaBomb", "G.Santini", "VeryBereNails", "Sugar&Co", "Natura&Co",
+    "AutoSeguro", "D´Angel", "SolarTech", "FisioStudio", "Z'Cruz", "IonDrive", "Ro&Co",
+    "BarBento", "AsiaMex", "UrbanLab", "CupCakes", "LoSa", "TecnhoFusion", "FoodPark",
+    "NexTrailers", "PhotoGraf", "ModaMedic", "CodeLand", "Lynk&Co", "TecnoByte", "CFLite",
+    "CFMoto", "GymOn",
     "OXXO", "Oxxo", "Toks", "Tok's", "FirstCash",
     # marcas con mayúscula interna que marcó Santiago en el panel
     "CIBanco", "Back2Back", "SushiStar", "ABControl", "AlSuper", "BanBajio", "BanBajío",
@@ -1616,6 +1627,9 @@ RESPETAR_FORMA = {"km", "kms",
 # siglas. No cambian nada de la ortografía, solo sirven para que la página de
 # revisión no las vuelva a preguntar, en cualquier navegador.
 NO_SON_SIGLAS = {
+    # siglas revisadas 2026-11-19
+    "McDonalds", "JUMP", "kICKBOXING", "LARGA", "ROLL", "BOWL", "RECTA", "CALLE", "CARGA.",
+    "MORCA", "MADIN", "JOIA", "GIAN", "EBTUN", "FED.", "ROO.", "ANEA", "CLj.",
     "AIR", "ALO!", "AROVA", "ARSA", "ARTEAGA", "BANCO", "BANORTE",
     "CAUSA", "CESAME", "CHAPA", "COCACOLA", "COPY", "CREE", "Chilorio'S",
     "CoSinaloa", "DANSA", "DE", "DELTAPLAST", "DEM", "DENTAL", "DIMAC", "DK", "EJIDO", "EL",
