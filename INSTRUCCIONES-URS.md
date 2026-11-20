@@ -149,3 +149,16 @@ En el JSON van tres campos:
 - `cerradosDesde`: la fecha de la primera corrida que empezó a contar, para que la página pueda decir desde cuándo.
 
 Dos advertencias que conviene repetir cuando se presente el dato: es el **último editor** del UR, no necesariamente quien lo cerró (si alguien comenta después, el crédito se le va a ese), y de los cerrados viejos nunca vamos a saber nada, porque ya no vienen en la lectura.
+
+## 9. El código ya está guardado
+
+Para no reconstruirlo en cada sesión, los tres bloques de JavaScript que hacen todo (capturar el filtro, barrer los dos servidores y armar los archivos) están en `urs-cosecha.js`, en la raíz del repo. Se pegan tal cual con la herramienta de JavaScript del navegador.
+
+Lo que cambió el 20 de noviembre de 2026 y hay que respetar:
+
+- **Una petición a la vez, con pausa de 350 ms.** Nada de ráfagas en paralelo: son 288 peticiones en ROW y 160 en NA, unos cinco minutos y medio en total.
+- **La descripción ya viene en la lista**, en el campo 7 del registro, con un prefijo en mayúsculas (`GENERAL_MAP_UPDATE: …`) que se le quita. Ya no hace falta pedir cada UR por separado como dice la sección 3.
+- **Waze deja ver 40 días de cerrados, no 30.** La columna «URs cerrados (40 d)» de la página de champs muestra exactamente esa ventana (`cerradosPorChamp`); el histórico sigue acumulándose aparte en `cerradosAcumulados` y en `urs-cerrados-champs.json`.
+- **`window.name` no sobrevive** al pasar de waze.com a github.com (sí de velezsan.github.io a github.com). Para cruzar los datos se usa el botón inyectado con clic real y `postMessage`, como dice la sección 5.
+- **`generado` va en segundos**, nunca como texto ISO.
+- Para enviar el formulario de subida de GitHub sirve `boton.form.requestSubmit(boton)`; el clic por coordenadas dejó de ser confiable.
