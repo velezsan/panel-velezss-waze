@@ -144,6 +144,11 @@
         <div class="d">Límites que no terminan en 0 ni en 5, por sentido y con el candado del segmento.</div>
         <div class="n" id="n-velocidades"></div>
       </a>
+      <a class="seccion" href="ancho.html">
+        <div class="t">🛣️ Sin Road Width</div>
+        <div class="d">Autopistas y carreteras (FW, MH, mH) sin número de carriles en algún sentido.</div>
+        <div class="n" id="n-ancho"></div>
+      </a>
       <a class="seccion" href="places.html">
         <div class="t">🏪 Places mal escritos</div>
         <div class="d">Nombres de places con la corrección de tu propia regla, y aviso cuando aplasta una sigla.</div>
@@ -263,6 +268,11 @@
       pon('n-comentarios', fmt(d.total)+' notas en '+((d.estados||[]).length)+' estados');
     })
     .catch(()=>{ pon('m-total','—'); pon('m-estados','—'); pon('n-comentarios','sin datos todavía'); });
+
+  fetch('data/ancho/index.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{ pon('n-ancho', fmt(d.total)+' segmentos en '+((d.estados||[]).length)+' estados'); })
+    .catch(()=>{ pon('n-ancho','sin datos todavía'); });
 
   fetch('data/candados/index.json',{cache:'no-store'})
     .then(r=>{if(!r.ok)throw 0;return r.json();})
