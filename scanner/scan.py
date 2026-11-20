@@ -50,6 +50,7 @@ PASES_DIR = os.path.join(DATA_DIR, "pases")
 COMENTARIOS_DIR = os.path.join(DATA_DIR, "comentarios")
 ORTOGRAFIA_DIR = os.path.join(DATA_DIR, "ortografia")
 VELOCIDADES_DIR = os.path.join(DATA_DIR, "velocidades")
+ANCHO_DIR = os.path.join(DATA_DIR, "ancho")
 PLACES_DIR = os.path.join(DATA_DIR, "places")
 PALABRAS_PATH = os.path.join(BASE, "scanner", "palabras_mal_escritas.json")
 
@@ -884,6 +885,11 @@ _pases_celda = {}  # id -> segmento con pases de peaje (se vacía por celda)
 _comentarios_celda = {}  # id -> comentario de mapa (se vacía por celda)
 _ortografia_celda = {}  # idCalle -> calle mal escrita (se vacía por celda)
 _velocidades_celda = {}  # id -> segmento con velocidad rara (se vacía por celda)
+_ancho_celda = {}  # id -> autopista o carretera sin Road Width (se vacía por celda)
+# tipos de vía a los que se les pide Road Width: Autopista, Carretera mayor y menor
+TIPOS_ANCHO = (3, 6, 7)
+# orden de los datos de cada segmento en docs/data*/ancho/<estado>.json
+CAMPOS_ANCHO = ["id", "lat", "lon", "rt", "f", "s", "ciudad", "nombre", "c"]
 _places_celda = {}  # id -> place con problema (se vacía por celda)
 # revisión de ortografía en los nombres de calle (solo Panel NA por ahora)
 REVISAR_ORTOGRAFIA = False
@@ -926,6 +932,55 @@ def velocidades_raras(seg):
         if velocidad_rara(v):
             malas[lado] = v
     return malas
+
+
+def sin_ancho(seg):
+    """Sentidos permitidos del segmento que no tienen Road Width (carriles).
+
+    Devuelve (falta, sentidos): falta vale 1 si falta en A→B, 2 si falta en
+    B→A, 3 si falta en los dos y 0 si está completo; sentidos es 1 o 2. En la
+    respuesta de Waze los carriles de A→B vienen en fromLanesInfo y los de
+    B→A en toLanesInfo.
+    """
+    def _tiene(info):
+        return isinstance(info, dict) and bool(info.get("numberOfLanes"))
+    ida = bool(seg.get("fwdDirection"))
+    reg = bool(seg.get("revDirection"))
+    if not ida and not reg:
+        ida = reg = True  # sentido sin definir: se revisan los dos
+    falta = 0
+    if ida and not _tiene(seg.get("fromLanesInfo")):
+        falta |= 1
+    if reg and not _tiene(seg.get("toLanesInfo")):
+        falta |= 2
+    return falta, (2 if ida and reg else 1)
+
+
+def cargar_ancho():
+    """Lee lo ya publicado en ANCHO_DIR y lo regresa por celda: idx -> [registros].
+
+    Esta sección no se guarda en scan_state.json (ya pesa demasiado): su
+    memoria son los mismos archivos que lee la página.
+    """
+    info = {}
+    try:
+        archivos = [f for f in os.listdir(ANCHO_DIR)
+                    if f.endswith(".json") and f != "index.json"]
+    except OSError:
+        return info
+    for fn in archivos:
+        d = load_json(os.path.join(ANCHO_DIR, fn), {})
+        if not isinstance(d, dict):
+            continue
+        edo = d.get("estado") or ""
+        for fila in d.get("segmentos") or []:
+            if not isinstance(fila, list) or len(fila) != len(CAMPOS_ANCHO):
+                continue
+            r = dict(zip(CAMPOS_ANCHO, fila))
+            idx = str(r.pop("c"))
+            r["edo"] = edo
+            info.setdefault(idx, []).append(r)
+    return info
 
 
 def pases_de_segmento(seg):
@@ -1182,6 +1237,24 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             "lk": (seg.get("lockRank") + 1) if isinstance(seg.get("lockRank"), int) else 1,
             "ciudad": ciudad_v, "edo": edo_v,
             "nombre": nombre_de_calle(stv) or "",
+        }
+
+    # autopistas y carreteras (FW, MH, mH) sin Road Width en algún sentido
+    for seg in segs:
+        if seg.get("roadType") not in TIPOS_ANCHO:
+            continue
+        falta_a, sentidos_a = sin_ancho(seg)
+        if not falta_a:
+            continue
+        lon_a, lat_a = punto_medio(seg)
+        if lon_a is None:
+            continue
+        sta, ciudad_a, edo_a = _ciudad_estado(seg, streets, cities, states)
+        _ancho_celda[seg.get("id")] = {
+            "id": seg.get("id"), "lat": round(lat_a, 5), "lon": round(lon_a, 5),
+            "rt": seg.get("roadType"), "f": falta_a, "s": sentidos_a,
+            "ciudad": ciudad_a, "edo": edo_a,
+            "nombre": nombre_de_calle(sta) or "",
         }
 
     # places (venues): nombres mal escritos y places sin calle
@@ -1489,7 +1562,7 @@ def main():
     global STATE_PATH, LASTRUN_PATH, DEBUG_PATH, DATA_DIR, ESTADOS_DIR, CANDADOS_DIR
     global PASES_DIR, REQ_CANDADO_EXTRA, COMENTARIOS_DIR, PEDIR_COMENTARIOS
     global ORTOGRAFIA_DIR, REVISAR_ORTOGRAFIA, PALABRAS_MAL, VELOCIDADES_DIR
-    global PLACES_DIR, PEDIR_PLACES
+    global PLACES_DIR, PEDIR_PLACES, ANCHO_DIR
     global FILTRAR_RESTRINGIDAS
     panel_na = args.panel == "na"
     # secciones que corren en los dos paneles
@@ -1515,6 +1588,7 @@ def main():
         COMENTARIOS_DIR = os.path.join(DATA_DIR, "comentarios")
         ORTOGRAFIA_DIR = os.path.join(DATA_DIR, "ortografia")
         VELOCIDADES_DIR = os.path.join(DATA_DIR, "velocidades")
+        ANCHO_DIR = os.path.join(DATA_DIR, "ancho")
         PLACES_DIR = os.path.join(DATA_DIR, "places")
 
     cfg = load_json(CONFIG_PATH, {})
@@ -1601,6 +1675,7 @@ def main():
     ortografia_info = estado.get("ortografia", {})  # idx -> [calles mal escritas]
     velocidades_info = estado.get("velocidades", {})  # idx -> [velocidades raras]
     places_info = estado.get("places", {})  # idx -> [places con problema]
+    ancho_info = cargar_ancho()  # idx -> [autopistas y carreteras sin Road Width]
     cursor = estado.get("cursor", 0)
     ciclo = estado.get("ciclo", 1)
     if (estado.get("celda_grados") not in (None, celda)
@@ -1615,6 +1690,7 @@ def main():
         ortografia_info = {}
         velocidades_info = {}
         places_info = {}
+        ancho_info = {}
 
     if args.modo == "test":
         log("MODO PRUEBA: escaneando solo el centro de Guadalajara")
@@ -2002,6 +2078,41 @@ def main():
             "estados": lista_v,
             "tipos": {str(k): v for k, v in ROAD_TYPE_NAMES.items()},
         }, compact=True)
+        # autopistas y carreteras sin Road Width: reagrupar por estado. Cada
+        # segmento va como lista (ver CAMPOS_ANCHO) y lleva al final su celda,
+        # porque estos archivos son también la memoria de la sección.
+        ancho_por_estado = {}
+        for _idx_a, regs in ancho_info.items():
+            for r in regs:
+                est_a = (normalizar_estado(r.get("edo", ""), estados_mx)
+                         or estados_mx.estado_de(r["lon"], r["lat"]))
+                if panel_na:
+                    if est_a not in nombres_mx:
+                        continue  # del lado de EUA: no se incluye
+                    if not r.get("edo") and not estados_mx.dentro_de_alguno(r["lon"], r["lat"]):
+                        continue
+                ancho_por_estado.setdefault(est_a, {})[r["id"]] = [
+                    r["id"], r["lat"], r["lon"], r["rt"], r["f"], r["s"],
+                    r.get("ciudad", ""), r.get("nombre", ""), _idx_a]
+        os.makedirs(ANCHO_DIR, exist_ok=True)
+        slugs_a = set()
+        lista_a = []
+        for est_a, segs_a in sorted(ancho_por_estado.items()):
+            slug_a = slugify(est_a)
+            slugs_a.add(slug_a)
+            save_json(os.path.join(ANCHO_DIR, f"{slug_a}.json"),
+                      {"estado": est_a, "campos": CAMPOS_ANCHO,
+                       "segmentos": list(segs_a.values())}, compact=True)
+            lista_a.append({"estado": est_a, "slug": slug_a, "total": len(segs_a)})
+        for fn in os.listdir(ANCHO_DIR):
+            if fn.endswith(".json") and fn[:-5] != "index" and fn[:-5] not in slugs_a:
+                os.remove(os.path.join(ANCHO_DIR, fn))
+        save_json(os.path.join(ANCHO_DIR, "index.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "total": sum(e["total"] for e in lista_a),
+            "estados": lista_a,
+            "tipos": {str(k): v for k, v in ROAD_TYPE_NAMES.items()},
+        }, compact=True)
         # panel de places (mal escritos y sin dirección): reagrupar por estado
         places_por_estado = {}
         for regs in places_info.values():
@@ -2188,6 +2299,7 @@ def main():
                 _candados_celda.clear()
                 _pases_celda.clear()
                 _velocidades_celda.clear()
+                _ancho_celda.clear()
                 _places_celda.clear()
                 _comentarios_celda.clear()
                 _ortografia_celda.clear()
@@ -2216,6 +2328,7 @@ def main():
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _velocidades_celda.clear()
+                    _ancho_celda.clear()
                     _places_celda.clear()
                     _comentarios_celda.clear()
                     _ortografia_celda.clear()
@@ -2229,6 +2342,7 @@ def main():
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _velocidades_celda.clear()
+                    _ancho_celda.clear()
                     _places_celda.clear()
                     _comentarios_celda.clear()
                     _ortografia_celda.clear()
@@ -2286,6 +2400,10 @@ def main():
                     velocidades_info[str(idx)] = list(_velocidades_celda.values())
                 else:
                     velocidades_info.pop(str(idx), None)
+                if _ancho_celda:
+                    ancho_info[str(idx)] = list(_ancho_celda.values())
+                else:
+                    ancho_info.pop(str(idx), None)
                 if _places_celda:
                     _hoy_pl = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
                     _prev_pl = {p.get("id"): p.get("v", "")
@@ -2372,6 +2490,7 @@ def main():
                 _candados_celda.clear()
                 _pases_celda.clear()
                 _velocidades_celda.clear()
+                _ancho_celda.clear()
                 _places_celda.clear()
                 _comentarios_celda.clear()
                 _ortografia_celda.clear()
@@ -2411,6 +2530,7 @@ def main():
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _velocidades_celda.clear()
+                    _ancho_celda.clear()
                     _places_celda.clear()
                     _comentarios_celda.clear()
                     _ortografia_celda.clear()
@@ -2426,6 +2546,7 @@ def main():
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _velocidades_celda.clear()
+                    _ancho_celda.clear()
                     _places_celda.clear()
                     _comentarios_celda.clear()
                     _ortografia_celda.clear()
@@ -2483,6 +2604,10 @@ def main():
                     velocidades_info[str(idx)] = list(_velocidades_celda.values())
                 else:
                     velocidades_info.pop(str(idx), None)
+                if _ancho_celda:
+                    ancho_info[str(idx)] = list(_ancho_celda.values())
+                else:
+                    ancho_info.pop(str(idx), None)
                 if _places_celda:
                     _hoy_pl = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
                     _prev_pl = {p.get("id"): p.get("v", "")
