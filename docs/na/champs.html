@@ -44,15 +44,7 @@
 </header>
 <main>
   <div id="contenido"><div class="cargando">Cargando datos…</div></div>
-  <p class="nota" id="nota"></p>
-  <p class="nota">El conteo de segmentos se construye con lo que el escáner recorre: cada celda aporta los segmentos
-    cuya última edición (de cualquier tipo de vía) fue hecha por un Local Champ dentro de la ventana de 60 días.
-    Las dos últimas columnas cuentan su actividad en el
-    <a href="https://www.waze.com/discuss/c/editors/mexico/4569" target="_blank" rel="noopener" style="color:var(--accent)">foro de México</a>:
-    <b>desbloqueos</b> es la sección de desbloqueos, actualizaciones y cierres; <b>otras secciones</b> es todo lo demás
-    (edición de mapas, mentorship, regiones, MapRaids…). En cada una, el primer número son los temas que abrió
-    y el segundo las respuestas que escribió. El foro se revisa una vez al día. La lista de Local Champs viene del
-    <a href="https://www.waze.com/discuss/t/local-champs/377004" target="_blank" rel="noopener" style="color:var(--accent)">foro oficial de la comunidad</a>.</p>
+  <p class="nota" id="nota" style="display:none"></p>
 </main>
 <script>
 (function(){
@@ -129,7 +121,7 @@
     cab.dataset.extra = "1";
     const modelo = cab.children[2];
     let refTh = modelo;
-    ["Places editados", "URs cerrados (30 d)"].forEach(txt => {
+    ["Places editados", "URs cerrados (40 d)"].forEach(txt => {
       const th = document.createElement("th");
       th.className = modelo.className;
       th.textContent = txt;
