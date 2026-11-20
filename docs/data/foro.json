@@ -1,15 +1,15 @@
 {
- "actualizado": "2026-11-19T10:38:03+00:00",
+ "actualizado": "2026-11-20T06:51:38+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 79,
- "peticiones": 83,
+ "temas_revisados": 82,
+ "peticiones": 86,
  "errores": 0,
  "champs": {
   "camachista": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 20
+    "respuestas": 21
    },
    "otras": {
     "temas": 0,
@@ -108,8 +108,8 @@
   }
  },
  "otros_frecuentes": {
-  "xl45": 43,
-  "world_yeh8sazm": 8,
+  "xl45": 44,
+  "world_yeh8sazm": 7,
   "JorgeLAB": 7,
   "DINSA_CENTRO": 6,
   "LuisCav29": 5,
