@@ -43,13 +43,38 @@ jobs:
       - name: Marca de inicio
         run: echo "INICIO=$(date +%s)" >> "$GITHUB_ENV"
 
+      - name: Recuperar la memoria del INEGI
+        # Lo que el INEGI ya contestó en corridas pasadas vive en el caché de
+        # Actions (no en el repo). Si no hay o falla, el escáner pregunta todo
+        # como siempre.
+        uses: actions/cache/restore@v4
+        continue-on-error: true
+        with:
+          path: /home/runner/inegi-memoria
+          key: inegi-na-${{ github.run_id }}
+          restore-keys: |
+            inegi-na-
+
       - name: Correr escáner (servidor NA)
+        env:
+          # memoria del INEGI: solo se pregunta por segmentos nuevos o editados
+          INEGI_MEMORIA: /home/runner/inegi-memoria/inegi.json
+          # freno para Waze: una celda cada 8 s como máximo (vuelta a NA ≈ 2 horas)
+          ESCANER_SEG_ENTRE_PETICIONES: '8'
         run: |
           python scanner/scan.py \
             --panel na \
             --modo "${{ github.event.inputs.modo || 'completo' }}" \
             --minutos "${{ github.event.inputs.minutos || '210' }}" \
             --zona="${{ github.event.inputs.zona || '' }}"
+
+      - name: Guardar la memoria del INEGI
+        if: always()
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: /home/runner/inegi-memoria
+          key: inegi-na-${{ github.run_id }}
 
       - name: Guardar resultados
         run: |
