@@ -1530,7 +1530,7 @@ def main():
     usar_inegi = cfg.get("sugerencias_inegi", True)
     inegi = ConsultorINEGI(cfg.get("pausa_inegi_segundos", 0.15)) if usar_inegi else None
     _mem_inegi = os.environ.get("INEGI_MEMORIA", "").strip()
-    if inegi is not None and _mem_inegi and not panel_na:
+    if inegi is not None and _mem_inegi:
         log(f"memoria del INEGI: {inegi.cargar_memoria(_mem_inegi)} segmentos recordados")
 
     inicio = time.time()
