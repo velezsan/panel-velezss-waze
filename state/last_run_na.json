@@ -1,9 +1,9 @@
 {
  "ok": true,
- "fecha": "2026-11-21T18:14:25.196559+00:00",
+ "fecha": "2026-11-21T20:04:53.863106+00:00",
  "modo": "completo",
- "celdas": 789,
- "peticiones": 789,
+ "celdas": 775,
+ "peticiones": 775,
  "segmentos_vistos": 505546,
  "sin_nombre_en_corrida": 103,
  "total_acumulado": 93,
@@ -12,5 +12,5 @@
  "inegi_de_memoria": 44639,
  "inegi_sembrados": 0,
  "inegi_memoria_total": 38153,
- "minutos": 105.3
+ "minutos": 103.4
 }
