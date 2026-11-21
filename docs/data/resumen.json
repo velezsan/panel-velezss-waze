@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-21T19:19:20+00:00",
+ "actualizado": "2026-11-21T20:09:52+00:00",
  "env": "row",
- "total": 108258,
+ "total": 108295,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -132,8 +132,8 @@
   {
    "estado": "Querétaro",
    "slug": "queretaro",
-   "total": 2178,
-   "ciudades": 145
+   "total": 2215,
+   "ciudades": 147
   },
   {
    "estado": "Quintana Roo",
