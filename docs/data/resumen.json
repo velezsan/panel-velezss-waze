@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-22T12:08:36+00:00",
+ "actualizado": "2026-11-22T12:51:55+00:00",
  "env": "row",
- "total": 108344,
+ "total": 108346,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -66,7 +66,7 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 10115,
+   "total": 10117,
    "ciudades": 503
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 35.4,
+  "porcentaje_vuelta": 35.6,
   "modo": "completo"
  },
  "aviso": "",
