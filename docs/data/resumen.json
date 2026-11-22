@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-22T09:10:41+00:00",
+ "actualizado": "2026-11-22T09:53:10+00:00",
  "env": "row",
- "total": 108339,
+ "total": 108342,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -186,7 +186,7 @@
   {
    "estado": "Yucatán",
    "slug": "yucatan",
-   "total": 2431,
+   "total": 2434,
    "ciudades": 154
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 34.9,
+  "porcentaje_vuelta": 35.1,
   "modo": "completo"
  },
  "aviso": "",
