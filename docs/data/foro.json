@@ -1,9 +1,9 @@
 {
- "actualizado": "2026-11-21T04:45:04+00:00",
+ "actualizado": "2026-11-22T02:39:23+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 81,
- "peticiones": 85,
+ "temas_revisados": 80,
+ "peticiones": 84,
  "errores": 0,
  "champs": {
   "camachista": {
@@ -43,7 +43,7 @@
    },
    "otras": {
     "temas": 0,
-    "respuestas": 3
+    "respuestas": 2
    }
   },
   "arturoae": {
