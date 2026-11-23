@@ -162,3 +162,8 @@ Lo que cambió el 20 de noviembre de 2026 y hay que respetar:
 - **`window.name` no sobrevive** al pasar de waze.com a github.com (sí de velezsan.github.io a github.com). Para cruzar los datos se usa el botón inyectado con clic real y `postMessage`, como dice la sección 5.
 - **`generado` va en segundos**, nunca como texto ISO.
 - Para enviar el formulario de subida de GitHub sirve `boton.form.requestSubmit(boton)`; el clic por coordenadas dejó de ser confiable.
+
+Lo aprendido el 23 de noviembre de 2026:
+
+- **El WME no deja bajar `urs-cosecha.js` desde raw.githubusercontent.com** (su política de seguridad bloquea ese `fetch`), así que los bloques 1 y 2 se pegan a mano en la herramienta de JavaScript. El bloque 3 también se pega, porque GitHub no permite `eval`.
+- **La pestaña de GitHub se abre hasta que la lectura terminó** (`window.H.fase === 'listo'`). Si se abre antes y se queda cinco minutos en segundo plano, Chrome la recarga y se pierden el receptor y la liga con el WME. Los datos no se pierden: siguen en `window.H` de la pestaña del WME, y basta volver a inyectar el botón, abrirla de nuevo y mandar todo enseguida.
