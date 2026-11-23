@@ -1,0 +1,162 @@
+/* Estilo común del panel velezss (ROW y NA). Se carga después del <style>
+   de cada página, así que aquí solo va lo que cambia el aspecto. */
+:root{
+  --bg:#0f1420; --panel:#171e2e; --panel2:#1d2639; --line:#2a3550;
+  --text:#e8ecf4; --muted:#93a0b8; --accent:#4da3ff; --accent2:#7fd18c;
+  --warn:#ffb454; --chip:#243049;
+  --radio:14px; --sombra:0 1px 0 rgba(255,255,255,.03) inset,0 10px 30px -18px rgba(0,0,0,.8);
+}
+html{scroll-behavior:smooth}
+body{
+  padding-top:56px;
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  background:
+    radial-gradient(900px 420px at 12% -8%,rgba(77,163,255,.13),transparent 62%),
+    radial-gradient(700px 380px at 96% 0%,rgba(127,209,140,.07),transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+}
+::selection{background:rgba(77,163,255,.35)}
+*{scrollbar-color:#33415f transparent}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-thumb{background:#2c3956;border-radius:8px;border:3px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:#3a4a6e}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+/* ---- barra de arriba (la pone barra.js) ---- */
+.barra-top{position:fixed;inset:0 0 auto 0;height:56px;z-index:50;display:flex;align-items:center;
+  justify-content:space-between;gap:12px;padding:0 max(20px,calc((100vw - 1100px)/2 + 20px));
+  background:rgba(15,20,32,.78);backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);border-bottom:1px solid rgba(42,53,80,.75)}
+.barra-top a{text-decoration:none}
+.barra-top .marca{display:flex;align-items:center;gap:10px;color:var(--text);font-weight:700;
+  font-size:1.02rem;letter-spacing:-.01em}
+.barra-top .logo{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;
+  background:linear-gradient(145deg,#6db6ff,#2f7fe0);color:#06121f;font-weight:800;font-size:.95rem;
+  box-shadow:0 4px 14px -4px rgba(77,163,255,.8)}
+.barra-top .marca small{color:var(--muted);font-weight:500;font-size:.8rem}
+.barra-top .servidores{display:flex;background:var(--panel);border:1px solid var(--line);
+  border-radius:999px;padding:3px;gap:2px}
+.barra-top .servidores a{color:var(--muted);font-size:.82rem;font-weight:600;padding:5px 13px;
+  border-radius:999px;white-space:nowrap;transition:color .15s,background .15s}
+.barra-top .servidores a:hover{color:var(--text)}
+.barra-top .servidores a.act{background:var(--accent);color:#06121f}
+
+/* ---- páginas de lista ---- */
+header{padding:30px 20px 6px}
+h1{font-size:1.55rem;letter-spacing:-.02em;line-height:1.2}
+.sub{font-size:.95rem;line-height:1.5}
+.sub a{font-weight:600}
+.sub a:hover{text-decoration:underline}
+main{padding-bottom:80px}
+.controls{gap:10px;margin:18px 0 16px}
+select,input[type=search],input.buscar{
+  height:40px;border-radius:10px;border:1px solid var(--line);background-color:var(--panel);
+  color:var(--text);font:inherit;font-size:.92rem;padding:0 12px;
+  transition:border-color .15s,box-shadow .15s,background-color .15s}
+select{appearance:none;-webkit-appearance:none;padding-right:34px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%2393a0b8' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center}
+select:hover,input[type=search]:hover,input.buscar:hover{border-color:#3b4b72;background-color:var(--panel2)}
+select:focus,input[type=search]:focus,input.buscar:focus{outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(77,163,255,.22)}
+input::placeholder{color:#6f7d98}
+table{border-radius:var(--radio);box-shadow:var(--sombra);border-color:var(--line)}
+th{padding:12px 12px;font-size:.72rem;letter-spacing:.07em;background:var(--panel2);
+  border-bottom:1px solid var(--line)}
+td{padding:11px 12px}
+tbody tr{transition:background .12s}
+tbody tr:hover td{background:rgba(77,163,255,.055)}
+a.wme{border-radius:9px;padding:7px 13px;font-size:.84rem;
+  box-shadow:0 6px 16px -8px rgba(77,163,255,.9);transition:transform .12s,filter .12s,box-shadow .12s}
+a.wme:hover{filter:brightness(1.08);transform:translateY(-1px)}
+a.wme:active{transform:translateY(0)}
+a.wme.hecho{box-shadow:none}
+.chip{border-radius:7px;padding:3px 9px;font-size:.78rem;white-space:nowrap}
+.controls .chip{white-space:normal}
+.pager{margin:22px 0;gap:8px}
+.pager button{height:38px;border-radius:10px;padding:0 15px;font-weight:600;transition:border-color .15s,background .15s}
+.pager button:not(:disabled):hover{border-color:var(--accent);background:var(--panel)}
+.pager input{height:38px;border-radius:10px}
+.cargando{padding:56px 20px}
+.tar,.tile{border-radius:var(--radio);box-shadow:var(--sombra)}
+.vistas{margin-bottom:12px}
+.vistas button{border-radius:10px}
+.tarjetas{gap:12px}
+
+@media (max-width:760px){
+  header{padding:22px 14px 4px}
+  h1{font-size:1.3rem}
+  main{padding-left:14px;padding-right:14px}
+  #contenido{overflow-x:auto;border-radius:var(--radio)}
+  th,td{padding:9px 10px}
+  .controls select,.controls input{flex:1 1 150px;min-width:0}
+  .barra-top{padding:0 14px}
+  .barra-top .marca small{display:none}
+  .barra-top .servidores a{padding:5px 10px;font-size:.78rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* ---- portada ---- */
+body.portada header.hero{max-width:1100px;margin:0 auto;padding:44px 20px 8px;display:grid;
+  grid-template-columns:minmax(0,1fr) 340px;gap:28px;align-items:end}
+.eyebrow{color:var(--accent);font-size:.74rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:10px}
+body.portada h1{font-size:clamp(1.8rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.03em;margin:0 0 10px}
+body.portada .hero .sub{font-size:1.02rem;max-width:52ch}
+a.estado{display:block;text-decoration:none;color:var(--text);background:linear-gradient(160deg,var(--panel2),var(--panel));
+  border:1px solid var(--line);border-radius:18px;padding:16px 18px 14px;box-shadow:var(--sombra);
+  transition:border-color .15s,transform .15s}
+a.estado:hover{border-color:var(--accent);transform:translateY(-2px)}
+.estado .fila{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.estado .l{color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.estado .v{font-size:1.7rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.estado .ciclo{color:var(--muted);font-size:.86rem;margin-top:-2px}
+.estado .avance{height:8px;border-radius:99px;background:#0e1422;border:1px solid var(--line);overflow:hidden;margin:12px 0 10px}
+.estado .avance i{display:block;height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,#2f7fe0,#6db6ff);transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.estado .pie{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:.8rem}
+.estado .pie b{color:var(--text);font-weight:600}
+.estado .ir{color:var(--accent);font-weight:600;white-space:nowrap}
+body.portada main{max-width:1100px;margin:0 auto;padding:10px 20px 90px}
+body.portada .aviso{border-radius:12px;margin:18px 0 0}
+.bloque{margin-top:38px;--tono:var(--accent);--tono-suave:rgba(77,163,255,.14)}
+.bloque.verde{--tono:var(--accent2);--tono-suave:rgba(127,209,140,.14)}
+.bloque.naranja{--tono:var(--warn);--tono-suave:rgba(255,180,84,.14)}
+.bloque h2{display:flex;align-items:center;gap:12px;margin:0 0 14px;font-size:.78rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.bloque h2::before{content:"";width:8px;height:8px;border-radius:3px;background:var(--tono);
+  box-shadow:0 0 0 4px var(--tono-suave)}
+.bloque h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+body.portada .secciones{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0}
+body.portada a.seccion{position:relative;display:flex;flex-direction:column;gap:12px;min-height:168px;
+  text-decoration:none;color:var(--text);
+  padding:18px 18px 16px;border-radius:16px;background:linear-gradient(165deg,var(--panel2) 0%,var(--panel) 55%);
+  border:1px solid var(--line);box-shadow:var(--sombra);overflow:hidden;
+  transition:transform .16s,border-color .16s,box-shadow .16s}
+body.portada a.seccion::after{content:"→";position:absolute;top:16px;right:18px;color:var(--tono);
+  font-weight:700;opacity:0;transform:translateX(-6px);transition:opacity .16s,transform .16s}
+body.portada a.seccion:hover{transform:translateY(-3px);border-color:var(--tono);
+  background:linear-gradient(165deg,var(--panel2) 0%,var(--panel) 55%);
+  box-shadow:0 18px 40px -22px rgba(0,0,0,.9),0 0 0 1px var(--tono-suave)}
+body.portada a.seccion:hover::after{opacity:1;transform:none}
+.seccion .cab{display:flex;align-items:center;gap:12px}
+.seccion .ico{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+  font-size:1.2rem;background:var(--tono-suave);border:1px solid rgba(255,255,255,.05)}
+body.portada a.seccion .t{font-size:1.02rem;font-weight:700;letter-spacing:-.01em;margin:0;padding-right:18px}
+body.portada a.seccion .d{color:var(--muted);font-size:.86rem;line-height:1.45;flex:1}
+.seccion .dato{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;padding-top:12px;
+  border-top:1px solid rgba(42,53,80,.8)}
+.seccion .num{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;color:var(--tono);
+  font-variant-numeric:tabular-nums;line-height:1}
+body.portada a.seccion .n{color:var(--muted);font-weight:500;font-size:.82rem}
+@media (max-width:900px){
+  body.portada header.hero{grid-template-columns:1fr;padding-top:30px;gap:18px}
+  body.portada .secciones{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:560px){
+  body.portada header.hero,body.portada main{padding-left:14px;padding-right:14px}
+  body.portada .secciones{grid-template-columns:1fr}
+  body.portada a.seccion{min-height:0}
+}
