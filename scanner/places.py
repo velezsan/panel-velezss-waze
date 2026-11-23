@@ -1832,6 +1832,51 @@ NO_SON_SIGLAS = {
 }
 
 # ---------------------------------------------------------------------------
+# Revisión de abreviaturas del 23-nov-2026 (pedida por Santiago)
+# ---------------------------------------------------------------------------
+# ALLOWED es la lista de siglas que se escriben en mayúsculas. Con el tiempo se
+# le colaron abreviaturas y palabras comunes, y por eso el panel proponía
+# "DR. Pérez", "CAR Wash", "Carl's JR", "ALL Inclusive" o "Estacionamiento
+# AXTEL". Todo lo de abajo sale de ALLOWED y entra a NO_SON_SIGLAS (para que no
+# se marque como "sigla aplastada" cuando venía en un nombre escrito a gritos).
+
+# Tratamientos y abreviaturas: siempre con mayúscula inicial, y conservan el
+# punto si lo traían ("LIC. Benito Juárez" -> "Lic. Benito Juárez").
+ABREVIATURAS_NORMALES = {
+    "DR", "DRA", "JR", "PROF", "LIC", "SR", "SRA", "STA", "NTRA", "FCO", "ESC", "SUC",
+    "PRIM", "FRACC", "NUM", "COL", "URB", "HRS", "MISC", "CIA", "AV", "AVE", "SN",
+    "GPE", "HDZ", "PSIC", "ABTS", "INC",
+}
+# Palabras que a veces sí son una sigla o una marca ("Estacionamiento Profesores
+# UP", "EST No. 10", "MZ Barrancos", "Pemex ES 1234"). Se dejan en mayúsculas
+# solo si así las escribieron dentro de un nombre que no está todo en
+# mayúsculas; en cualquier otro caso van con mayúscula inicial ("Car Wash").
+SIGLA_O_PALABRA = {t.lower() for t in (
+    "ALL", "CAR", "AXTEL", "GIRON",
+    "ING", "CAP", "MA", "MR", "ST", "CDA", "FAM", "DOC", "EJ", "INT", "SEG", "EST",
+    "MZ", "LT", "CO", "ES", "CD", "TEC",
+    "INN", "BY", "ROMA", "EX", "FIT", "GO", "ONE", "PET", "PETS", "LE", "DO", "MAGÓN",
+    "LAB", "CIMA", "TOP", "BE", "GIL", "VET", "ECO", "HA", "OTAY", "UP", "NOVA", "DA",
+    "MY", "MORENA", "DI", "TO", "IL", "LO", "VIA", "MARCO", "UMAN", "FAMA", "ME", "OCA",
+    "BOL", "MC", "MAC", "GUERO", "CID", "OH", "LUX", "YO", "MOY", "WE", "MERCO", "BRISA",
+    "JOY", "MAT", "KI", "FU", "RO", "KIN", "FLY", "NOÉ", "GEN", "OLD", "REX", "DU", "PA",
+    "ZOE", "EBEN", "EZER", "ANDA", "TAI", "ISA", "EK", "BETOS", "TAO", "LU", "SÍ", "AH",
+    "BAM", "ASTRO", "PEKES", "LI", "PERI", "EMI", "FA", "IS", "MAQUE", "DANA", "SAM", "TAE",
+    "MART",
+)}
+_fuera = ABREVIATURAS_NORMALES | {t.upper() for t in SIGLA_O_PALABRA}
+_fuera |= {t + "." for t in _fuera}
+ALLOWED -= _fuera
+NO_SON_SIGLAS |= _fuera
+
+# "Dr" y "Dra" llevan punto: "Consultorio Dr Juan" -> "Consultorio Dr. Juan".
+ACCENT_FIXES.update({"dr": "Dr.", "dra": "Dra."})
+
+# AGS (Aguascalientes) sí se respeta en mayúsculas: "Planta AGS 1", "Cedis AGS".
+ALLOWED.add("AGS")
+NO_SON_SIGLAS.discard("AGS")
+
+# ---------------------------------------------------------------------------
 # Dos arreglos respecto al JavaScript original, pedidos por Santiago
 # ---------------------------------------------------------------------------
 # 1) Las llaves de ACCENT_FIXES con espacio nunca se aplicaban: fixGrammar
@@ -1903,13 +1948,26 @@ def es_codigo(tok):
     return bool(_RE_SOLO_LETRAS.sub("", tok)) and any(ch.isdigit() for ch in tok)
 
 
-def se_respeta(tok):
+def se_respeta(tok, a_gritos=False):
     """Palabra que se deja con las mayúsculas que ya traía (KM / Km, GAMA / Gama).
 
     Si viene toda en minúsculas no se protege: ahí no hay nada que respetar y
     le toca la mayúscula inicial como a cualquier palabra del nombre.
+
+    Las de SIGLA_O_PALABRA solo se respetan cuando vienen en mayúsculas dentro
+    de un nombre que no está escrito todo en mayúsculas (a_gritos).
     """
-    return tok.lower() in RESPETAR_FORMA and tok != tok.lower()
+    if tok.lower() in RESPETAR_FORMA and tok != tok.lower():
+        return True
+    return (not a_gritos and len(tok) > 1 and tok == tok.upper()
+            and tok.lower() in SIGLA_O_PALABRA)
+
+
+def escrito_a_gritos(texto):
+    """Nombre de dos o más palabras sin una sola minúscula ("CAR WASH EL GÜERO")."""
+    if any(ch.islower() for ch in texto):
+        return False
+    return len([t for t in texto.split() if _RE_SOLO_LETRAS.sub("", t)]) >= 2
 
 
 def _patron_keep():
@@ -1925,6 +1983,7 @@ def fix_grammar(texto):
     """Misma salida que fixGrammar() del userscript."""
     guardadas = []
     src = str(texto)
+    a_gritos = escrito_a_gritos(src)
 
     def _guardar(m):
         marcador = MARCA_INI + str(len(guardadas)) + MARCA_FIN
@@ -1935,7 +1994,8 @@ def fix_grammar(texto):
 
     def _guardar_codigo(m):
         tok = m.group(2)
-        if not es_codigo(tok) and not se_respeta(tok):
+        # pegada a un punto ("A.L.MA.") es parte de otra abreviatura: no se aparta
+        if not es_codigo(tok) and not se_respeta(tok, a_gritos or m.group(1) == "."):
             return m.group(0)
         marcador = MARCA_INI + str(len(guardadas)) + MARCA_FIN
         guardadas.append(tok)
