@@ -5,7 +5,7 @@
     var ruta = location.pathname;
     var esNA = /\/na\//.test(ruta);
     var pagina = ruta.split('/').pop() || 'index.html';
-    var soloRow = { 'pases.html': 1 };
+    var soloRow = {};
     var otra = (esNA || !soloRow[pagina]) ? pagina : 'index.html';
     var nav = document.createElement('nav');
     nav.className = 'barra-top';

@@ -17,13 +17,25 @@
   .sub{color:var(--muted);font-size:.92rem;margin:0}
   .sub a{color:var(--accent);text-decoration:none}
   main{max-width:1100px;margin:0 auto;padding:14px 20px 60px}
+  .tarjetas{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 4px}
+  .tar{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;
+       color:var(--text);font:inherit;text-align:left;cursor:pointer;min-width:112px;
+       transition:border-color .15s,background .15s,transform .15s}
+  .tar:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .tar b{display:block;font-size:1.35rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .tar span{display:block;color:var(--muted);font-size:.8rem}
+  .tar.on{border-color:var(--accent);background:rgba(77,163,255,.12)}
+  .tar.on span{color:var(--text)}
+  .tar.us b{color:var(--warn)}
+  .tar.us.on{border-color:var(--warn);background:rgba(255,180,84,.12)}
   .controls{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;align-items:center}
-  select{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+  select,input[type=search]{background:var(--panel2);color:var(--text);border:1px solid var(--line);
          border-radius:8px;padding:8px 10px;font-size:.92rem;min-width:150px}
+  input[type=search]{flex:1 1 200px;max-width:320px}
   table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);
         border-radius:12px;overflow:hidden;font-size:.92rem}
-  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line)}
-  th{background:var(--panel2);color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+  th{background:var(--panel2);color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
   tr:last-child td{border-bottom:none}
   a.wme{display:inline-block;background:var(--accent);color:#08131f;font-weight:600;
         padding:5px 11px;border-radius:7px;text-decoration:none;font-size:.85rem;white-space:nowrap}
@@ -34,12 +46,12 @@
   .quitar:hover{color:var(--text)}
   .chip{display:inline-block;background:#243049;border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
   .chip.nuevo{background:#1e3a24;color:#7fd18c}
-  .pase{display:inline-block;background:#1d3550;color:#a9cdf5;border-radius:6px;
-        padding:2px 7px;font-size:.78rem;margin:1px 3px 1px 0;white-space:nowrap}
-  .pase.easy{background:#1e3a24;color:#7fd18c}
-  .falta{display:inline-block;background:#3a2c14;color:#ffd9a0;border:1px solid var(--warn);
-         border-radius:6px;padding:2px 7px;font-size:.78rem;white-space:nowrap}
-  tr.pendiente td{background:#1a2033}
+  .ciudad{color:var(--muted);font-size:.85rem;margin-top:2px}
+  .pase{display:inline-block;background:#1d3550;color:#a9cdf5;border-radius:6px;font-weight:600;
+        padding:3px 8px;font-size:.78rem;margin:2px 4px 2px 0;white-space:nowrap}
+  .pase.us{background:#3a2c14;color:#ffd9a0}
+  .falta{display:inline-block;color:#ffb454;border:1px dashed var(--warn);
+         border-radius:6px;padding:2px 7px;font-size:.78rem;margin:2px 4px 2px 0;white-space:nowrap}
   .lk{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--warn);font-weight:600}
   .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
   .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
@@ -49,8 +61,7 @@
         padding:7px 6px;width:64px;font-size:.9rem;text-align:center}
   .pager #pg-total{color:var(--muted);font-size:.9rem}
   .cargando{color:var(--muted);padding:40px;text-align:center}
-  .nota{color:var(--muted);font-size:.85rem;margin-top:12px}
-  @media (max-width:640px){ th:nth-child(3),td:nth-child(3){display:none} }
+  @media (max-width:640px){ th:nth-child(5),td:nth-child(5),th:nth-child(6),td:nth-child(6){display:none} }
 </style>
 <link rel="stylesheet" href="estilo.css">
 <script src="barra.js" defer></script>
@@ -58,21 +69,19 @@
 <body>
 <header>
   <h1>🎫 Pases de peaje</h1>
-  <p class="sub">Segmentos con restricción de pases (IAVE, PASE, TELEVía, VIAPASS, easytrip) ·
+  <p class="sub">Segmentos con restricción de telepeaje y qué pases acepta cada uno (IAVE, PASE, TELEVía, VIAPASS, easytrip) ·
     <a href="index.html">← Volver al panel</a></p>
 </header>
 <main>
-  <div class="controls">
-    <select id="sel-estado"><option value="">Elige un estado…</option></select>
-    <select id="sel-estatus">
-      <option value="falta">Con los 4 pases · falta easytrip</option>
-      <option value="incompletos">Incompletos (menos de 4)</option>
-      <option value="listos">Ya tienen easytrip</option>
-      <option value="">Todos</option>
-    </select>
-    <span class="chip" id="resumen-chip" style="display:none"></span>
+  <div class="tarjetas" id="tarjetas"></div>
+  <div class="controls" id="controles" style="display:none">
+    <select id="sel-estado"></select>
+    <select id="sel-tipo"></select>
+    <select id="sel-estatus"></select>
+    <input type="search" id="buscar" placeholder="Buscar nombre, ciudad o pase…">
+    <span class="chip" id="resumen-chip"></span>
   </div>
-  <div id="contenido"><div class="cargando">Cargando datos…</div></div>
+  <div id="contenido"><div class="cargando">Cargando segmentos…</div></div>
   <div class="pager" id="pager" style="display:none">
     <button id="pg-first" title="Primera página">«</button>
     <button id="pg-prev">← Anterior</button>
@@ -85,166 +94,176 @@
 </main>
 <script>
 (function(){
-  const $=id=>document.getElementById(id);
-  const fmt=n=>n.toLocaleString('es-MX');
-  const BASE4=['iave-mexico','tag-pase-mexico','televia-mexico','viapass-mexico'];
-  let indice=null, datos=null, lista=[], pagina=0, porPagina=100;
+  var DATOS='data/pases/', ENV='row', LLAVE='svs_visitados_pases';
+  var $=function(id){return document.getElementById(id);};
+  var fmt=function(n){return Number(n||0).toLocaleString('es-MX');};
+  var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  // nombre bonito de cada pase tal como lo guarda Waze en la restricción
+  var NOMBRES={'iave-mexico':'IAVE','tag-pase-mexico':'PASE','televia-mexico':'TELEVía','viapass-mexico':'VIAPASS',
+    'mexico-easytrip':'easytrip','sentri-us':'SENTRI','fast-us':'FAST','ready-lane-us':'Ready Lane','nexus-us':'NEXUS'};
+  var MX=['iave-mexico','tag-pase-mexico','televia-mexico','viapass-mexico','mexico-easytrip'];
+  var ORDEN=MX.concat(['sentri-us','fast-us','ready-lane-us']);
+  var canon=function(p){return p==='easytrip-mexico'?'mexico-easytrip':p;};
+  var nombrePase=function(p){
+    if(NOMBRES[p])return NOMBRES[p];
+    return p.replace(/-(mexico|us)$/,'').replace(/-/g,' ').replace(/\b[a-z]/g,function(c){return c.toUpperCase();});
+  };
+  var esUS=function(p){return /-us$/.test(p);};
+  var faltan=function(r){
+    var tiene=MX.filter(function(p){return r.pases.indexOf(p)!==-1;});
+    if(!tiene.length||tiene.length===MX.length)return [];
+    return MX.filter(function(p){return r.pases.indexOf(p)===-1;});
+  };
 
-  let visitados=new Set();
-  try{visitados=new Set(JSON.parse(localStorage.getItem('svs_visitados_pases')||'[]'));}catch(e){}
-  function guardar(){try{localStorage.setItem('svs_visitados_pases',JSON.stringify([...visitados]));}catch(e){}}
+  var indice=null, todos=[], lista=[], pagina=0, porPagina=100, paseSel='';
+  var visitados={};
+  try{JSON.parse(localStorage.getItem(LLAVE)||'[]').forEach(function(x){visitados[x]=1;});}catch(e){}
+  var guardar=function(){try{localStorage.setItem(LLAVE,JSON.stringify(Object.keys(visitados)));}catch(e){}};
+  var tipoNombre=function(rt){return (indice&&indice.tipos&&indice.tipos[String(rt)])||('Tipo '+rt);};
+  var permalink=function(r){return 'https://www.waze.com/editor?env='+ENV+'&lat='+r.lat+'&lon='+r.lon+'&zoomLevel=17&segments='+r.id;};
+  var fechaDe=function(v){return v.indexOf('T')!==-1?new Date(v+':00Z'):new Date(v+'T12:00:00Z');};
 
-  const tipoNombre=rt=>(indice&&indice.tipos&&indice.tipos[String(rt)])||('Tipo '+rt);
-  const nombrePase=p=>(indice&&indice.nombres_pases&&indice.nombres_pases[p])||p;
-  const esEasy=p=>/easytrip/i.test(p);
-  const tieneEasy=r=>(r.pases||[]).some(esEasy);
-  const tiene4=r=>BASE4.every(p=>(r.pases||[]).includes(p));
-  const permalink=r=>`https://www.waze.com/editor?env=row&lat=${r.lat}&lon=${r.lon}&zoomLevel=17&segments=${r.id}`;
-  const fechaDe=v=>v.includes('T')?new Date(v+':00Z'):new Date(v+'T12:00:00Z');
+  function pintarTarjetas(){
+    var cuenta={};
+    todos.forEach(function(r){r.pases.forEach(function(p){cuenta[p]=(cuenta[p]||0)+1;});});
+    var llaves=Object.keys(cuenta).sort(function(a,b){
+      var ia=ORDEN.indexOf(a),ib=ORDEN.indexOf(b);
+      return (ia===-1?99:ia)-(ib===-1?99:ib)||a.localeCompare(b);
+    });
+    var html='<button class="tar'+(paseSel===''?' on':'')+'" data-pase=""><b>'+fmt(todos.length)+'</b><span>Todos los segmentos</span></button>';
+    llaves.forEach(function(p){
+      html+='<button class="tar'+(esUS(p)?' us':'')+(paseSel===p?' on':'')+'" data-pase="'+esc(p)+'"><b>'+fmt(cuenta[p])+'</b><span>'+esc(nombrePase(p))+'</span></button>';
+    });
+    $('tarjetas').innerHTML=html;
+  }
 
-  async function cargarEstado(slug){
-    if(!slug){$('contenido').innerHTML='<div class="cargando">Elige un estado para ver sus segmentos con pases.</div>';$('pager').style.display='none';return;}
-    $('contenido').innerHTML='<div class="cargando">Cargando segmentos…</div>';
-    try{
-      if(slug==='__todos'){
-        const listas=await Promise.all(indice.estados.map(async e=>{
-          try{
-            const r=await fetch('data/pases/'+e.slug+'.json',{cache:'no-store'});
-            const d=await r.json();
-            return Object.values(d.segmentos||{}).map(s=>({...s,est:e.estado}));
-          }catch(_){return [];}
-        }));
-        const segs={};
-        listas.flat().forEach(s=>{segs[s.id]=s;});
-        datos={segmentos:segs};
-      }else{
-        const r=await fetch('data/pases/'+slug+'.json',{cache:'no-store'});
-        datos=await r.json();
-      }
-    }catch(e){
-      $('contenido').innerHTML='<div class="cargando">No se pudo cargar este estado.</div>';
-      return;
-    }
-    filtrar();
+  function llenarSelects(){
+    var porEstado={},porTipo={};
+    todos.forEach(function(r){porEstado[r.est]=(porEstado[r.est]||0)+1;porTipo[r.rt]=(porTipo[r.rt]||0)+1;});
+    $('sel-estado').innerHTML='<option value="">Todos los estados ('+fmt(todos.length)+')</option>'+
+      Object.keys(porEstado).sort(function(a,b){return a.localeCompare(b,'es');}).map(function(e){
+        return '<option value="'+esc(e)+'">'+esc(e)+' ('+fmt(porEstado[e])+')</option>';}).join('');
+    $('sel-tipo').innerHTML='<option value="">Todos los tipos de vía</option>'+
+      Object.keys(porTipo).sort(function(a,b){return a-b;}).map(function(t){
+        return '<option value="'+t+'">'+esc(tipoNombre(t))+' ('+fmt(porTipo[t])+')</option>';}).join('');
+    var inc=todos.filter(function(r){return faltan(r).length;}).length;
+    $('sel-estatus').innerHTML='<option value="">Completos e incompletos</option>'+
+      '<option value="incompletos">Les falta algún pase de México ('+fmt(inc)+')</option>';
   }
 
   function filtrar(){
-    if(!datos)return;
-    const f=$('sel-estatus').value;
-    lista=Object.values(datos.segmentos||{}).filter(r=>{
-      if(f==='falta')return tiene4(r)&&!tieneEasy(r);
-      if(f==='incompletos')return !tiene4(r);
-      if(f==='listos')return tieneEasy(r);
+    var e=$('sel-estado').value,t=$('sel-tipo').value,s=$('sel-estatus').value;
+    var q=$('buscar').value.trim().toLowerCase();
+    lista=todos.filter(function(r){
+      if(paseSel&&r.pases.indexOf(paseSel)===-1)return false;
+      if(e&&r.est!==e)return false;
+      if(t&&String(r.rt)!==t)return false;
+      if(s==='incompletos'&&!faltan(r).length)return false;
+      if(q){
+        var txt=(r.id+' '+(r.nombre||'')+' '+(r.ciudad||'')+' '+r.est+' '+r.pases.map(nombrePase).join(' ')).toLowerCase();
+        if(txt.indexOf(q)===-1)return false;
+      }
       return true;
     });
-    // primero los que ya tienen los 4 y les falta easytrip, luego el resto
-    const rango=r=>tiene4(r)&&!tieneEasy(r)?0:(tiene4(r)?2:1);
-    lista.sort((a,b)=>rango(a)-rango(b)
-      ||(a.est||'').localeCompare(b.est||'','es')
-      ||(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')
-      ||(a.nombre||'').localeCompare(b.nombre||'','es')
-      ||a.id-b.id);
-    pagina=0;
-    pintar();
+    lista.sort(function(a,b){
+      return a.est.localeCompare(b.est,'es')||(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')||
+        (a.nombre||'zzz').localeCompare(b.nombre||'zzz','es')||a.id-b.id;
+    });
+    pagina=0;pintar();
   }
 
   function pintar(){
-    const total=lista.length;
-    const ini=pagina*porPagina, fin=Math.min(ini+porPagina,total);
-    let html=`<table><thead><tr><th>Tipo de vía</th><th>Nombre</th><th>Ciudad</th><th>Pases</th><th>Candado</th><th>Revisado</th><th></th></tr></thead><tbody>`;
-    if(!total){
-      html+='<tr><td colspan="7" class="cargando">No hay segmentos con esos filtros. 🎉</td></tr>';
-    }
-    lista.slice(ini,fin).forEach(r=>{
-      const vis=visitados.has(String(r.id));
-      const pend=tiene4(r)&&!tieneEasy(r);
-      let det='—', esNuevo=false;
-      const marca=r.r||r.v;
+    var total=lista.length, ini=pagina*porPagina, fin=Math.min(ini+porPagina,total);
+    var html='<table><thead><tr><th>Tipo de vía</th><th>Nombre</th><th>Dónde</th><th>Pases que acepta</th><th>Candado</th><th>Revisado</th><th></th></tr></thead><tbody>';
+    if(!total)html+='<tr><td colspan="7" class="cargando">No hay segmentos con esos filtros.</td></tr>';
+    lista.slice(ini,fin).forEach(function(r){
+      var vis=visitados[String(r.id)];
+      var det='—', esNuevo=false, marca=r.r||r.v;
       if(marca){
-        const d=fechaDe(marca);
+        var d=fechaDe(marca);
         det=d.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
-        if(marca.includes('T'))det+=' '+d.toLocaleTimeString('es-MX',{hour:'numeric',minute:'2-digit'});
       }
       if(r.v)esNuevo=(Date.now()-fechaDe(r.v).getTime())<48*3600*1000;
-      const chips=(r.pases||[]).map(p=>`<span class="pase${esEasy(p)?' easy':''}">${nombrePase(p)}</span>`).join('')
-        +(pend?' <span class="falta">falta easytrip</span>':'');
-      html+=`<tr class="${vis?'visitado':(pend?'pendiente':'')}"><td><span class="chip">${tipoNombre(r.rt)}</span></td>
-        <td>${r.nombre||'<span class="chip">sin nombre</span>'}${r.est?' <span class="chip">'+r.est+'</span>':''}</td>
-        <td>${r.ciudad||'<span class="chip">sin ciudad</span>'}</td>
-        <td>${chips}</td>
-        <td class="lk">${r.lk||'—'}</td>
-        <td style="white-space:nowrap">${det}${esNuevo?' <span class="chip nuevo">nuevo</span>':''}</td>
-        <td><a class="wme${vis?' hecho':''}" data-id="${r.id}" target="wme" href="${permalink(r)}">${vis?'✓ Abierto':'Abrir en WME'}</a>${vis?`<span class="quitar" data-quitar="${r.id}" title="Desmarcar">✕</span>`:''}</td></tr>`;
+      var orden=r.pases.slice().sort(function(a,b){
+        var ia=ORDEN.indexOf(a),ib=ORDEN.indexOf(b);return (ia===-1?99:ia)-(ib===-1?99:ib);});
+      var chips=orden.map(function(p){return '<span class="pase'+(esUS(p)?' us':'')+'">'+esc(nombrePase(p))+'</span>';}).join('')+
+        faltan(r).map(function(p){return '<span class="falta">falta '+esc(nombrePase(p))+'</span>';}).join('');
+      html+='<tr'+(vis?' class="visitado"':'')+'><td><span class="chip">'+esc(tipoNombre(r.rt))+'</span></td>'+
+        '<td>'+(r.nombre?esc(r.nombre):'<span class="chip">sin nombre</span>')+'</td>'+
+        '<td><span class="chip">'+esc(r.est)+'</span>'+(r.ciudad?'<div class="ciudad">'+esc(r.ciudad)+'</div>':'')+'</td>'+
+        '<td>'+chips+'</td>'+
+        '<td class="lk">'+(r.lk||'—')+'</td>'+
+        '<td style="white-space:nowrap">'+det+(esNuevo?' <span class="chip nuevo">nuevo</span>':'')+'</td>'+
+        '<td><a class="wme'+(vis?' hecho':'')+'" data-id="'+r.id+'" target="wme" href="'+permalink(r)+'">'+(vis?'✓ Abierto':'Abrir en WME')+'</a>'+
+        (vis?'<span class="quitar" data-quitar="'+r.id+'" title="Desmarcar">✕</span>':'')+'</td></tr>';
     });
     html+='</tbody></table>';
     $('contenido').innerHTML=html;
-    const pgs=Math.max(1,Math.ceil(total/porPagina));
+    var pgs=Math.max(1,Math.ceil(total/porPagina));
     $('pager').style.display=total>porPagina?'flex':'none';
-    $('pg-info').textContent=`${fmt(ini+1)}–${fmt(fin)} de ${fmt(total)} · pág.`;
-    $('pg-num').value=pagina+1;
-    $('pg-num').max=pgs;
-    $('pg-total').textContent=`/ ${pgs}`;
-    $('pg-first').disabled=pagina===0;
-    $('pg-prev').disabled=pagina===0;
-    $('pg-next').disabled=pagina>=pgs-1;
-    $('pg-last').disabled=pagina>=pgs-1;
+    $('pg-info').textContent=fmt(ini+1)+'–'+fmt(fin)+' de '+fmt(total)+' · pág.';
+    $('pg-num').value=pagina+1;$('pg-num').max=pgs;$('pg-total').textContent='/ '+pgs;
+    $('pg-first').disabled=$('pg-prev').disabled=pagina===0;
+    $('pg-next').disabled=$('pg-last').disabled=pagina>=pgs-1;
+    var chip=$('resumen-chip');
+    chip.textContent=fmt(total)+(total===1?' segmento':' segmentos')+(total!==todos.length?' de '+fmt(todos.length):'')+
+      (indice&&indice.actualizado?' · actualizado '+new Date(indice.actualizado).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'');
   }
 
-  $('contenido').addEventListener('click',e=>{
-    const q=e.target.closest('.quitar');
-    if(q){visitados.delete(String(q.dataset.quitar));guardar();pintar();return;}
+  function marcarVisto(e){
+    var a=e.target.closest('a.wme');
+    if(a&&a.dataset.id){visitados[String(a.dataset.id)]=1;guardar();setTimeout(pintar,150);}
+  }
+  $('contenido').addEventListener('click',function(e){
+    var q=e.target.closest('.quitar');
+    if(q){delete visitados[String(q.dataset.quitar)];guardar();pintar();return;}
     marcarVisto(e);
   });
-  function marcarVisto(e){
-    const a=e.target.closest('a.wme');
-    if(a&&a.dataset.id){visitados.add(String(a.dataset.id));guardar();setTimeout(pintar,150);}
-  }
-  // copiar el enlace con el botón derecho, o abrirlo con el de en medio,
-  // también cuenta como que ya lo viste
   $('contenido').addEventListener('contextmenu',marcarVisto);
   $('contenido').addEventListener('auxclick',marcarVisto);
-  $('pg-prev').addEventListener('click',()=>{pagina--;pintar();window.scrollTo(0,0);});
-  $('pg-next').addEventListener('click',()=>{pagina++;pintar();window.scrollTo(0,0);});
-  $('pg-first').addEventListener('click',()=>{pagina=0;pintar();window.scrollTo(0,0);});
-  $('pg-last').addEventListener('click',()=>{pagina=Math.max(0,Math.ceil(lista.length/porPagina)-1);pintar();window.scrollTo(0,0);});
-  function irAPagina(){
-    const pgs=Math.max(1,Math.ceil(lista.length/porPagina));
-    let v=parseInt($('pg-num').value,10);
+  $('tarjetas').addEventListener('click',function(e){
+    var b=e.target.closest('.tar');if(!b)return;
+    paseSel=(paseSel===b.dataset.pase)?'':b.dataset.pase;
+    pintarTarjetas();filtrar();
+  });
+  var ir=function(n){pagina=n;pintar();window.scrollTo(0,0);};
+  $('pg-prev').addEventListener('click',function(){ir(pagina-1);});
+  $('pg-next').addEventListener('click',function(){ir(pagina+1);});
+  $('pg-first').addEventListener('click',function(){ir(0);});
+  $('pg-last').addEventListener('click',function(){ir(Math.max(0,Math.ceil(lista.length/porPagina)-1));});
+  var irAPagina=function(){
+    var pgs=Math.max(1,Math.ceil(lista.length/porPagina)),v=parseInt($('pg-num').value,10);
     if(isNaN(v))v=pagina+1;
-    pagina=Math.min(Math.max(v,1),pgs)-1;
-    pintar();window.scrollTo(0,0);
-  }
+    ir(Math.min(Math.max(v,1),pgs)-1);
+  };
   $('pg-num').addEventListener('change',irAPagina);
-  $('pg-num').addEventListener('keydown',e=>{if(e.key==='Enter')irAPagina();});
-  $('sel-estado').addEventListener('change',e=>cargarEstado(e.target.value));
-  $('sel-estatus').addEventListener('change',filtrar);
+  $('pg-num').addEventListener('keydown',function(e){if(e.key==='Enter')irAPagina();});
+  ['sel-estado','sel-tipo','sel-estatus'].forEach(function(id){$(id).addEventListener('change',filtrar);});
+  $('buscar').addEventListener('input',filtrar);
 
-  fetch('data/pases/index.json',{cache:'no-store'})
-    .then(r=>{if(!r.ok)throw 0;return r.json();})
-    .then(d=>{
-      indice=d;
-      const sel=$('sel-estado');
-      if(d.estados&&d.estados.length){
-        const ot=document.createElement('option');
-        ot.value='__todos';ot.textContent=`Todo México (${fmt(d.total)})`;
-        sel.appendChild(ot);
-        d.estados.forEach(e=>{
-          const o=document.createElement('option');
-          o.value=e.slug;o.textContent=`${e.estado} (${fmt(e.total)})`;
-          sel.appendChild(o);
+  var json=function(u){return fetch(u,{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();});};
+  json(DATOS+'index.json').then(function(d){
+    indice=d;
+    if(!d.estados||!d.estados.length){
+      $('contenido').innerHTML='<div class="cargando">Todavía no se ha encontrado ningún segmento con pases.</div>';return;
+    }
+    return Promise.all(d.estados.map(function(e){
+      return json(DATOS+e.slug+'.json').then(function(x){
+        return Object.keys(x.segmentos||{}).map(function(k){
+          var s=x.segmentos[k];
+          var pases=[];(s.pases||[]).forEach(function(p){p=canon(p);if(pases.indexOf(p)===-1)pases.push(p);});
+          return {id:s.id,lat:s.lat,lon:s.lon,rt:s.rt,lk:s.lk,ciudad:s.ciudad,nombre:s.nombre,v:s.v,r:s.r,pases:pases,est:e.estado};
         });
-        const chip=$('resumen-chip');
-        chip.style.display='inline-block';
-        const act=d.actualizado?new Date(d.actualizado).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'—';
-        chip.textContent=`${fmt(d.total)} segmentos con pases · actualizado ${act}`;
-        $('contenido').innerHTML='<div class="cargando">Elige un estado para ver sus segmentos con pases.</div>';
-      }else{
-        $('contenido').innerHTML='<div class="cargando">Aún no hay datos. La lista se llena con las corridas del escáner.</div>';
-      }
-    })
-    .catch(()=>{
-      $('contenido').innerHTML='<div class="cargando">Los datos se generan con las corridas del escáner. Esta sección es nueva: estará disponible después de la próxima corrida.</div>';
+      }).catch(function(){return [];});
+    })).then(function(listas){
+      var visto={};
+      listas.forEach(function(l){l.forEach(function(s){if(!visto[s.id]){visto[s.id]=1;todos.push(s);}});});
+      $('controles').style.display='flex';
+      pintarTarjetas();llenarSelects();filtrar();
     });
+  }).catch(function(){
+    $('contenido').innerHTML='<div class="cargando">Los datos se generan con las corridas del escáner. Si esta sección es nueva, estará disponible después de la próxima corrida.</div>';
+  });
 })();
 </script>
 </body>
