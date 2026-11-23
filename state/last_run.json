@@ -1,16 +1,16 @@
 {
  "ok": true,
- "fecha": "2026-11-23T08:23:32.126546+00:00",
+ "fecha": "2026-11-23T08:33:32.034515+00:00",
  "modo": "completo",
- "celdas": 241,
- "peticiones": 241,
- "segmentos_vistos": 34317,
- "sin_nombre_en_corrida": 1224,
+ "celdas": 0,
+ "peticiones": 0,
+ "segmentos_vistos": 0,
+ "sin_nombre_en_corrida": 0,
  "total_acumulado": 108463,
- "peticiones_inegi": 10465,
+ "peticiones_inegi": 0,
  "errores_inegi": 0,
- "inegi_de_memoria": 2459,
- "inegi_sembrados": 982,
+ "inegi_de_memoria": 0,
+ "inegi_sembrados": 0,
  "inegi_memoria_total": 289096,
- "minutos": 105.1
+ "minutos": 2.5
 }
