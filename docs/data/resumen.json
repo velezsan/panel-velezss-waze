@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-24T05:19:55+00:00",
+ "actualizado": "2026-11-24T06:09:29+00:00",
  "env": "row",
- "total": 108472,
+ "total": 108464,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -168,7 +168,7 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 1209,
+   "total": 1207,
    "ciudades": 97
   },
   {
@@ -192,8 +192,8 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 2917,
-   "ciudades": 266
+   "total": 2911,
+   "ciudades": 264
   }
  ],
  "progreso": {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 43.5,
+  "porcentaje_vuelta": 43.1,
   "modo": "completo"
  },
  "aviso": "",
