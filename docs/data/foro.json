@@ -1,15 +1,25 @@
 {
- "actualizado": "2026-11-23T06:31:53+00:00",
+ "actualizado": "2026-11-24T09:01:35+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
  "temas_revisados": 80,
  "peticiones": 84,
  "errores": 0,
  "champs": {
+  "arturoae": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 3
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 1
+   }
+  },
   "gwm_": {
    "desbloqueos": {
     "temas": 0,
-    "respuestas": 42
+    "respuestas": 43
    },
    "otras": {
     "temas": 0,
@@ -44,16 +54,6 @@
    "otras": {
     "temas": 0,
     "respuestas": 2
-   }
-  },
-  "arturoae": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 2
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 1
    }
   },
   "davidabarca": {
@@ -95,13 +95,13 @@
   "LuisCav29": 5,
   "world_r6y4yry5": 4,
   "world_9jx5hsnm": 4,
+  "lilloscar": 3,
   "world_t766j8xl": 3,
-  "lilloscar": 2,
+  "world_flc51nw2": 2,
   "Georsaneditorcdmx": 2,
   "world_ey9tmsgb": 2,
   "akron25": 2,
   "JadPort": 2,
-  "world_gcr4fuhs": 2,
-  "CasaTinta": 2
+  "world_gcr4fuhs": 2
  }
 }
