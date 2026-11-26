@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-26T18:54:49+00:00",
+ "actualizado": "2026-11-26T19:37:51+00:00",
  "env": "row",
- "total": 108473,
+ "total": 108475,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -48,7 +48,7 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 3381,
+   "total": 3383,
    "ciudades": 110
   },
   {
