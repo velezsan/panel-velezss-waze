@@ -1,11 +1,21 @@
 {
- "actualizado": "2026-11-25T05:30:23+00:00",
+ "actualizado": "2026-11-26T03:24:05+00:00",
  "ventana_dias": 60,
  "categoria_desbloqueos": 4571,
- "temas_revisados": 81,
- "peticiones": 85,
+ "temas_revisados": 82,
+ "peticiones": 86,
  "errores": 0,
  "champs": {
+  "camachista": {
+   "desbloqueos": {
+    "temas": 0,
+    "respuestas": 22
+   },
+   "otras": {
+    "temas": 0,
+    "respuestas": 4
+   }
+  },
   "arturoae": {
    "desbloqueos": {
     "temas": 0,
@@ -24,16 +34,6 @@
    "otras": {
     "temas": 0,
     "respuestas": 2
-   }
-  },
-  "camachista": {
-   "desbloqueos": {
-    "temas": 0,
-    "respuestas": 21
-   },
-   "otras": {
-    "temas": 0,
-    "respuestas": 4
    }
   },
   "eumirgarciac2": {
