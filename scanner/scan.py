@@ -721,7 +721,8 @@ def pedir_celda(sesion, env, bbox, pausa, tipos=None):
     """Pide los features de un bbox. Devuelve dict con segments/streets/cities."""
     # pedimos también los tipos vecinos (avenidas, carreteras, rampas) para
     # que las sugerencias de nombre tengan contexto, aunque no se reporten
-    solicitados = sorted(set(tipos or [1, 2]) | {1, 2, 3, 4, 6, 7})
+    solicitados = sorted(set(tipos or [1, 2]) | {1, 2, 3, 4, 6, 7}
+                         | (TIPOS_SOLO_PLACES if PEDIR_PLACES else set()))
     params = {
         "bbox": f"{bbox[0]:.6f},{bbox[1]:.6f},{bbox[2]:.6f},{bbox[3]:.6f}",
         "language": "es",
@@ -1087,9 +1088,80 @@ def repartir_por_estado(crudo, estados_mx, estado_celda):
     return out
 
 
+# Vías que cuentan como "la calle más cercana" de un place. Las rampas y los
+# caminos de estacionamiento casi nunca llevan nombre, así que no cuentan.
+TIPOS_CALLE_PLACE = {1, 2, 3, 6, 7, 8, 17, 22}
+# De esas, las que se piden SOLO para esto (terracería, privadas y callejones):
+# se apartan al llegar y ninguna otra revisión las ve.
+TIPOS_SOLO_PLACES = {8, 17, 22}
+
+
+def tramos_para_places(segs, streets):
+    """Prepara las vías de una celda para buscar la más cercana a un place.
+
+    Devuelve [(lon mín, lat mín, lon máx, lat máx, puntos, tiene_nombre)].
+    """
+    out = []
+    for seg in segs:
+        if seg.get("roadType") not in TIPOS_CALLE_PLACE:
+            continue
+        geom = seg.get("geometry") or seg.get("geoJSONGeometry") or {}
+        try:
+            pts = [(float(p[0]), float(p[1])) for p in (geom.get("coordinates") or [])]
+        except (TypeError, ValueError, IndexError):
+            continue
+        if not pts:
+            continue
+        xs = [p[0] for p in pts]
+        ys = [p[1] for p in pts]
+        con_nombre = bool(nombre_de_calle(streets.get(seg.get("primaryStreetID"))))
+        out.append((min(xs), min(ys), max(xs), max(ys), pts, con_nombre))
+    return out
+
+
+def calle_cercana_tiene_nombre(lon, lat, tramos):
+    """¿Tiene nombre la vía más cercana al punto? None si no hay ninguna vía.
+
+    Distancias planas en grados con el coseno de la latitud: a esta escala
+    basta para saber cuál queda más cerca.
+    """
+    cos_lat = math.cos(math.radians(lat)) or 1.0
+    mejor, mejor_nombre = None, None
+    for (x1, y1, x2, y2, pts, con_nombre) in tramos:
+        if mejor is not None:
+            # si ni su caja queda más cerca que lo mejor hasta ahora, se salta
+            dx = max(x1 - lon, 0.0, lon - x2) * cos_lat
+            dy = max(y1 - lat, 0.0, lat - y2)
+            if dx * dx + dy * dy > mejor:
+                continue
+        if len(pts) == 1:
+            pares = [(pts[0], pts[0])]
+        else:
+            pares = zip(pts, pts[1:])
+        for a, b in pares:
+            ax, ay = (a[0] - lon) * cos_lat, a[1] - lat
+            bx, by = (b[0] - lon) * cos_lat, b[1] - lat
+            ux, uy = bx - ax, by - ay
+            largo2 = ux * ux + uy * uy
+            t = -(ax * ux + ay * uy) / largo2 if largo2 else 0.0
+            t = max(0.0, min(1.0, t))
+            qx, qy = ax + t * ux, ay + t * uy
+            d2 = qx * qx + qy * qy
+            # con empate gana la que tiene nombre: ante la duda, se marca
+            if mejor is None or d2 < mejor or (d2 == mejor and con_nombre):
+                mejor, mejor_nombre = d2, con_nombre
+    return mejor_nombre
+
+
 def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
     """Extrae de la respuesta los segmentos sin nombre + sugerencia de nombre."""
     segs = _objetos(data, "segments")
+    # todas las vías, para saber cuál es la calle más cercana de cada place
+    _segs_para_places = segs
+    _tramos_pl = None  # se arma solo si hace falta
+    # terracería, privadas y callejones se piden solo para eso: fuera de aquí
+    segs = [s for s in segs if s.get("roadType") not in TIPOS_SOLO_PLACES
+            or s.get("roadType") in tipos_con_nombre]
     # descartar lo que cae en zonas no editables de este entorno (Panel NA)
     _restr = areas_restringidas(data)
     if _restr == "TODO":
@@ -1300,6 +1372,13 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             exenta_pl = any(c in SIN_CALLE_EXENTAS for c in cats_pl)
             # "sin dirección" = sin calle, como su script
             sin_dir = 0 if (calle_pl or exenta_pl) else 1
+            if sin_dir:
+                # si la calle más cercana tampoco tiene nombre, no hay calle
+                # que ponerle: no se marca
+                if _tramos_pl is None:
+                    _tramos_pl = tramos_para_places(_segs_para_places, streets)
+                if calle_cercana_tiene_nombre(lon_pl, lat_pl, _tramos_pl) is False:
+                    sin_dir = 0
             es_area_pl = (ven.get("geometry") or {}).get("type") != "Point"
             punto_pl = 1 if es_punto_que_debe_ser_area(cats_pl, es_area_pl) else 0
             sug_pl = fix_grammar(nom_pl) if necesita_correccion(nom_pl) else ""
