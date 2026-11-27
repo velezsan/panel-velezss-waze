@@ -81,6 +81,15 @@
       <option value="sin">Solo los seguros (sin siglas)</option>
       <option value="con">Solo los que aplastan una sigla</option>
     </select>
+    <select id="sel-lk" title="Nivel de bloqueo del place">
+      <option value="">Candado: todos</option>
+      <option value="1">Candado 1</option>
+      <option value="2">Candado 2</option>
+      <option value="3">Candado 3</option>
+      <option value="4">Candado 4</option>
+      <option value="5">Candado 5</option>
+      <option value="6">Candado 6</option>
+    </select>
     <select id="sel-orden">
       <option value="">Orden: por ciudad</option>
       <option value="nom">Orden: por nombre</option>
@@ -1586,6 +1595,7 @@
   function filtrar(){
     if(!datos)return;
     const f=$('sel-sigla').value, q=$('buscar').value.trim().toLowerCase();
+    const fl=$('sel-lk').value, porNivel={};
     lista=conPropuesta().filter(r=>{
       const tiene=sigsDe(r).length>0;
       if(f==='con'&&!tiene)return false;
@@ -1596,8 +1606,12 @@
             ||(r.calle||'').toLowerCase().includes(q)
             ||(r.est||'').toLowerCase().includes(q)
             ||sigsDe(r).some(s=>s.toLowerCase().includes(q))))return false;
+      const nv=r.lk||1; porNivel[nv]=(porNivel[nv]||0)+1;
+      if(fl&&String(nv)!==fl)return false;
       return true;
     });
+    // cuántos hay de cada nivel con los demás filtros puestos
+    [...$('sel-lk').options].forEach(o=>{o.textContent=o.value?`Candado ${o.value} (${fmt(porNivel[o.value]||0)})`:'Candado: todos';});
     const marca=r=>r.r||r.v||'';
     const porCiudad=(a,b)=>(a.est||'').localeCompare(b.est||'','es')
       ||(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')
@@ -1683,7 +1697,7 @@
   $('pg-num').addEventListener('change',irAPagina);
   $('pg-num').addEventListener('keydown',e=>{if(e.key==='Enter')irAPagina();});
   $('sel-estado').addEventListener('change',e=>cargarEstado(e.target.value));
-  ['sel-sigla','sel-orden'].forEach(i=>$(i).addEventListener('change',filtrar));
+  ['sel-sigla','sel-lk','sel-orden'].forEach(i=>$(i).addEventListener('change',filtrar));
   $('buscar').addEventListener('input',()=>{clearTimeout(window._bt);window._bt=setTimeout(filtrar,250);});
 
   fetch('../data-na/places/index.json',{cache:'no-store'})
