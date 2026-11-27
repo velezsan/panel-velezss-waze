@@ -873,6 +873,9 @@ CHAMPS_MX = {
 VENTANA_CHAMPS_DIAS = 60
 _champs_celda = {}  # userName -> ids de segmentos editados (se vacía por celda)
 _champs_places_celda = {}  # userName -> ids de places editados (se vacía por celda)
+# lo mismo pero sabiendo el estado: (estado según Waze, userName) -> ids
+_champs_edo_celda = {}
+_champs_places_edo_celda = {}
 
 # candado mínimo esperado por tipo de vía (etapa 1: sin PS)
 REQ_CANDADO = {3: 5, 6: 4, 4: 4, 7: 3}  # FW, MH, Ramp, mH
@@ -1069,6 +1072,21 @@ def en_area_restringida(anillos, lon, lat):
     return any(_punto_en_anillo(lon, lat, a) for a in anillos)
 
 
+def repartir_por_estado(crudo, estados_mx, estado_celda):
+    """Ediciones de champs de una celda, por estado: {estado: {userName: n}}.
+
+    crudo trae (estado según Waze, userName) -> ids. El estado sale de la
+    ciudad del segmento o del place; si no tiene (calle sin ciudad), se usa
+    el estado donde cae el centro de la celda.
+    """
+    out = {}
+    for (edo, un), ids in crudo.items():
+        est = normalizar_estado(edo, estados_mx) or estado_celda
+        d = out.setdefault(est, {})
+        d[un] = d.get(un, 0) + len(ids)
+    return out
+
+
 def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
     """Extrae de la respuesta los segmentos sin nombre + sugerencia de nombre."""
     segs = _objetos(data, "segments")
@@ -1095,6 +1113,8 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             un = usuarios.get(seg.get("updatedBy"), "")
             if un and un.lower() in CHAMPS_MX:
                 _champs_celda.setdefault(un, set()).add(seg.get("id"))
+                _edo_ch = _ciudad_estado(seg, streets, cities, states)[2]
+                _champs_edo_celda.setdefault((_edo_ch, un), set()).add(seg.get("id"))
 
     # lo mismo con los places: vienen en la misma respuesta
     try:
@@ -1103,6 +1123,9 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
                 un_pl = usuarios.get(ven.get("updatedBy"), "")
                 if un_pl and un_pl.lower() in CHAMPS_MX:
                     _champs_places_celda.setdefault(un_pl, set()).add(ven.get("id"))
+                    _edo_pl = _ciudad_estado({"primaryStreetID": ven.get("streetID")},
+                                             streets, cities, states)[2]
+                    _champs_places_edo_celda.setdefault((_edo_pl, un_pl), set()).add(ven.get("id"))
     except Exception:
         pass
 
@@ -1669,6 +1692,9 @@ def main():
     celdas_info = estado.get("celdas", {})  # idx -> {"n": segs, "c": ciclo}
     champs_info = estado.get("champs", {})  # idx -> {userName: segs editados}
     champs_places_info = estado.get("champs_places", {})  # idx -> {userName: places editados}
+    # idx -> {estado: {userName: n}}; solo lo traen las celdas ya recorridas con este código
+    champs_edo_info = estado.get("champs_edo", {})
+    champs_places_edo_info = estado.get("champs_places_edo", {})
     candados_info = estado.get("candados", {})  # idx -> [registros de candado bajo]
     pases_info = estado.get("pases", {})  # idx -> [segmentos con pases de peaje]
     comentarios_info = estado.get("comentarios", {})  # idx -> [notas de mapa]
@@ -1684,6 +1710,8 @@ def main():
         celdas_info, cursor, ciclo = {}, 0, 1
         champs_info = {}
         champs_places_info = {}
+        champs_edo_info = {}
+        champs_places_edo_info = {}
         candados_info = {}
         pases_info = {}
         comentarios_info = {}
@@ -1879,6 +1907,8 @@ def main():
         resumen = guardar_almacen(almacen, {"env": env, "progreso": progreso})
         estado.update({"cursor": cursor, "ciclo": ciclo, "celdas": celdas_info,
                        "champs": champs_info, "champs_places": champs_places_info,
+                       "champs_edo": champs_edo_info,
+                       "champs_places_edo": champs_places_edo_info,
                        "candados": candados_info,
                        "pases": pases_info, "comentarios": comentarios_info,
                        "ortografia": ortografia_info,
@@ -1911,6 +1941,39 @@ def main():
             "totales": tot_champs,
             "places": tot_places,
             "celdas_con_places": len(champs_places_info),
+        }, compact=True)
+        # lo mismo por estado, para las subpáginas de Local Champs. Las celdas
+        # recorridas con este código traen el estado exacto de cada edición;
+        # las que faltan se cargan completas al estado donde cae su centro.
+        champs_por_edo = {}
+        celdas_exactas = celdas_aprox = 0
+        for _clave, _info, _exacto in (("seg", champs_info, champs_edo_info),
+                                       ("places", champs_places_info, champs_places_edo_info)):
+            for _i, _m in _info.items():
+                _det = _exacto.get(_i)
+                if _det:
+                    _reparto = _det
+                    celdas_exactas += 1
+                else:
+                    try:
+                        _f, _c = divmod(int(_i), cols)
+                    except ValueError:
+                        continue  # celdas del modo prueba
+                    _reparto = {estados_mx.estado_de(lon1 + (_c + 0.5) * celda,
+                                                     lat1 + (_f + 0.5) * celda): _m}
+                    celdas_aprox += 1
+                for _est, _usuarios in _reparto.items():
+                    if panel_na and _est not in nombres_mx:
+                        continue  # del lado de EUA: no se incluye
+                    _d = champs_por_edo.setdefault(_est, {"seg": {}, "places": {}})[_clave]
+                    for _u, _n in _usuarios.items():
+                        _d[_u] = _d.get(_u, 0) + _n
+        save_json(os.path.join(DATA_DIR, "champs-estados.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(),
+            "ventana_dias": VENTANA_CHAMPS_DIAS,
+            "celdas_exactas": celdas_exactas,
+            "celdas_aproximadas": celdas_aprox,
+            "estados": {k: champs_por_edo[k] for k in sorted(champs_por_edo)},
         }, compact=True)
         # panel de candados bajos: reagrupar por estado
         cand_por_estado = {}
@@ -2296,6 +2359,8 @@ def main():
                         usa_n = None
                 _champs_celda.clear()
                 _champs_places_celda.clear()
+                _champs_edo_celda.clear()
+                _champs_places_edo_celda.clear()
                 _candados_celda.clear()
                 _pases_celda.clear()
                 _velocidades_celda.clear()
@@ -2325,6 +2390,8 @@ def main():
                     segs_en_celda = 0
                     _champs_celda.clear()
                     _champs_places_celda.clear()
+                    _champs_edo_celda.clear()
+                    _champs_places_edo_celda.clear()
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _velocidades_celda.clear()
@@ -2339,6 +2406,8 @@ def main():
                     segs_en_celda = 0
                     _champs_celda.clear()  # celda del servidor NA: no cuenta
                     _champs_places_celda.clear()
+                    _champs_edo_celda.clear()
+                    _champs_places_edo_celda.clear()
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _velocidades_celda.clear()
@@ -2356,6 +2425,14 @@ def main():
                     champs_places_info[str(idx)] = {k: len(v) for k, v in _champs_places_celda.items()}
                 else:
                     champs_places_info.pop(str(idx), None)
+                _est_celda = estados_mx.estado_de((bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2)
+                for _crudo, _destino in ((_champs_edo_celda, champs_edo_info),
+                                         (_champs_places_edo_celda, champs_places_edo_info)):
+                    _rep = repartir_por_estado(_crudo, estados_mx, _est_celda)
+                    if _rep:
+                        _destino[str(idx)] = _rep
+                    else:
+                        _destino.pop(str(idx), None)
                 if _candados_celda:
                     _hoy_c = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
                     _prev_c = {p.get("id"): p.get("v", "")
@@ -2487,6 +2564,8 @@ def main():
                         usa_n = None
                 _champs_celda.clear()
                 _champs_places_celda.clear()
+                _champs_edo_celda.clear()
+                _champs_places_edo_celda.clear()
                 _candados_celda.clear()
                 _pases_celda.clear()
                 _velocidades_celda.clear()
@@ -2527,6 +2606,8 @@ def main():
                     segs_en_celda = 0
                     _champs_celda.clear()
                     _champs_places_celda.clear()
+                    _champs_edo_celda.clear()
+                    _champs_places_edo_celda.clear()
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _velocidades_celda.clear()
@@ -2543,6 +2624,8 @@ def main():
                     segs_en_celda = 0  # tratarla como vacía: re-checar solo de vez en cuando
                     _champs_celda.clear()  # celda del servidor NA: no cuenta
                     _champs_places_celda.clear()
+                    _champs_edo_celda.clear()
+                    _champs_places_edo_celda.clear()
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _velocidades_celda.clear()
@@ -2560,6 +2643,14 @@ def main():
                     champs_places_info[str(idx)] = {k: len(v) for k, v in _champs_places_celda.items()}
                 else:
                     champs_places_info.pop(str(idx), None)
+                _est_celda = estados_mx.estado_de((bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2)
+                for _crudo, _destino in ((_champs_edo_celda, champs_edo_info),
+                                         (_champs_places_edo_celda, champs_places_edo_info)):
+                    _rep = repartir_por_estado(_crudo, estados_mx, _est_celda)
+                    if _rep:
+                        _destino[str(idx)] = _rep
+                    else:
+                        _destino.pop(str(idx), None)
                 if _candados_celda:
                     _hoy_c = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
                     _prev_c = {p.get("id"): p.get("v", "")
