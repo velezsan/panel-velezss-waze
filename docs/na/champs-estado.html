@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Local Champs por estado · velezss NA</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#171e2e; --panel2:#1d2639; --line:#2a3550;
+    --text:#e8ecf4; --muted:#93a0b8; --accent:#4da3ff; --accent2:#7fd18c; --warn:#ffb454;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.45}
+  header{padding:24px 20px 8px;max-width:900px;margin:0 auto}
+  h1{margin:0 0 4px;font-size:1.3rem;font-weight:700}
+  h1 .edo{color:var(--accent)}
+  .sub{color:var(--muted);font-size:.92rem;margin:0}
+  .sub a{color:var(--accent);text-decoration:none}
+  main{max-width:900px;margin:0 auto;padding:14px 20px 50px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;align-items:center}
+  select{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+         border-radius:8px;padding:8px 10px;font-size:.92rem;min-width:220px}
+  .paso{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;
+        height:40px;padding:0 14px;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}
+  .paso:hover{border-color:var(--accent)}
+  .tarjetas{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 16px}
+  .tar{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 16px;min-width:130px}
+  .tar b{display:block;font-size:1.4rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .tar span{display:block;color:var(--muted);font-size:.8rem}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;overflow:hidden;font-size:.95rem}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  th{background:var(--panel2);color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+  tr:last-child td{border-bottom:none}
+  .num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  td.cero{color:var(--muted);opacity:.5}
+  .barra{height:8px;background:var(--panel2);border-radius:4px;overflow:hidden;min-width:120px}
+  .barra i{display:block;height:100%;background:var(--accent);border-radius:4px}
+  .chip{display:inline-block;background:#243049;border-radius:6px;padding:2px 8px;font-size:.78rem;color:var(--muted)}
+  .cargando{color:var(--muted);padding:40px;text-align:center}
+  .pos{color:var(--muted);width:36px}
+  .tabla{overflow-x:auto}
+  @media (max-width:640px){
+    th:last-child,td:last-child{display:none}
+    .tabla table{font-size:.88rem}
+    .tabla th,.tabla td{padding:9px 6px}
+    .tabla th{font-size:.64rem;letter-spacing:.03em}
+    .tabla td:nth-child(5),.tabla th:nth-child(5){padding-right:12px}
+    .lg{display:none}
+    .tabla td.pos{width:20px;padding-left:10px}
+    .tarjetas{display:grid;grid-template-columns:1fr 1fr}
+    .tar{min-width:0}
+    select{min-width:0;flex:1}
+  }
+</style>
+<link rel="stylesheet" href="../estilo.css">
+<script src="../barra.js" defer></script>
+</head>
+<body>
+<header>
+  <h1>🏆 Local Champs · <span class="edo" id="edo">por estado</span></h1>
+  <p class="sub">Lo que editó cada Local Champ en este estado en los últimos 60 días, y los URs que cerró ·
+    <a href="champs.html">← Todos los champs</a> · <a href="index.html">Volver al panel</a></p>
+</header>
+<main>
+  <div class="controls" id="controles" style="display:none">
+    <button class="paso" id="ant" title="Estado anterior">←</button>
+    <select id="sel-estado" aria-label="Estado"></select>
+    <button class="paso" id="sig" title="Estado siguiente">→</button>
+    <span class="chip" id="exactitud" style="display:none"></span>
+  </div>
+  <div class="tarjetas" id="tarjetas"></div>
+  <div id="contenido"><div class="cargando">Cargando datos…</div></div>
+</main>
+<script>
+(function(){
+  var DATOS='../data-na/', ZONA='NA';
+  var $=function(id){return document.getElementById(id);};
+  var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var slug=function(s){return String(s).normalize('NFD').replace(/[^ -~]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');};
+  var fmt=function(n){return Number(n||0).toLocaleString('es-MX');};
+  var json=function(u){return fetch(u,{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});};
+  var suma=function(o){var t=0;Object.keys(o||{}).forEach(function(k){t+=o[k]||0;});return t;};
+  var CE=null, URS={}, estados=[];
+
+  function pintar(){
+    var actual=null, h=decodeURIComponent(location.hash.replace(/^#/,''));
+    estados.forEach(function(e){if(slug(e)===h)actual=e;});
+    if(!actual){
+      // sin estado elegido: el que tiene más ediciones
+      actual=estados.slice().sort(function(a,b){return suma((CE.estados[b]||{}).seg)-suma((CE.estados[a]||{}).seg);})[0];
+    }
+    $('sel-estado').value=actual;
+    $('edo').textContent=actual;
+    document.title='Local Champs · '+actual+' · velezss '+ZONA;
+    var d=CE.estados[actual]||{seg:{},places:{}}, u=URS[actual]||{};
+    var filas={};
+    var meter=function(o,campo){Object.keys(o||{}).forEach(function(k){
+      var id=k.toLowerCase();filas[id]=filas[id]||{nombre:k,seg:0,places:0,urs:0};filas[id][campo]+=o[k]||0;});};
+    meter(d.seg,'seg');meter(d.places,'places');meter(u,'urs');
+    var lista=Object.keys(filas).map(function(k){return filas[k];}).filter(function(f){return f.seg||f.places||f.urs;});
+    lista.sort(function(a,b){return b.seg-a.seg||b.places-a.places||b.urs-a.urs||a.nombre.localeCompare(b.nombre);});
+    var hayUrs=!!CE.__urs;
+    $('tarjetas').innerHTML=
+      '<div class="tar"><b>'+fmt(suma(d.seg))+'</b><span>Segmentos editados</span></div>'+
+      '<div class="tar"><b>'+fmt(suma(d.places))+'</b><span>Places editados</span></div>'+
+      '<div class="tar"><b>'+(hayUrs?fmt(suma(u)):'—')+'</b><span>URs cerrados (40 d)</span></div>'+
+      '<div class="tar"><b>'+lista.length+'</b><span>'+(lista.length===1?'Champ activo':'Champs activos')+'</span></div>';
+    if(!lista.length){
+      $('contenido').innerHTML='<div class="cargando">Ningún Local Champ editó en '+esc(actual)+' en este periodo.</div>';return;
+    }
+    var max=Math.max.apply(null,lista.map(function(f){return f.seg;}))||1;
+    var celda=function(n){return '<td class="num'+(n?'':' cero')+'">'+(n?fmt(n):'—')+'</td>';};
+    var html='<div class="tabla"><table><thead><tr><th></th><th>Local Champ</th><th class="num">Segmentos<span class="lg"> editados</span></th><th class="num">Places<span class="lg"> editados</span></th><th class="num">URs<span class="lg"> cerrados</span> (40 d)</th><th></th></tr></thead><tbody>';
+    lista.forEach(function(f,i){
+      html+='<tr><td class="pos">'+(i+1)+'</td><td>'+esc(f.nombre)+'</td>'+celda(f.seg)+celda(f.places)+
+        (hayUrs?celda(f.urs):'<td class="num cero">—</td>')+
+        '<td><div class="barra"><i style="width:'+Math.round(100*f.seg/max)+'%"></i></div></td></tr>';
+    });
+    $('contenido').innerHTML=html+'</tbody></table></div>';
+  }
+
+  function mover(d){
+    var i=estados.indexOf($('sel-estado').value);
+    var n=estados[(i+d+estados.length)%estados.length];
+    location.hash=slug(n);
+  }
+
+  Promise.all([json(DATOS+'champs-estados.json'),json('urs-datos.json')]).then(function(r){
+    CE=r[0]; var uj=r[1];
+    if(!CE||!CE.estados){
+      $('contenido').innerHTML='<div class="cargando">Los datos por estado se generan con las corridas del escáner. Estarán disponibles después de la próxima corrida.</div>';return;
+    }
+    if(uj&&uj.cerradosPorChampEstado){URS=uj.cerradosPorChampEstado;CE.__urs=true;}
+    var todos={};Object.keys(CE.estados).forEach(function(e){todos[e]=1;});Object.keys(URS).forEach(function(e){todos[e]=1;});
+    estados=Object.keys(todos).sort(function(a,b){return a.localeCompare(b,'es');});
+    if(!estados.length){$('contenido').innerHTML='<div class="cargando">Todavía no hay ediciones de Local Champs.</div>';return;}
+    $('sel-estado').innerHTML=estados.map(function(e){
+      return '<option value="'+esc(e)+'">'+esc(e)+' ('+fmt(suma((CE.estados[e]||{}).seg))+')</option>';}).join('');
+    $('controles').style.display='flex';
+    var ex=CE.celdas_exactas||0, ap=CE.celdas_aproximadas||0;
+    if(ap>0&&ex+ap>0){
+      var c=$('exactitud');c.style.display='inline-block';
+      c.textContent='Aproximado por ahora · exacto en '+Math.round(100*ex/(ex+ap))+'% de las celdas';
+    }
+    $('sel-estado').addEventListener('change',function(e){location.hash=slug(e.target.value);});
+    $('ant').addEventListener('click',function(){mover(-1);});
+    $('sig').addEventListener('click',function(){mover(1);});
+    window.addEventListener('hashchange',pintar);
+    pintar();
+  });
+})();
+</script>
+</body>
+</html>

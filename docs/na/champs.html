@@ -148,5 +148,42 @@
   }, 300);
 })();
 </script>
+<style>
+  #por-estado{margin-top:34px}
+  #por-estado h2{display:flex;align-items:center;gap:12px;margin:0 0 6px;font-size:.78rem;font-weight:700;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  #por-estado h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+  #por-estado .edos{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  @media (max-width:760px){#por-estado .edos{grid-template-columns:repeat(2,1fr);gap:8px}
+    #por-estado a{padding:10px 11px}#por-estado a span,#por-estado a b{font-size:.86rem}}
+  #por-estado a{display:flex;align-items:center;justify-content:space-between;gap:10px;text-decoration:none;
+    color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px;
+    transition:border-color .15s,transform .15s,background .15s}
+  #por-estado a:hover{border-color:var(--accent);background:var(--panel2);transform:translateY(-2px)}
+  #por-estado a span{font-weight:600;font-size:.93rem}
+  #por-estado a b{color:var(--accent);font-variant-numeric:tabular-nums;font-size:.93rem}
+  #por-estado a.vacio b{color:var(--muted);font-weight:500}
+</style>
+<script>
+(function(){
+  var slug=function(s){return String(s).normalize('NFD').replace(/[^ -~]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');};
+  var fmt=function(n){return Number(n||0).toLocaleString('es-MX');};
+  var json=function(u){return fetch(u,{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});};
+  var suma=function(o){var t=0;Object.keys(o||{}).forEach(function(k){t+=o[k]||0;});return t;};
+  json('../data-na/champs-estados.json').then(function(d){
+    if(!d||!d.estados)return;
+    var nombres=Object.keys(d.estados).sort(function(a,b){return suma(d.estados[b].seg)-suma(d.estados[a].seg)||a.localeCompare(b,'es');});
+    if(!nombres.length)return;
+    var sec=document.createElement('section');sec.id='por-estado';
+    var html='<h2>Segmentos editados por estado</h2><div class="edos">';
+    nombres.forEach(function(e){
+      var n=suma(d.estados[e].seg);
+      html+='<a href="champs-estado.html#'+slug(e)+'"'+(n?'':' class="vacio"')+'><span>'+e.replace(/[&<>]/g,'')+'</span><b>'+(n?fmt(n):'—')+'</b></a>';
+    });
+    sec.innerHTML=html+'</div>';
+    var main=document.querySelector('main');if(main)main.appendChild(sec);
+  });
+})();
+</script>
 </body>
 </html>
