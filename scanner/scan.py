@@ -1088,9 +1088,10 @@ def repartir_por_estado(crudo, estados_mx, estado_celda):
     return out
 
 
-# Vías que cuentan como "la calle más cercana" de un place. Las rampas y los
-# caminos de estacionamiento casi nunca llevan nombre, así que no cuentan.
-TIPOS_CALLE_PLACE = {1, 2, 3, 6, 7, 8, 17, 22}
+# Vías que cuentan como "la calle más cercana" de un place: todas las que se
+# piden, rampas incluidas. Los caminos de estacionamiento (tipo 20) son los
+# únicos que no cuentan: ni siquiera se piden.
+TIPOS_CALLE_PLACE = {1, 2, 3, 4, 6, 7, 8, 17, 22}
 # De esas, las que se piden SOLO para esto (terracería, privadas y callejones):
 # se apartan al llegar y ninguna otra revisión las ve.
 TIPOS_SOLO_PLACES = {8, 17, 22}
