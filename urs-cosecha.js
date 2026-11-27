@@ -178,6 +178,16 @@ window.BUILD = async (recs, panel, ahora) => {
   const union = {};
   for (const k of new Set([...Object.keys(oldS.cerradosChamps || {}), ...Object.keys(hoyCe)])) union[k] = [...new Set([...(oldS.cerradosChamps[k] || []), ...(hoyCe[k] || [])])].sort((a, b) => a - b);
   const ventana = {}; for (const k of Object.keys(hoyCe)) ventana[k] = hoyCe[k].length;   // lo que Waze deja ver hoy (40 días)
+  // lo mismo por estado, con el nombre corto que usa el panel (para champs-estado.html)
+  const ALIAS = { 'veracruz de ignacio de la llave': 'Veracruz', 'coahuila de zaragoza': 'Coahuila', 'michoacán de ocampo': 'Michoacán', 'michoacan de ocampo': 'Michoacán', 'querétaro de arteaga': 'Querétaro', 'queretaro de arteaga': 'Querétaro', 'estado de méxico': 'México', 'estado de mexico': 'México', 'distrito federal': 'Ciudad de México', 'mexico city': 'Ciudad de México' };
+  const MX = new Set(['Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas', 'Chihuahua', 'Ciudad de México', 'Coahuila', 'Colima', 'Durango', 'Guanajuato', 'Guerrero', 'Hidalgo', 'Jalisco', 'México', 'Michoacán', 'Morelos', 'Nayarit', 'Nuevo León', 'Oaxaca', 'Puebla', 'Querétaro', 'Quintana Roo', 'San Luis Potosí', 'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas']);
+  const porEdo = {}; let sinEdo = 0;
+  for (const x of ce) {
+    if (!x.ed || !CH.has(x.ed.toLowerCase())) continue;
+    const e0 = (x.edo || '').trim(); const e = ALIAS[e0.toLowerCase()] || e0;
+    if (!MX.has(e)) { sinEdo++; continue; }   // sin estado o del lado de EUA
+    const k = canon[x.ed.toLowerCase()]; const d = porEdo[e] = porEdo[e] || {}; d[k] = (d[k] || 0) + 1;
+  }
   const acum = {}; for (const k of Object.keys(union)) acum[k] = union[k].length;         // histórico, corrida tras corrida
   const tipos = Object.assign({}, old.tipos); for (const x of R) if (!tipos[String(x.t)]) tipos[String(x.t)] = 'Tipo ' + x.t;
   const tCe = ce.map(x => x.a || x.c); const ven = ce.length ? [Math.min(...tCe), Math.max(...tCe)] : [0, 0];
@@ -185,10 +195,10 @@ window.BUILD = async (recs, panel, ahora) => {
     generado: ahora,   // SIEMPRE en segundos (con texto ISO la página pinta mal la fecha)
     fuente: 'WME ' + (esNA ? 'NA' : 'ROW') + ' · filtro TodoMX (Con Cerrados)', n: urs.length, totalLeidos: R.length, cerradosLeidos: ce.length,
     champsAcumulados: true, ventanaCerrados: ven, cols: old.cols, colsChamps: old.colsChamps, tipos, editores, reporteros, estados, ciudades, champs, urs,
-    cerradosPorChamp: ventana, cerradosVentanaDias: 40, cerradosAcumulados: acum, cerradosDesde: ven[0], champsTotal: champs.length
+    cerradosPorChamp: ventana, cerradosPorChampEstado: porEdo, cerradosVentanaDias: 40, cerradosAcumulados: acum, cerradosDesde: ven[0], champsTotal: champs.length
   };
   const side = { generado: ahora, fuente: 'WME ' + (esNA ? 'NA' : 'ROW'), desde: oldS.desde, nota: oldS.nota, cerradosChamps: union, cerradosPorChamp: acum };
-  return { datos, side, resumen: { panel, leidos: R.length, abiertos: urs.length, antes: old.n, cerrados: ce.length, sinContestar: urs.filter(u => !editores[u[6]]).length, mas28dias: urs.filter(u => (ahora - u[4]) / 86400 >= 28).length, champs: champs.length, recuperados, ventana, acum } };
+  return { datos, side, resumen: { panel, leidos: R.length, abiertos: urs.length, antes: old.n, cerrados: ce.length, sinContestar: urs.filter(u => !editores[u[6]]).length, mas28dias: urs.filter(u => (ahora - u[4]) / 86400 >= 28).length, champs: champs.length, recuperados, ventana, acum, estadosConCerrados: Object.keys(porEdo).length, cerradosSinEstado: sinEdo } };
 };
 // Se suben docs/urs-datos.json + docs/urs-cerrados-champs.json (un commit) y los
 // mismos dos nombres en docs/na (otro commit). Antes de enviar el primero se guardan
