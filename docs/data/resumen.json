@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-28T08:09:01+00:00",
+ "actualizado": "2026-11-28T08:55:10+00:00",
  "env": "row",
- "total": 108540,
+ "total": 108567,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -48,7 +48,7 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 3383,
+   "total": 3410,
    "ciudades": 110
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 73.2,
+  "porcentaje_vuelta": 73.5,
   "modo": "completo"
  },
  "aviso": "",
