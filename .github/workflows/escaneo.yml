@@ -66,6 +66,9 @@ jobs:
           INEGI_MEMORIA: /home/runner/inegi-memoria/inegi.json
           # freno para Waze: una celda cada 8 s como máximo (vuelta al país ≈ 1 semana)
           ESCANER_SEG_ENTRE_PETICIONES: '8'
+          # al INEGI se le pregunta por 3 segmentos a la vez; si empieza a fallar,
+          # el escáner regresa solo a preguntar de uno en uno
+          INEGI_EN_PARALELO: '3'
         run: |
           python scanner/scan.py \
             --modo "${{ github.event.inputs.modo || 'completo' }}" \
