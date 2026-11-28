@@ -1,16 +1,16 @@
 {
  "ok": true,
- "fecha": "2026-11-27T23:14:41.477155+00:00",
+ "fecha": "2026-11-28T01:05:38.417801+00:00",
  "modo": "completo",
- "celdas": 789,
- "peticiones": 789,
+ "celdas": 775,
+ "peticiones": 775,
  "segmentos_vistos": 505598,
  "sin_nombre_en_corrida": 108,
  "total_acumulado": 96,
- "peticiones_inegi": 0,
+ "peticiones_inegi": 2,
  "errores_inegi": 0,
- "inegi_de_memoria": 44659,
+ "inegi_de_memoria": 44658,
  "inegi_sembrados": 0,
  "inegi_memoria_total": 38180,
- "minutos": 105.2
+ "minutos": 103.4
 }
