@@ -160,6 +160,21 @@ def _title_case(texto):
     return " ".join(out)
 
 
+# número, guion y UNA sola letra: la letra va en mayúscula ("Calle 18-a" → "Calle 18-A")
+_RE_NUM_LETRA = re.compile(r"(?<!\w)(\d+)-([a-zñ])(?!\w)")
+
+
+def corregir_sufijo_letra(nombre):
+    """Pone en mayúscula la letra de "18-a", "31-b", "45-d"… y nada más.
+
+    Solo cuando es un número suelto, guion y una sola letra: "Campeche-mérida",
+    "Ex-hacienda" o "18-bis" se quedan como vienen.
+    """
+    if not nombre or "-" not in nombre:
+        return nombre
+    return _RE_NUM_LETRA.sub(lambda m: m.group(1) + "-" + m.group(2).upper(), nombre)
+
+
 def _normalizar_nombre(nombre):
     """Réplica de normalizeStreetName de GAIA ("31"→"Calle 31", Avenida→Av., etc.)."""
     if not nombre:
@@ -202,7 +217,7 @@ def _limpiar_valor(val, nombres, vistos):
         return
     if re.search(r"mapserver|inegi|objectid|shape_len|cvegeo", v, flags=re.I):
         return
-    limpio = _normalizar_nombre(_title_case(v))
+    limpio = corregir_sufijo_letra(_normalizar_nombre(_title_case(v)))
     if not limpio or len(limpio) < 2:
         return
     if re.fullmatch(r"[A-Za-z]{1,3}\d+", limpio):
@@ -396,7 +411,8 @@ class ConsultorINEGI:
         f = self._firma(coords)
         if f is None or v[0] != f:
             return False, ""
-        nombre = v[2] if len(v) > 2 else ""
+        # lo guardado antes de la regla del sufijo sale ya corregido
+        nombre = corregir_sufijo_letra(v[2]) if len(v) > 2 else ""
         if self._dia() - v[1] > self._vigencia(seg_id, bool(nombre)):
             return False, ""
         self.de_memoria += 1
@@ -1763,6 +1779,11 @@ def guardar_almacen(almacen, meta):
         for _sid in [k for k, r in segmentos.items()
                      if _nombre_invalido(r.get("sug") or "")]:
             del segmentos[_sid]
+        # sugerencias guardadas antes de la regla del sufijo ("Calle 18-a"):
+        # se corrigen al guardar, sin esperar a que el escáner vuelva a pasar
+        for _r in segmentos.values():
+            if _r.get("sug") and "-" in _r["sug"]:
+                _r["sug"] = corregir_sufijo_letra(_r["sug"])
         slug = slugify(estado)
         slugs_actuales.add(slug)
         ciudades = {}
