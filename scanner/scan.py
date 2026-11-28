@@ -18,10 +18,12 @@ import os
 import re
 import subprocess
 import sys
+import threading
 import time
 import unicodedata
 import zlib
 from collections import deque
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
 try:
@@ -309,6 +311,25 @@ class ConsultorINEGI:
         self.previas_pos = {}    # id -> (lat, lon) del almacén, para sembrar la memoria
         self.de_memoria = 0      # segmentos resueltos sin preguntar
         self.sembrados = 0       # de esos, los que se dieron por buenos desde el almacén
+        # consultas en paralelo (apagadas mientras paralelo sea 1)
+        self.paralelo = 1            # segmentos que se preguntan a la vez
+        self.paralelo_pedido = 1     # lo que pidió el workflow
+        self.paralelo_apagado = ""   # motivo, si se apagó solo en esta corrida
+        self.tandas_paralelas = 0
+        self.canario = None          # (lon, lat, nombres) de un punto que sí contestó
+        self._candado = threading.Lock()
+        self._local = threading.local()
+        self._local.sesion = self.sesion
+        self._grupo = None
+
+    def _sesion_hilo(self):
+        """Una conexión por hilo: requests.Session no se comparte entre hilos."""
+        s = getattr(self._local, "sesion", None)
+        if s is None:
+            s = requests.Session()
+            s.headers.update({"User-Agent": HEADERS["User-Agent"]})
+            self._local.sesion = s
+        return s
 
     # --- memoria entre corridas ---------------------------------------------
 
@@ -416,9 +437,9 @@ class ConsultorINEGI:
         self.sembrados += 1
         return nombre
 
-    def nombres_en(self, lon, lat):
+    def nombres_en(self, lon, lat, sin_cache=False):
         key = (round(lon, 6), round(lat, 6))
-        if key in self.cache:
+        if not sin_cache and key in self.cache:
             return self.cache[key]
         # 7 decimales, igual que el script GAIA de Santiago. Con 6 el bbox
         # queda corrido unos centímetros y el INEGI llega a devolver también
@@ -435,19 +456,108 @@ class ConsultorINEGI:
             "INFO_FORMAT": "text/html", "FEATURE_COUNT": "5",
         }
         time.sleep(self.pausa)
-        self.peticiones += 1
+        with self._candado:
+            self.peticiones += 1
         try:
-            r = self.sesion.get(INEGI_WMS, params=params, timeout=10)
+            r = self._sesion_hilo().get(INEGI_WMS, params=params, timeout=10)
             r.encoding = "utf-8"  # el INEGI responde UTF-8 sin declararlo
             if r.status_code != 200:
-                self.errores += 1
+                with self._candado:
+                    self.errores += 1
                 return None  # no contestó: distinto de "contestó y no hay nombre"
             nombres = parse_wms(r.text)
-            self.cache[key] = nombres
+            if not sin_cache:
+                self.cache[key] = nombres
+                if any(not _nombre_invalido(n) for n in nombres):
+                    self.canario = (lon, lat, list(nombres))
             return nombres
         except requests.RequestException:
-            self.errores += 1
+            with self._candado:
+                self.errores += 1
             return None
+
+    def canario_sano(self, c=None):
+        """Vuelve a preguntar por un punto que ya había dado nombre.
+
+        False si ahora el INEGI calla o contesta otra cosa (dos veces seguidas):
+        es la señal de que está rechazando consultas en silencio."""
+        c = c or self.canario
+        if c is None:
+            return True
+        esperado = sorted(n.lower() for n in c[2])
+        for intento in range(2):
+            if intento:
+                time.sleep(1.0)
+            nombres = self.nombres_en(c[0], c[1], sin_cache=True)
+            if nombres is not None and sorted(n.lower() for n in nombres) == esperado:
+                return True
+        return False
+
+    def _apagar_paralelo(self, motivo):
+        self.paralelo = 1
+        self.paralelo_apagado = motivo
+        log(f"INEGI: las consultas en paralelo se apagan por esta corrida ({motivo})")
+
+    def sugerir_varios(self, lista, limite):
+        """sugerir() para varios segmentos, en el mismo orden.
+
+        Cada resultado es None (se acabó el tiempo) o lo que regresa sugerir().
+        Con paralelo > 1 se pregunta por varios segmentos a la vez. Como el INEGI
+        puede rechazar en silencio (contesta vacío), cada tanda lleva preguntas
+        de control: entre las consultas se vuelve a preguntar por un punto que ya
+        había dado nombre, y otra vez al terminar. Si alguna contesta distinto, o
+        hubo demasiados errores, los "no dio nombre" de esa tanda se tratan como
+        "el INEGI no contestó" (no se guardan ni tumban la sugerencia anterior)
+        y el resto de la corrida sigue de uno en uno.
+        """
+        def uno(coords):
+            if time.time() >= limite:
+                return None
+            return self.sugerir(coords)
+
+        c = self.canario
+        # con pocas no vale la pena: las comprobaciones costarían más que lo ganado
+        if self.paralelo <= 1 or len(lista) < 6 or c is None:
+            return [uno(x) for x in lista]
+        if self._grupo is None:
+            self._grupo = ThreadPoolExecutor(max_workers=self.paralelo,
+                                             thread_name_prefix="inegi")
+        tareas = []  # las coordenadas de cada segmento; None = pregunta de control
+        for i, coords in enumerate(lista):
+            if i % 8 == 4:
+                tareas.append(None)
+            tareas.append(coords)
+
+        def tarea(coords):
+            if coords is None:
+                return self.nombres_en(c[0], c[1], sin_cache=True)
+            return uno(coords)
+
+        pet0, err0 = self.peticiones, self.errores
+        crudo = list(self._grupo.map(tarea, tareas))
+        self.tandas_paralelas += 1
+        res = [r for t, r in zip(tareas, crudo) if t is not None]
+        controles = [r for t, r in zip(tareas, crudo) if t is None]
+        esperado = sorted(n.lower() for n in c[2])
+        # un control sin respuesta (None) ya cuenta como error; aquí importan los
+        # que sí contestaron, pero otra cosa
+        distintos = sum(1 for r in controles
+                        if r is not None and sorted(n.lower() for n in r) != esperado)
+        pet, err = self.peticiones - pet0, self.errores - err0
+        motivo = ""
+        if err >= 3 and err * 10 >= pet:
+            motivo = f"{err} errores en {pet} consultas"
+        elif distintos:
+            motivo = (f"{distintos} de {len(controles)} preguntas de control "
+                      "contestaron distinto con varias consultas a la vez")
+        elif not self.canario_sano(c):
+            motivo = "dejó de contestar un punto que ya había contestado"
+        if motivo:
+            self._apagar_paralelo(motivo)
+            # de esta tanda solo se creen los nombres al 100%; lo demás, a repetir
+            res = [r if (r is None or (r[0] and r[1] >= 100 and not r[2]))
+                   else (r[0], r[1], r[2], True) for r in res]
+        return res
 
     def sugerir(self, coords):
         """Réplica del flujo por etapas de GAIA con aborto temprano.
@@ -1538,6 +1648,7 @@ def enriquecer_con_inegi(hallazgos, inegi, limite, previas=None):
     responde hoy pero el segmento ya tenía nombre al 100% en una corrida
     anterior, se conserva ese nombre (el INEGI a veces contesta vacío).
     """
+    pendientes = []  # (hallazgo, coords) que sí hay que preguntarle al INEGI
     for h in hallazgos:
         coords = h.pop("_coords", [])
         if inegi is None:
@@ -1552,9 +1663,14 @@ def enriquecer_con_inegi(hallazgos, inegi, limite, previas=None):
                 h["sug"] = nombre_mem
                 h["conf"] = 100
             continue
-        if time.time() >= limite:
+        pendientes.append((h, coords))
+    if inegi is None:
+        return hallazgos
+    respuestas = inegi.sugerir_varios([c for _h, c in pendientes], limite)
+    for (h, coords), resp in zip(pendientes, respuestas):
+        if resp is None:  # se acabó el tiempo antes de llegar a este
             continue
-        nombre, conf, empatado, fallo = inegi.sugerir(coords)
+        nombre, conf, empatado, fallo = resp
         if not fallo:
             aplica = bool(nombre) and conf >= 100 and not empatado
             # un "no" que contradice a la vuelta pasada no se guarda: puede ser un
@@ -1571,8 +1687,6 @@ def enriquecer_con_inegi(hallazgos, inegi, limite, previas=None):
             # sugerencia vieja no se queda pegada para siempre.
             h["sug"] = previas[str(h["id"])]
             h["conf"] = 100
-    if inegi is None:
-        return hallazgos
     return [h for h in hallazgos if h.get("sug")]
 
 
@@ -1734,6 +1848,14 @@ def main():
     franja_na = cfg.get("franja_na_grados", 0.6)  # ancho de la franja del Panel NA
     usar_inegi = cfg.get("sugerencias_inegi", True)
     inegi = ConsultorINEGI(cfg.get("pausa_inegi_segundos", 0.15)) if usar_inegi else None
+    if inegi is not None:
+        try:
+            inegi.paralelo = max(1, min(4, int(os.environ.get("INEGI_EN_PARALELO", "1") or 1)))
+        except ValueError:
+            inegi.paralelo = 1
+        inegi.paralelo_pedido = inegi.paralelo
+        if inegi.paralelo > 1:
+            log(f"INEGI: se pregunta por {inegi.paralelo} segmentos a la vez")
     _mem_inegi = os.environ.get("INEGI_MEMORIA", "").strip()
     if inegi is not None and _mem_inegi:
         log(f"memoria del INEGI: {inegi.cargar_memoria(_mem_inegi)} segmentos recordados")
@@ -2856,6 +2978,9 @@ def main():
         "inegi_de_memoria": inegi.de_memoria if inegi else 0,
         "inegi_sembrados": inegi.sembrados if inegi else 0,
         "inegi_memoria_total": len(inegi.memoria) if inegi else 0,
+        "inegi_en_paralelo": inegi.paralelo_pedido if inegi else 1,
+        "inegi_tandas_paralelas": inegi.tandas_paralelas if inegi else 0,
+        "inegi_paralelo_apagado": inegi.paralelo_apagado if inegi else "",
         "minutos": round((time.time() - inicio) / 60, 1),
     })
     log(f"Listo: {celdas_aplicadas} celdas, {contador['req']} peticiones, "
