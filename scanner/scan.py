@@ -1097,6 +1097,24 @@ TIPOS_CALLE_PLACE = {1, 2, 3, 4, 6, 7, 8, 17, 22}
 TIPOS_SOLO_PLACES = {8, 17, 22}
 
 
+def punto_de_entrada(ven):
+    """Punto de entrada de un place (el principal si tiene varios) o None."""
+    primero = None
+    for e in (ven.get("entryExitPoints") or []):
+        if not isinstance(e, dict):
+            continue
+        c = (e.get("point") or {}).get("coordinates")
+        try:
+            p = (float(c[0]), float(c[1]))
+        except (TypeError, ValueError, IndexError):
+            continue
+        if e.get("primary"):
+            return p
+        if primero is None:
+            primero = p
+    return primero
+
+
 def tramos_para_places(segs, streets):
     """Prepara las vías de una celda para buscar la más cercana a un place.
 
@@ -1374,12 +1392,22 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             # "sin dirección" = sin calle, como su script
             sin_dir = 0 if (calle_pl or exenta_pl) else 1
             if sin_dir:
-                # si la calle más cercana tampoco tiene nombre, no hay calle
-                # que ponerle: no se marca
-                if _tramos_pl is None:
-                    _tramos_pl = tramos_para_places(_segs_para_places, streets)
-                if calle_cercana_tiene_nombre(lon_pl, lat_pl, _tramos_pl) is False:
+                # Se mide desde el punto de entrada del place (si tiene) y no
+                # desde su centro: en un área grande quedan lejos uno del otro.
+                # Si la calle más cercana a ese punto tampoco tiene nombre, no
+                # hay calle que ponerle y no se marca.
+                _ref_pl = punto_de_entrada(ven) or (lon_pl, lat_pl)
+                _bb_pl = data.get("_bbox_pedido") if isinstance(data, dict) else None
+                if _bb_pl and not (_bb_pl[0] <= _ref_pl[0] <= _bb_pl[2]
+                                   and _bb_pl[1] <= _ref_pl[1] <= _bb_pl[3]):
+                    # ese punto cae en otra celda y aquí no vienen sus calles:
+                    # lo decide la celda donde sí cae
                     sin_dir = 0
+                else:
+                    if _tramos_pl is None:
+                        _tramos_pl = tramos_para_places(_segs_para_places, streets)
+                    if calle_cercana_tiene_nombre(_ref_pl[0], _ref_pl[1], _tramos_pl) is False:
+                        sin_dir = 0
             es_area_pl = (ven.get("geometry") or {}).get("type") != "Point"
             punto_pl = 1 if es_punto_que_debe_ser_area(cats_pl, es_area_pl) else 0
             sug_pl = fix_grammar(nom_pl) if necesita_correccion(nom_pl) else ""
@@ -2294,7 +2322,13 @@ def main():
                     _sig_pub = siglas_aplastadas(nom_pl, sug_pl)
                     if _sig_pub:
                         reg_pl["sig"] = _sig_pub[:6]
-                places_por_estado.setdefault(est_pl, {})[str(r["id"])] = reg_pl
+                # un place que toca dos celdas viene en las dos: "sin dirección"
+                # lo decide solo la celda donde cae su punto de entrada, así
+                # que esa marca no se pierde aunque la otra llegue después
+                _prev_pl = places_por_estado.setdefault(est_pl, {}).get(str(r["id"]))
+                if _prev_pl is not None and _prev_pl.get("sd") and not exenta_pl:
+                    reg_pl["sd"] = 1
+                places_por_estado[est_pl][str(r["id"])] = reg_pl
         os.makedirs(PLACES_DIR, exist_ok=True)
         slugs_pl = set()
         lista_pl = []
